@@ -1,5 +1,5 @@
 package tracklistd.api.Entity;
 
-public class Feed {
+public abstract class Media {
 
 }
