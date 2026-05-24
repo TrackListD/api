@@ -3,10 +3,11 @@
  * 
  * import java.util.List;
  * 
- * import tracklistd.api.Entity.User;
  * import org.springframework.stereotype.Service;
  * 
  * import tracklistd.api.Entity.Publication;
+ * import tracklistd.api.Entity.User;
+ * import tracklistd.api.Repository.PublicationRepository;
  * 
  * @Service
  * public class FeedService {
@@ -18,13 +19,11 @@
  * }
  * 
  * public List<Publication> getFeed(User user) {
+ * 
  * List<User> following = user.getFollowing();
  * 
- * return publicationRepository.findByAuthorInOrderByCreatedAtDesc(following);
- * 
+ * return publicationRepository
+ * .findByAuthorInOrderByCreatedAtDesc(following);
  * }
  * }
- * 
- * comentei essa parte pq as entidades ainda n tao prontas
- * tentem seguir um pouco do que coloquei aqui, se possivel
  */
