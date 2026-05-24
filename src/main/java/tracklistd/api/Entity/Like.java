@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
-import tracklistd.api.Entity.Interfaces.Publication;
 
 @Entity
 public class Like {
