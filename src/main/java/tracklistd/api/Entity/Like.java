@@ -5,8 +5,15 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter // gerar getters
+@Table(name = "like_content", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "user_id", "publication_id" })
+})
+@NoArgsConstructor
 public class Like {
 
     // id - chave primaria
@@ -15,14 +22,17 @@ public class Like {
     private Long id;
 
     // referencia ao usuario que curtiu
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // referencia a publicação curtida
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "publication_id", nullable = false)
     private Publication publication;
 
     // referencia a data da publicação (criada automaticamente)
+    @Column(updatable = false, nullable = false)
     @CreationTimestamp
     private LocalDateTime dateTime;
 }
