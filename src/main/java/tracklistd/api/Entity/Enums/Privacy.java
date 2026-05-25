@@ -1,5 +1,4 @@
 package tracklistd.api.Entity.Enums;
 
-public class Privacy {
-
+public enum Privacy {
 }
