@@ -1,5 +1,8 @@
 package tracklistd.api.Entity.Interfaces;
+import tracklistd.api.Entity.Enums.ModerationStatus;
 
-public class Reportable {
+public interface Reportable {
+    public String getContentReported();
 
+    public ModerationStatus getStatusModeration();
 }
