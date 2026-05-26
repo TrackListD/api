@@ -1,7 +1,10 @@
 package tracklistd.api.Entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -16,7 +19,7 @@ import lombok.Setter;
 public abstract class Media {
 
     @Id
-    protected Long spotifyID;
+    protected String spotifyID;
 
     @Setter
     @Column(nullable = false, length = 150)
@@ -25,16 +28,12 @@ public abstract class Media {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "media_artists", joinColumns = @JoinColumn(name = "media_id"), inverseJoinColumns = @JoinColumn(name = "artist_id"))
     @OrderColumn(name = "artist_order")
-    protected List<Artist> authors;
-
-    @Setter
-    @Column(name = "cover_url")
-    protected String coverURL;
+    protected List<Artist> authors = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "media_genres", joinColumns = @JoinColumn(name = "media_id"))
     @Column(name = "genre")
-    protected List<String> musicGenres;
+    protected Set<String> musicGenres = new LinkedHashSet<>();
 
     @Setter
     @Column(name = "release_date")
