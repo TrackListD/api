@@ -5,9 +5,11 @@ import java.time.Duration;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Table(name = "musics")
 @DiscriminatorValue("music")
 @NoArgsConstructor
 public class Music extends Media {
@@ -16,6 +18,7 @@ public class Music extends Media {
     @JoinColumn(name = "album_id")
     private Album album;
 
+    @Setter
     @Column(name = "duration")
     private Duration duration;
 

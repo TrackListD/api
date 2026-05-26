@@ -2,11 +2,11 @@ package tracklistd.api.Entity;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -18,6 +18,7 @@ public abstract class Media {
     @Id
     protected Long spotifyID;
 
+    @Setter
     @Column(nullable = false, length = 150)
     protected String title;
 
@@ -26,13 +27,16 @@ public abstract class Media {
     @OrderColumn(name = "artist_order")
     protected List<Artist> authors;
 
+    @Setter
+    @Column(name = "cover_url")
     protected String coverURL;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "media_genres", joinColumns = @JoinColumn(name = "media_id"))
     @Column(name = "genre")
-    protected Set<String> musicGenres;
+    protected List<String> musicGenres;
 
+    @Setter
     @Column(name = "release_date")
     protected LocalDate releaseDate;
 
@@ -40,5 +44,13 @@ public abstract class Media {
         if (this.authors != null && !this.authors.isEmpty())
             return this.authors.get(0);
         return null;
+    }
+
+    public void addGenre(String genre) {
+        this.musicGenres.add(genre);
+    }
+
+    public void addAuthor(Artist author) {
+        this.authors.add(author);
     }
 }
