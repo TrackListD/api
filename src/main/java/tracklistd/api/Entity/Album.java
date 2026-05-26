@@ -1,5 +1,6 @@
 package tracklistd.api.Entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ public class Album extends Media {
 
     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderColumn(name = "track_number")
-    private List<Music> musics;
+    private List<Music> musics = new ArrayList<>();
 
     public void addMusic(Music newMusic) {
         this.musics.add(newMusic);
