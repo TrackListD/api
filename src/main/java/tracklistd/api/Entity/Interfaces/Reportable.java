@@ -5,4 +5,6 @@ public interface Reportable {
     public String getContentReported();
 
     public ModerationStatus getStatusModeration();
+
+    public Reportable getTarget();
 }
