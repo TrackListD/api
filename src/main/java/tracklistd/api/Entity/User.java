@@ -24,6 +24,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, length = 100)
+    private String nome;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -31,9 +34,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "quem_pode_comentar", nullable = false)
     private Privacy quemPodeComentar;
-
-    @Column(nullable = false, length = 100)
-    private String nome;
 
     @CreationTimestamp
     @Column(name = "data_criacao", updatable = false)
