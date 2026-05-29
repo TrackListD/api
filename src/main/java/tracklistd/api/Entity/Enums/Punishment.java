@@ -1,5 +1,7 @@
 package tracklistd.api.Entity.Enums;
 
-public class Punishment {
-
+public enum Punishment {
+    WARNING,
+    TEMPORARY_SUSPENSION,
+    ACCOUNT_DELETION
 }

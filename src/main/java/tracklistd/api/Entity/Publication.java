@@ -6,7 +6,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "type_publication", discriminatorType = DiscriminatorType.STRING)
@@ -18,7 +17,7 @@ public abstract class Publication {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+    protected User author;
 
     @CreationTimestamp
     @Column(name = "publication_date", nullable = false, updatable = false)
@@ -28,7 +27,8 @@ public abstract class Publication {
     @Column(name = "update_at")
     private LocalDateTime updateAt;
 
-    public Publication(){}
+    public Publication() {
+    }
 
     public Publication(User author) {
         this.author = author;
