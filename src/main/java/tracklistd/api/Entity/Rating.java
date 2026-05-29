@@ -16,7 +16,7 @@ import tracklistd.api.Entity.Interfaces.Reportable;
 @Entity
 @DiscriminatorValue("rating")
 @PrimaryKeyJoinColumn(name = "rating_id")
-public class Rating extends Publication implements Reportable{
+public class Rating extends Publication implements Reportable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id", nullable = false)
@@ -36,7 +36,8 @@ public class Rating extends Publication implements Reportable{
     @Column(name = "who_can_see", nullable = false, updatable = true)
     private Privacy whoCanSee = Privacy.PUBLIC;
 
-    public Rating(){}
+    public Rating() {
+    }
 
     public Rating(User author, Media target, Float ratingNote, String review, Privacy whoCanSee) {
         super(author);
@@ -84,19 +85,16 @@ public class Rating extends Publication implements Reportable{
 
     @Override
     public String getContentReported() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getContentReported'");
+        return review;
     }
 
     @Override
     public ModerationStatus getStatusModeration() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStatusModeration'");
+        return status;
     }
 
     @Override
     public Reportable getTarget() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTarget'");
+        return author;
     }
 }

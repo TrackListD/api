@@ -1,4 +1,5 @@
 package tracklistd.api.Entity;
+
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,53 +17,57 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import tracklistd.api.Entity.Enums.ModerationStatus;
+import tracklistd.api.Entity.Enums.Punishment;
 import tracklistd.api.Entity.Enums.ReportStatus;
 import tracklistd.api.Entity.Interfaces.Reportable;
 
 @Entity
 @Getter
 @NoArgsConstructor
-public class Report implements Reportable{
-    //----------- Class atributes -----------//
+public class Report implements Reportable {
+    // ----------- Class atributes -----------//
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne (fetch = FetchType.LAZY, optional=false)
-    @JoinColumn(name = "informer_id", nullable=false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "informer_id", nullable = false)
     private User userInformer;
 
-    @ManyToOne (fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_target_id")
     private User userTarget;
 
-    @Column(name="report_reason")
+    @Column(name = "report_reason")
     private String reason;
 
-    @Column(name="report_date", nullable=false, updatable=false)
+    @Column(name = "report_date", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime reportDate;
 
-    @Enumerated (EnumType.STRING)
-    @Column(name="status_report", updatable=true)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_report", updatable = true)
     private ReportStatus statusReport;
 
-    @ManyToOne (fetch=FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_target_id")
     private Comment commentTarget;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="rating_target_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rating_target_id")
     private Rating ratingTarget;
 
-    //---------------------------------------//
+    @Enumerated(EnumType.STRING)
+    @Column(name = "punishment_type", updatable = true)
+    private Punishment punishment;
 
-    //----------- Constructor -----------//
+    // ---------------------------------------//
 
+    // ----------- Constructor -----------//
 
-    //-- Report constructor for Comment --//
-    public Report(User informer, String Reason, LocalDateTime date, Comment comment){
+    // -- Report constructor for Comment --//
+    public Report(User informer, String Reason, LocalDateTime date, Comment comment) {
         this.userInformer = informer;
         this.userTarget = null;
         this.reason = Reason;
@@ -72,8 +77,8 @@ public class Report implements Reportable{
         this.statusReport = ReportStatus.PENDING;
     }
 
-    //-- Report constructor for Rating --//
-    public Report(User informer, String Reason, LocalDateTime date, Rating rating){
+    // -- Report constructor for Rating --//
+    public Report(User informer, String Reason, LocalDateTime date, Rating rating) {
         this.userInformer = informer;
         this.userTarget = null;
         this.reason = Reason;
@@ -83,9 +88,8 @@ public class Report implements Reportable{
         this.statusReport = ReportStatus.PENDING;
     }
 
-
-    //-- Report constructor for Targeted User --//
-    public Report(User informer, String Reason, LocalDateTime date, User target){
+    // -- Report constructor for Targeted User --//
+    public Report(User informer, String Reason, LocalDateTime date, User target) {
         this.userInformer = informer;
         this.userTarget = target;
         this.reason = Reason;
@@ -95,12 +99,11 @@ public class Report implements Reportable{
         this.statusReport = ReportStatus.PENDING;
     }
 
-    //---------------------------------//
+    // ---------------------------------//
 
-    //----------- Methods -----------//
+    // ----------- Methods -----------//
 
-
-    public void solveReport(ReportStatus newStatus){
+    public void solveReport(ReportStatus newStatus) {
         statusReport = newStatus;
     }
 
@@ -119,12 +122,12 @@ public class Report implements Reportable{
     }
 
     @Override
-    public ModerationStatus getStatusModeration(){
+    public ModerationStatus getStatusModeration() {
         return null;
     }
 
     @Override
-    public Reportable getTarget(){
+    public Reportable getTarget() {
         if (commentTarget != null)
             return commentTarget;
 
@@ -137,6 +140,6 @@ public class Report implements Reportable{
         return null;
     }
 
-    //---------------------------------------//
+    // ---------------------------------------//
 
 }
