@@ -1,15 +1,22 @@
 package tracklistd.api.Entity;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import tracklistd.api.Entity.Enums.ModerationStatus;
+import tracklistd.api.Entity.Interfaces.Reportable;
 
 
 @Entity
 @DiscriminatorValue("comment")
 @PrimaryKeyJoinColumn(name = "comment_id")
-public class Comment extends Publication {
+public class Comment extends Publication implements Reportable{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
@@ -48,6 +55,24 @@ public class Comment extends Publication {
 
     public void setModerationStatus(ModerationStatus status) {
         this.moderationStatus = status;
+    }
+
+    @Override
+    public String getContentReported() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getContentReported'");
+    }
+
+    @Override
+    public ModerationStatus getStatusModeration() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getStatusModeration'");
+    }
+
+    @Override
+    public Reportable getTarget() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getTarget'");
     }
 
 }

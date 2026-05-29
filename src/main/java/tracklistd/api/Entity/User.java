@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Enums.Role;
+import tracklistd.api.Entity.Interfaces.Reportable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,12 +19,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-
-public class User {
+public class User implements Reportable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     @Column(nullable = false, length = 100)
     private String nome;
@@ -56,8 +57,22 @@ public class User {
     @ManyToMany(mappedBy = "seguindo")
     private List<User> seguidores;
 
-    private String idLoginApi;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status", nullable = false, updatable = true)
+    private ModerationStatus moderationStatus = ModerationStatus.ACTIVE;
 
-    private Boolean estaAtivo;
+    @Override
+    public String getContentReported() {
+        return nome;
+    }
 
+    @Override
+    public ModerationStatus getStatusModeration() {
+        return moderationStatus;
+    }
+
+    @Override
+    public Reportable getTarget() {
+        return this;
+    }
 }
