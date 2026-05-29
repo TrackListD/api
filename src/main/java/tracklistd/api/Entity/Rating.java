@@ -1,15 +1,22 @@
 package tracklistd.api.Entity;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
+import tracklistd.api.Entity.Interfaces.Reportable;
 
 @Entity
 @DiscriminatorValue("rating")
 @PrimaryKeyJoinColumn(name = "rating_id")
-public class Rating extends Publication {
+public class Rating extends Publication implements Reportable{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id", nullable = false)
@@ -73,5 +80,23 @@ public class Rating extends Publication {
 
     public void setPrivacy(Privacy whoCanSee) {
         this.whoCanSee = whoCanSee;
+    }
+
+    @Override
+    public String getContentReported() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getContentReported'");
+    }
+
+    @Override
+    public ModerationStatus getStatusModeration() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getStatusModeration'");
+    }
+
+    @Override
+    public Reportable getTarget() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getTarget'");
     }
 }
