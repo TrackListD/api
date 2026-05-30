@@ -35,6 +35,6 @@ public class Artist {
     @Column(name = "genre")
     private Set<String> musicalGenres = new LinkedHashSet<>();
 
-    @ManyToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY)
     private List<Media> releasedMedia = new ArrayList<>();
 }
