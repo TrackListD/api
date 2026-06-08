@@ -1,6 +1,7 @@
 package tracklistd.api.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.MediaList;
 import tracklistd.api.Entity.User;
@@ -8,6 +9,7 @@ import tracklistd.api.Entity.User;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface MediaListRepository extends JpaRepository<MediaList, Long> {
 
     // Métodos CRUD básicos já vêm inclusos (save, findById, findAll, delete, etc.)
