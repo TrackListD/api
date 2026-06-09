@@ -13,6 +13,7 @@ import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "type_media", discriminatorType = DiscriminatorType.STRING)
 @NoArgsConstructor

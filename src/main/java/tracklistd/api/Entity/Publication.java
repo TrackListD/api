@@ -5,6 +5,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -27,6 +29,12 @@ public abstract class Publication {
     @Column(name = "update_at")
     private LocalDateTime updateAt;
 
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "publication")
+    private List<Like> likes = new ArrayList<>();
+
     public Publication() {
     }
 
@@ -48,5 +56,13 @@ public abstract class Publication {
 
     public LocalDateTime getUpdateAt() {
         return updateAt;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
     }
 }

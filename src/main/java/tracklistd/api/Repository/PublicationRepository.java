@@ -14,12 +14,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PublicationRepository extends JpaRepository<Publication, Long> {
-    public List<Publication> findByAuthorInOrderByCreatedAtDesc(Set<User> following);
+    public List<Publication> findByAuthorInOrderByPublicationDateDesc(Set<User> following);
 
     @Query("""
             SELECT p FROM Publication p
-            WHERE p.createdAt >= :date
-            ORDER BY (p.likes + p.comments) DESC
+            WHERE p.publicationDate >= :date
+            ORDER BY (SIZE(p.likes) + SIZE(p.comments)) DESC
             """)
     List<Publication> findTrending(@Param("date") LocalDateTime date);
 }

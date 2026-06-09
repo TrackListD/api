@@ -6,25 +6,32 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Repository.PublicationRepository;
+import tracklistd.api.Repository.UserRepository;
 
 @Service
 public class FeedService {
 
     private final PublicationRepository publicationRepository;
+    private final UserRepository userRepository;
 
-    public FeedService(PublicationRepository publicationRepository) {
+    public FeedService(PublicationRepository publicationRepository, UserRepository userRepository) {
         this.publicationRepository = publicationRepository;
+        this.userRepository = userRepository;
     }
 
-    public List<Publication> getSocialFeed(User user) {
+    @Transactional
+    public List<Publication> getSocialFeed(Long userId) {
 
-        Set<User> following = user.getFollowing(); // pega todos os seguidos do usuario
+        User user = userRepository.findById(userId)
+                .orElseThrow();
 
         return publicationRepository
-                .findByAuthorInOrderByCreatedAtDesc(following); // retorna todos os posts da lista "seguindo" do usuario
+                .findByAuthorInOrderByPublicationDateDesc(
+                        user.getFollowing());
     }
 
     public List<Publication> getGlobalFeed() {
