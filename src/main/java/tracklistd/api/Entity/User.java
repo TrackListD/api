@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "tb_users")
+@Table(name = "tl_users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -83,4 +83,5 @@ public class User implements Reportable {
     public Reportable getTarget() {
         return this;
     }
+
 }

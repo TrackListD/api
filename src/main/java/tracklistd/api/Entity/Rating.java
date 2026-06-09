@@ -97,4 +97,8 @@ public class Rating extends Publication implements Reportable {
     public Reportable getTarget() {
         return author;
     }
+
+    public void setMediaTarget(Media media) {
+        this.target = media;
+    }
 }
