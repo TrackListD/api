@@ -109,17 +109,17 @@ public class MediaListService {
 
     }
 
-    public void favoriteMediaList(Long mediaListId, Long authorId)
+    public void favoriteMediaList(Long mediaListId)
     {
-        MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
+        MediaList mediaList = findMediaList(mediaListId);
 
         mediaList.setFavorite(true);
         this.mediaListRepository.save(mediaList);
     }
 
-    public void unfavoriteMediaList(Long mediaListId, Long authorId)
+    public void unfavoriteMediaList(Long mediaListId)
     {
-        MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
+        MediaList mediaList = findMediaList(mediaListId);
 
         mediaList.setFavorite(false);
         this.mediaListRepository.save(mediaList);
@@ -146,5 +146,14 @@ public class MediaListService {
             throw new MediaListaOwnershipViolation();
 
         return mediaList;
+    }
+
+    private MediaList findMediaList(Long mediaListId)
+    {
+        MediaList mediaList = this.mediaListRepository.findById(mediaListId).orElseThrow(
+                () -> new MediaListaException("Essa Lista não existe")
+        );
+
+        return  mediaList;
     }
 }
