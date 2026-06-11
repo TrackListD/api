@@ -22,4 +22,5 @@ public interface PublicationRepository extends JpaRepository<Publication, Long> 
             ORDER BY (SIZE(p.likes) + SIZE(p.comments)) DESC
             """)
     List<Publication> findTrending(@Param("date") LocalDateTime date);
+
 }
