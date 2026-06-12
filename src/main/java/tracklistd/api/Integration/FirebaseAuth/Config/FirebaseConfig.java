@@ -9,14 +9,19 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Configuration
 public class FirebaseConfig {
+
+    @Value("${firebase.config.path}")
+    private String firebaseConfigPath;
 
     @Bean
     public FirebaseApp firebaseSetUp() {
         try {
-            FileInputStream serviceAccount = new FileInputStream(
-                    "src/main/resources/firebase/tracklistd-53c90-firebase-adminsdk-fbsvc-5a6b9ee13e.json");
+
+            FileInputStream serviceAccount = new FileInputStream(firebaseConfigPath);
 
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
