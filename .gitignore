@@ -34,3 +34,5 @@ build/
 
 ### Arquivo de senhas ###
 .env
+
+src/main/resources/firebase/tracklistd-53c90-firebase-adminsdk-fbsvc-5a6b9ee13e.json
