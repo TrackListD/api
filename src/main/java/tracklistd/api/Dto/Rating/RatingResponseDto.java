@@ -22,7 +22,7 @@ public record RatingResponseDto(
         @Schema(description = "Nome do Album ou Musica que será Avaliado", example = "Billie Jean")
         String targetName,
 
-        Integer likeCount,
+        Long likeCount,
         Integer commentCount
 ) { }
 

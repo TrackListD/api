@@ -9,6 +9,9 @@ import tracklistd.api.Exceptions.RatingsExceptions.InvalidRatingNote;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingAlreadyExists;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingException;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingOwnershipViolation;
+import tracklistd.api.Repository.CommentRepository;
+import tracklistd.api.Repository.LikeRepository;
+import tracklistd.api.Repository.MediaRepository;
 import tracklistd.api.Repository.RatingRepository;
 
 import java.util.ArrayList;
@@ -20,13 +23,21 @@ import java.util.Optional;
 public class RatingService {
 
     private final RatingRepository ratingRepository;
+    private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
+    private final MediaService mediaService;
 
     //Construtor gerenciado pelo Spring Boot
     //Injeção de Dependência
-    public RatingService(RatingRepository ratingRepository)
+    public RatingService(RatingRepository ratingRepository,
+                         CommentRepository commentRepository,
+                         LikeRepository likeRepository,
+                         MediaService mediaService)
     {
         this.ratingRepository = ratingRepository;
-    }
+        this.commentRepository = commentRepository;
+        this.likeRepository = likeRepository;
+        this.mediaService = mediaService;}
 
     public Rating createRating(User author, Media target, Float ratingNote, String review, Privacy whoCanSee )
     {
@@ -84,6 +95,30 @@ public class RatingService {
     public List<Rating> getRatingsByUser(User author)
     {
         return this.ratingRepository.findRatingByAuthorAndWhoCanSee(author, Privacy.PUBLIC);
+    }
+
+    public Rating getRatingById(Long ratingId)
+    {
+       Rating rating =  this.ratingRepository.findById(ratingId).orElseThrow(
+               () -> new RatingException("Essa Avaliação não Existe")
+       );
+
+       return rating;
+    }
+
+    public Integer getRatingComments(Rating rating)
+    {
+       return this.commentRepository.countByPost(rating);
+    }
+
+    public Long getRatingLikes(Rating rating)
+    {
+        return this.likeRepository.countByPublicationId(rating.getId());
+    }
+
+    public Media getRatingTargetMedia(Rating rating)
+    {
+        return this.mediaService.getMediaById(rating.getTargetMedia().getSpotifyID());
     }
 
     // Métodos Privados
