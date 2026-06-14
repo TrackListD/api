@@ -12,7 +12,6 @@ import tracklistd.api.Entity.Interfaces.Reportable;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "tb_users")
