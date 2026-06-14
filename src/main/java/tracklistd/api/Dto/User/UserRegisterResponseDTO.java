@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 
 public record UserRegisterResponseDTO(
         Long id,
-        String nome,
+        String name,
         Role role,
-        Privacy quemPodeComentar,
+        Privacy whoCanComment,
         String bio,
-        ModerationStatus statusModeracao,
-        LocalDateTime dataCriacao) {
+        ModerationStatus moderationStatus,
+        LocalDateTime creationDate) {
 
     public UserRegisterResponseDTO(User user) {
         this(
