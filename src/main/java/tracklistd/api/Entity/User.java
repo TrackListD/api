@@ -63,7 +63,6 @@ public class User implements Reportable {
     public User(String name, String idLoginApi, Role role, Privacy privacy) {
         this.name = name;
         this.idLoginApi = idLoginApi;
-
         this.role = role;
         this.whoCanComment = privacy;
         this.moderationStatus = ModerationStatus.ACTIVE;
