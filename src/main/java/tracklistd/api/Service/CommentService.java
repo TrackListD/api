@@ -3,11 +3,13 @@ package tracklistd.api.Service;
 import org.springframework.stereotype.Service;
 import tracklistd.api.Entity.Comment;
 import tracklistd.api.Entity.Publication;
+import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.CommentExceptions.CommentException;
 import tracklistd.api.Exceptions.CommentExceptions.CommentOwershipViolation;
 import tracklistd.api.Exceptions.CommentExceptions.CommentTextBlankException;
 import tracklistd.api.Repository.CommentRepository;
+import tracklistd.api.Repository.LikeRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,10 +18,12 @@ import java.util.Objects;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
 
-    public CommentService(CommentRepository commentRepository)
+    public CommentService(CommentRepository commentRepository, LikeRepository likeRepository)
     {
         this.commentRepository = commentRepository;
+        this.likeRepository = likeRepository;
     }
 
     public Comment createComment(User author, Publication post, String text)
@@ -59,6 +63,11 @@ public class CommentService {
     public List<Comment> getCommentsByUser(User author)
     {
         return this.commentRepository.getCommentsByAuthor(author);
+    }
+
+    public Long getCommentLikes(Rating rating)
+    {
+        return this.likeRepository.countByPublicationId(rating.getId());
     }
 
     //Metodos Privados
