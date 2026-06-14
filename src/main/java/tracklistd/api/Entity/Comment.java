@@ -12,11 +12,10 @@ import jakarta.persistence.PrimaryKeyJoinColumn;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Interfaces.Reportable;
 
-
 @Entity
 @DiscriminatorValue("comment")
 @PrimaryKeyJoinColumn(name = "comment_id")
-public class Comment extends Publication implements Reportable{
+public class Comment extends Publication implements Reportable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
@@ -35,7 +34,8 @@ public class Comment extends Publication implements Reportable{
         this.text = text;
     }
 
-    public Comment() {}
+    public Comment() {
+    }
 
     public Publication getPost() {
         return post;
@@ -59,20 +59,17 @@ public class Comment extends Publication implements Reportable{
 
     @Override
     public String getContentReported() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getContentReported'");
+        return text;
     }
 
     @Override
     public ModerationStatus getStatusModeration() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStatusModeration'");
+        return moderationStatus;
     }
 
     @Override
     public Reportable getTarget() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTarget'");
+        return this.author;
     }
 
 }
