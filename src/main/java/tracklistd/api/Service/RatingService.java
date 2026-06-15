@@ -9,6 +9,7 @@ import tracklistd.api.Exceptions.RatingsExceptions.InvalidRatingNote;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingAlreadyExists;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingException;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingOwnershipViolation;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.CommentRepository;
 import tracklistd.api.Repository.LikeRepository;
 import tracklistd.api.Repository.MediaRepository;
@@ -100,7 +101,7 @@ public class RatingService {
     public Rating getRatingById(Long ratingId)
     {
        Rating rating =  this.ratingRepository.findById(ratingId).orElseThrow(
-               () -> new RatingException("Essa Avaliação não Existe")
+               () -> new ResourceNotFoundException("Essa Avaliação não Existe")
        );
 
        return rating;
@@ -138,7 +139,7 @@ public class RatingService {
     private Rating findRatingAndValidateOwner(Long ratingId, Long authorId)
     {
         Rating rating = ratingRepository.findById(ratingId).orElseThrow(
-                () -> new RatingException("Está Avaliação não existe"));
+                () -> new ResourceNotFoundException("Está Avaliação não existe"));
 
         if(!Objects.equals(rating.getAuthorPublication().getId(), authorId))
             throw new RatingOwnershipViolation();

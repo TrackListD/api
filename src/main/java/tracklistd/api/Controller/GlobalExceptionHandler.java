@@ -8,8 +8,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import tracklistd.api.Dto.ErrorDto;
+import tracklistd.api.Exceptions.CommentExceptions.CommentOnCommentException;
 import tracklistd.api.Exceptions.CommentExceptions.CommentOwershipViolation;
 import tracklistd.api.Exceptions.CommentExceptions.CommentTextBlankException;
+import tracklistd.api.Exceptions.CommentExceptions.SelfCommentException;
+import tracklistd.api.Exceptions.MediaListExceptions.InvalidMediaTypeForListException;
 import tracklistd.api.Exceptions.MediaListExceptions.ListNameBlankException;
 import tracklistd.api.Exceptions.MediaListExceptions.MediaListNameAlreadyExitsException;
 import tracklistd.api.Exceptions.MediaListExceptions.MediaListaOwnershipViolation;
@@ -119,6 +122,25 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errorDto, HttpStatus.CONFLICT);
+    }
+
+    //Captura exceções personalizadas que retornam um erro do tipo 422
+    @ExceptionHandler({
+            CommentOnCommentException.class,
+            SelfCommentException.class,
+            InvalidMediaTypeForListException.class
+    })
+    public ResponseEntity<ErrorDto> unprocessableContentException(RuntimeException ex)
+    {
+        ErrorDto errorDto = ErrorDto
+                .builder()
+                .timestamp(LocalDateTime.now())
+                .codeError(HttpStatus.UNPROCESSABLE_CONTENT.value())
+                .status(HttpStatus.UNPROCESSABLE_CONTENT.name())
+                .errors(List.of(ex.getMessage()))
+                .build();
+
+        return new ResponseEntity<>(errorDto, HttpStatus.UNPROCESSABLE_CONTENT);
     }
 
     //Captura quaisquer exceções não esperada

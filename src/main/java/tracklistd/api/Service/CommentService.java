@@ -5,9 +5,8 @@ import tracklistd.api.Entity.Comment;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
-import tracklistd.api.Exceptions.CommentExceptions.CommentException;
-import tracklistd.api.Exceptions.CommentExceptions.CommentOwershipViolation;
-import tracklistd.api.Exceptions.CommentExceptions.CommentTextBlankException;
+import tracklistd.api.Exceptions.CommentExceptions.*;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.CommentRepository;
 import tracklistd.api.Repository.LikeRepository;
 
@@ -31,9 +30,9 @@ public class CommentService {
         if(text.isBlank())
             throw new CommentTextBlankException();
         if(!checkTypeOfPost(post))
-            throw new CommentException("Impossivel Comentar um comentario");
+            throw new CommentOnCommentException();
         if(Objects.equals(post.getAuthorPublication().getId(), author.getId()))
-            throw new CommentException("Impossivel comentar no proprio Post");
+            throw new SelfCommentException();
 
         Comment comment = new Comment(author,post,text);
         this.commentRepository.save(comment);
@@ -81,7 +80,7 @@ public class CommentService {
     private Comment findCommentAndValidateOwner(Long commentId, Long authorId)
     {
         Comment comment = this.commentRepository.findById(commentId).orElseThrow(
-                () -> new CommentException("Esse comentario não existe")
+                () -> new ResourceNotFoundException("Esse comentario não existe")
         );
 
         if(!Objects.equals(comment.getAuthorPublication().getId(), authorId))

@@ -3,6 +3,7 @@ package tracklistd.api.Service;
 import org.springframework.stereotype.Service;
 import tracklistd.api.Entity.Media;
 import tracklistd.api.Exceptions.MediaExceptions.MediaException;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.MediaRepository;
 
 @Service
@@ -18,7 +19,7 @@ public class MediaService {
     public Media getMediaById(String mediaId)
     {
         Media media = this.mediaRepository.findMediaBySpotifyID(mediaId).orElseThrow(
-                () -> new MediaException("Essa midia não existe")
+                () -> new ResourceNotFoundException("Essa midia não existe")
         );
         return media;
     }
