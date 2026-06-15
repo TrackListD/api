@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 @Schema(description = "DTO com os dados públicos de um comentário")
 public record CommentResponseDto(
         @Schema(description = "ID da publicação à qual o comentário pertence", example = "1")
-        Long idPublication,
+        Long idPost,
 
         Long idAuthor,
 
@@ -14,6 +14,6 @@ public record CommentResponseDto(
         String text,
 
         LocalDateTime commentDate,
-        Integer likeCount
+        Long likeCount
 ) {
 }

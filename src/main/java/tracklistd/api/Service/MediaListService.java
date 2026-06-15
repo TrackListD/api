@@ -6,11 +6,10 @@ import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Media;
 import tracklistd.api.Entity.MediaList;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Exceptions.CommentExceptions.SelfCommentException;
 import tracklistd.api.Exceptions.MediaExceptions.MediaException;
-import tracklistd.api.Exceptions.MediaListExceptions.ListNameBlankException;
-import tracklistd.api.Exceptions.MediaListExceptions.MediaListNameAlreadyExitsException;
-import tracklistd.api.Exceptions.MediaListExceptions.MediaListaException;
-import tracklistd.api.Exceptions.MediaListExceptions.MediaListaOwnershipViolation;
+import tracklistd.api.Exceptions.MediaListExceptions.*;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.MediaListRepository;
 import tracklistd.api.Repository.MediaRepository;
 
@@ -78,11 +77,11 @@ public class MediaListService {
 
         //Procuro a media pelo Id
         Media media = this.mediaRepository.findById(mediaId).orElseThrow(
-                () -> new MediaException("Essa midia não existe")
+                () -> new ResourceNotFoundException("Essa midia não existe")
         );
         //Com a midia retornada, verifico se elá é do tipo da lista
         if(!mediaList.getTypeOfList().matches(media))
-            throw new MediaException("Impossivel adicionar um(a) " + media.getClass().getSimpleName() + " em uma lista de " + mediaList.getTypeOfList().toString());
+            throw new InvalidMediaTypeForListException("Impossivel adicionar um(a) " + media.getClass().getSimpleName() + " em uma lista de " + mediaList.getTypeOfList().toString());
         //Se não for, lanço uma exceção
         //Se for, adiciono a lista
         mediaList.addMedia(media);
@@ -96,11 +95,11 @@ public class MediaListService {
 
         //Procura a media pelo id
         Media media = this.mediaRepository.findById(mediaId).orElseThrow(
-                () -> new MediaException("Essa midia não existe")
+                () -> new ResourceNotFoundException("Essa midia não existe")
         );
         //Com a media retornada, verifico se ela está na lista
         if(!mediaList.getMedia().contains(media))
-            throw new MediaException("Essa midia não está na lista");
+            throw new ResourceNotFoundException("Essa midia não está na lista");
         //Se não estiver, lanço exceção
 
         //Se estiver removo
@@ -138,7 +137,7 @@ public class MediaListService {
     {
         //Verifica se a Lista Existe
         MediaList mediaList = this.mediaListRepository.findById(mediaListId).orElseThrow(
-                () -> new MediaListaException("Está Lista não existe")
+                () -> new ResourceNotFoundException("Está Lista não existe")
         );
 
         //Se encontrada a Lista, verifica se ela pertence ao User logado
@@ -151,7 +150,7 @@ public class MediaListService {
     private MediaList findMediaList(Long mediaListId)
     {
         MediaList mediaList = this.mediaListRepository.findById(mediaListId).orElseThrow(
-                () -> new MediaListaException("Essa Lista não existe")
+                () -> new ResourceNotFoundException("Essa Lista não existe")
         );
 
         return  mediaList;
