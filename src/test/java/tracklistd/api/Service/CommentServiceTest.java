@@ -8,12 +8,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import tracklistd.api.Entity.Comment;
-import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.CommentExceptions.CommentException;
 import tracklistd.api.Exceptions.CommentExceptions.CommentOwershipViolation;
 import tracklistd.api.Exceptions.CommentExceptions.CommentTextBlankException;
+import tracklistd.api.Exceptions.CommentExceptions.SelfCommentException;
+import tracklistd.api.Exceptions.CommentExceptions.CommentOnCommentException;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.CommentRepository;
 
 import java.util.Collections;
@@ -58,9 +60,7 @@ class CommentServiceTest {
         String blankText = "   ";
 
         // Act & Assert
-        assertThrows(CommentTextBlankException.class, () ->
-            commentService.createComment(author, post, blankText)
-        );
+        assertThrows(CommentTextBlankException.class, () -> commentService.createComment(author, post, blankText));
         verify(commentRepository, never()).save(any(Comment.class));
     }
 
@@ -73,9 +73,8 @@ class CommentServiceTest {
         ReflectionTestUtils.setField(commentPost, "author", differentAuthor);
 
         // Act & Assert
-        CommentException exception = assertThrows(CommentException.class, () ->
-            commentService.createComment(author, commentPost, "My comment text")
-        );
+        CommentOnCommentException exception = assertThrows(CommentOnCommentException.class,
+                () -> commentService.createComment(author, commentPost, "My comment text"));
         assertEquals("Impossivel Comentar um comentario", exception.getMessage());
         verify(commentRepository, never()).save(any(Comment.class));
     }
@@ -86,9 +85,9 @@ class CommentServiceTest {
         ReflectionTestUtils.setField(post, "author", author);
 
         // Act & Assert
-        CommentException exception = assertThrows(CommentException.class, () ->
-            commentService.createComment(author, post, "My comment text")
-        );
+
+        SelfCommentException exception = assertThrows(SelfCommentException.class,
+                () -> commentService.createComment(author, post, "My comment text"));
         assertEquals("Impossivel comentar no proprio Post", exception.getMessage());
         verify(commentRepository, never()).save(any(Comment.class));
     }
@@ -120,9 +119,9 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        CommentException exception = assertThrows(CommentException.class, () ->
-            commentService.editCommentText(newText, commentId, author.getId())
-        );
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> commentService.editCommentText(newText, commentId, author.getId()));
         assertEquals("Esse comentario não existe", exception.getMessage());
         verify(commentRepository, never()).save(any(Comment.class));
     }
@@ -137,9 +136,7 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         // Act & Assert
-        assertThrows(CommentOwershipViolation.class, () ->
-            commentService.editCommentText(newText, commentId, 999L)
-        );
+        assertThrows(CommentOwershipViolation.class, () -> commentService.editCommentText(newText, commentId, 999L));
         verify(commentRepository, never()).save(any(Comment.class));
     }
 
@@ -153,9 +150,8 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         // Act & Assert
-        assertThrows(CommentTextBlankException.class, () ->
-            commentService.editCommentText(blankText, commentId, author.getId())
-        );
+        assertThrows(CommentTextBlankException.class,
+                () -> commentService.editCommentText(blankText, commentId, author.getId()));
         verify(commentRepository, never()).save(any(Comment.class));
     }
 
@@ -185,9 +181,9 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        CommentException exception = assertThrows(CommentException.class, () ->
-            commentService.deleteComment(commentId, author.getId())
-        );
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> commentService.deleteComment(commentId, author.getId()));
         assertEquals("Esse comentario não existe", exception.getMessage());
         verify(commentRepository, never()).delete(any(Comment.class));
     }
@@ -201,9 +197,7 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         // Act & Assert
-        assertThrows(CommentOwershipViolation.class, () ->
-            commentService.deleteComment(commentId, 999L)
-        );
+        assertThrows(CommentOwershipViolation.class, () -> commentService.deleteComment(commentId, 999L));
         verify(commentRepository, never()).delete(any(Comment.class));
     }
 
