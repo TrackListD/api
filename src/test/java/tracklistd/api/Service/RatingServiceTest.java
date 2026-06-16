@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Music;
 import tracklistd.api.Entity.Rating;
@@ -91,7 +90,7 @@ class RatingServiceTest {
         assertEquals(target, result.getTargetMedia());
         assertEquals(validNote, result.getRatingNote());
         assertEquals(review, result.getReview());
-        assertEquals(privacy, result.getPrivacy());
+        assertEquals(privacy, result.getWhoCanSee());
 
         verify(ratingRepository, times(1)).save(result);
     }
