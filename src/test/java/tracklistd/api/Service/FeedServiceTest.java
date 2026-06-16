@@ -3,7 +3,6 @@ package tracklistd.api.Service;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
-import jakarta.transaction.Transactional;
 import tracklistd.api.Entity.Music;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.Rating;
@@ -76,7 +74,7 @@ public class FeedServiceTest {
         rating.editNote(5f);
         rating.editReview("Muito bom");
 
-        rating.setPrivacy(Privacy.PUBLIC);
+        rating.setWhoCanSee(Privacy.PUBLIC);
         rating.setStatus(ModerationStatus.ACTIVE);
 
         publicationRepository.save(rating);

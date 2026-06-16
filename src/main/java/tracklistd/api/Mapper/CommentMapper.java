@@ -14,16 +14,18 @@ import java.time.LocalDateTime;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-    @Mapping(source = "post", target = "post")
+    @Mapping(target = "post",               ignore = true) // sem setPost(), populado pelo construtor
+    @Mapping(target = "moderationStatus",   ignore = true) // default ACTIVE
     Comment toEntity(CommentRequestDto commentRequestDto, Publication post, User author);
 
-    @Mapping(source = "publicationDate", target = "commentDate")
-    @Mapping(source = "post.id", target = "idPost")
-    @Mapping(source = "author.id", target = "idAuthor")
+    @Mapping(source = "comment.publicationDate", target = "commentDate")
+    @Mapping(source = "comment.post.id", target = "idPost")
+    @Mapping(source = "comment.author.id", target = "idAuthor")
     @Mapping(source = "likeCount", target = "likeCount")
     CommentResponseDto toResponseDTO(Comment comment, Long likeCount);
 
     @Mapping(source = "commentResponseDto", target = "publicData")
-    @Mapping(source = "moderationStatus", target = "status")
+    @Mapping(source = "comment.moderationStatus", target = "status")
+    @Mapping(source = "comment.updateAt",target = "updateAt")
     CommentOwnerResponseDto toOwnerResponseDTO(Comment comment, CommentResponseDto commentResponseDto);
 }

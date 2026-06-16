@@ -15,15 +15,18 @@ import java.util.Set;
 public interface MediaListMapper {
 
 
+    @Mapping(target = "favorite",  source = "mediaListRequestDto.isFavorite")
+    @Mapping(target = "comments", ignore = true)
+    @Mapping(target = "media",    ignore = true)
     MediaList toEntity(MediaListRequestDto mediaListRequestDto, User author);
 
     @Mapping(source = "author.name", target = "authorName")
     @Mapping(source = "author.id", target = "idAuthor")
-    @Mapping(source = "medias", target = "mediaIds")
+    @Mapping(source = "media", target = "mediaIds")
     MediaListResponseDto toResponseDto(MediaList mediaList);
 
     //Transforma a Entidade em DTO de response "privado" do criador
-    @Mapping(source = "mediaListResponseDto", target = "publicDto")
+    @Mapping(source = "mediaListResponseDto", target = "publicData")
     MediaListOwnerResponseDto toOwnerResponseDTO(MediaList mediaList, MediaListResponseDto mediaListResponseDto);
 
 
