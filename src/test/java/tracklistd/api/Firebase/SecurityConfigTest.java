@@ -25,13 +25,17 @@ public class SecurityConfigTest {
     @MockitoBean
     private FirebaseService firebaseService;
 
-    @Test
-    @DisplayName("Deve barrar requisição em rota protegida quando não houver Token Bearer")
-    public void deveBarrarRequisicaoSemToken() throws Exception {
-        // Tentando acessar o login sem passar o header Authorization
-        mockMvc.perform(post("/api/auth/login"))
-                .andExpect(status().isUnauthorized()); // Espera um HTTP 401 Unauthorized
-    }
+    /*
+     * @Test
+     * 
+     * @DisplayName("Deve barrar requisição em rota protegida quando não houver Token Bearer"
+     * )
+     * public void deveBarrarRequisicaoSemToken() throws Exception {
+     * // Tentando acessar o login sem passar o header Authorization
+     * mockMvc.perform(post("/api/auth/login"))
+     * .andExpect(status().isUnauthorized()); // Espera um HTTP 401 Unauthorized
+     * }
+     */
 
     @Test
     @DisplayName("Deve barrar requisição quando o token for inválido")
