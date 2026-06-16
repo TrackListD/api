@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "tb_users")
+@Table(name = "tl_users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,7 +23,7 @@ public class User implements Reportable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -63,7 +63,6 @@ public class User implements Reportable {
     public User(String name, String idLoginApi, Role role, Privacy privacy) {
         this.name = name;
         this.idLoginApi = idLoginApi;
-
         this.role = role;
         this.whoCanComment = privacy;
         this.moderationStatus = ModerationStatus.ACTIVE;
@@ -83,4 +82,5 @@ public class User implements Reportable {
     public Reportable getTarget() {
         return this;
     }
+
 }

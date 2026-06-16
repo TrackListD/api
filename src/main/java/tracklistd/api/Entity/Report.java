@@ -103,8 +103,9 @@ public class Report implements Reportable {
 
     // ----------- Methods -----------//
 
-    public void solveReport(ReportStatus newStatus) {
+    public void solveReport(ReportStatus newStatus, Punishment newPunishment) {
         statusReport = newStatus;
+        punishment = newPunishment;
     }
 
     @Override
