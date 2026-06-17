@@ -41,8 +41,8 @@ public class AuthControllerTest {
         mockMvc.perform(post("/api/auth/login")
                 .header("Authorization", "Bearer " + tokenValido))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nome").value("Vinicius Teste"))
+                .andExpect(jsonPath("$.name").value("Vinicius Teste"))
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.statusModeracao").value("ACTIVE"));
+                .andExpect(jsonPath("$.moderationStatus").value("ACTIVE"));
     }
 }

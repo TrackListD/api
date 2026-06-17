@@ -19,6 +19,8 @@ import tracklistd.api.Exceptions.MediaListExceptions.ListNameBlankException;
 import tracklistd.api.Exceptions.MediaListExceptions.MediaListNameAlreadyExitsException;
 import tracklistd.api.Exceptions.MediaListExceptions.MediaListaException;
 import tracklistd.api.Exceptions.MediaListExceptions.MediaListaOwnershipViolation;
+import tracklistd.api.Exceptions.MediaListExceptions.InvalidMediaTypeForListException;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.MediaListRepository;
 import tracklistd.api.Repository.MediaRepository;
 
@@ -62,9 +64,8 @@ class MediaListServiceTest {
         String blankName = "   ";
 
         // Act & Assert (Ação e Validação)
-        assertThrows(ListNameBlankException.class, () ->
-            mediaListService.createMediaList(author, ListType.MUSIC, blankName, Privacy.PUBLIC, false)
-        );
+        assertThrows(ListNameBlankException.class,
+                () -> mediaListService.createMediaList(author, ListType.MUSIC, blankName, Privacy.PUBLIC, false));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -76,9 +77,8 @@ class MediaListServiceTest {
                 .thenReturn(Optional.of(new MediaList()));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListNameAlreadyExitsException.class, () ->
-            mediaListService.createMediaList(author, ListType.MUSIC, listName, Privacy.PUBLIC, false)
-        );
+        assertThrows(MediaListNameAlreadyExitsException.class,
+                () -> mediaListService.createMediaList(author, ListType.MUSIC, listName, Privacy.PUBLIC, false));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -113,9 +113,8 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.of(mediaList));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(ListNameBlankException.class, () ->
-            mediaListService.renameMediaList(blankName, listId, author.getId())
-        );
+        assertThrows(ListNameBlankException.class,
+                () -> mediaListService.renameMediaList(blankName, listId, author.getId()));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -129,9 +128,8 @@ class MediaListServiceTest {
                 .thenReturn(Optional.of(new MediaList()));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListNameAlreadyExitsException.class, () ->
-            mediaListService.renameMediaList(newName, listId, author.getId())
-        );
+        assertThrows(MediaListNameAlreadyExitsException.class,
+                () -> mediaListService.renameMediaList(newName, listId, author.getId()));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -142,9 +140,9 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.empty());
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaException.class, () ->
-            mediaListService.renameMediaList("Novo Nome", listId, author.getId())
-        );
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> mediaListService.renameMediaList("Novo Nome", listId, author.getId()));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -156,9 +154,8 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.of(mediaList));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaOwnershipViolation.class, () ->
-            mediaListService.renameMediaList("Novo Nome", listId, otherUserId)
-        );
+        assertThrows(MediaListaOwnershipViolation.class,
+                () -> mediaListService.renameMediaList("Novo Nome", listId, otherUserId));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -188,9 +185,8 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.empty());
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaException.class, () ->
-            mediaListService.deleteMediaList(listId, author.getId())
-        );
+
+        assertThrows(ResourceNotFoundException.class, () -> mediaListService.deleteMediaList(listId, author.getId()));
         verify(mediaListRepository, never()).delete(any(MediaList.class));
     }
 
@@ -202,9 +198,7 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.of(mediaList));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaOwnershipViolation.class, () ->
-            mediaListService.deleteMediaList(listId, otherUserId)
-        );
+        assertThrows(MediaListaOwnershipViolation.class, () -> mediaListService.deleteMediaList(listId, otherUserId));
         verify(mediaListRepository, never()).delete(any(MediaList.class));
     }
 
@@ -230,9 +224,9 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.empty());
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaException.class, () ->
-            mediaListService.addMediaToList(listId, 20L, author.getId())
-        );
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> mediaListService.addMediaToList(listId, 20L, author.getId()));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -244,9 +238,8 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.of(mediaList));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaOwnershipViolation.class, () ->
-            mediaListService.addMediaToList(listId, 20L, otherUserId)
-        );
+        assertThrows(MediaListaOwnershipViolation.class,
+                () -> mediaListService.addMediaToList(listId, 20L, otherUserId));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -259,9 +252,9 @@ class MediaListServiceTest {
         when(mediaRepository.findById(mediaId)).thenReturn(Optional.empty());
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaException.class, () ->
-            mediaListService.addMediaToList(listId, mediaId, author.getId())
-        );
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> mediaListService.addMediaToList(listId, mediaId, author.getId()));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -276,9 +269,8 @@ class MediaListServiceTest {
         when(mediaRepository.findById(mediaId)).thenReturn(Optional.of(album));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaException.class, () ->
-            mediaListService.addMediaToList(listId, mediaId, author.getId())
-        );
+        assertThrows(InvalidMediaTypeForListException.class,
+                () -> mediaListService.addMediaToList(listId, mediaId, author.getId()));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -308,9 +300,9 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.empty());
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaException.class, () ->
-            mediaListService.removeMediaFromList(listId, 20L, author.getId())
-        );
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> mediaListService.removeMediaFromList(listId, 20L, author.getId()));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -322,9 +314,8 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.of(mediaList));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaOwnershipViolation.class, () ->
-            mediaListService.removeMediaFromList(listId, 20L, otherUserId)
-        );
+        assertThrows(MediaListaOwnershipViolation.class,
+                () -> mediaListService.removeMediaFromList(listId, 20L, otherUserId));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -338,9 +329,9 @@ class MediaListServiceTest {
         when(mediaRepository.findById(mediaId)).thenReturn(Optional.of(musicNotInList));
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaException.class, () ->
-            mediaListService.removeMediaFromList(listId, mediaId, author.getId())
-        );
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> mediaListService.removeMediaFromList(listId, mediaId, author.getId()));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -371,9 +362,8 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.empty());
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaException.class, () ->
-            mediaListService.favoriteMediaList(listId)
-        );
+
+        assertThrows(ResourceNotFoundException.class, () -> mediaListService.favoriteMediaList(listId));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -400,9 +390,8 @@ class MediaListServiceTest {
         when(mediaListRepository.findById(listId)).thenReturn(Optional.empty());
 
         // Act & Assert (Ação e Validação)
-        assertThrows(MediaListaException.class, () ->
-            mediaListService.unfavoriteMediaList(listId)
-        );
+
+        assertThrows(ResourceNotFoundException.class, () -> mediaListService.unfavoriteMediaList(listId));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
