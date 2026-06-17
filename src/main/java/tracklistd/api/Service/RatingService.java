@@ -90,10 +90,17 @@ public class RatingService {
         ratingRepository.delete(rating);
     }
 
+    public List<Rating> getRatingsByUserPrivacy(User author, Privacy privacy)
+    {
+        return this.ratingRepository.findRatingByAuthorAndWhoCanSee(author, privacy);
+    }
+
     public List<Rating> getRatingsByUser(User author)
     {
-        return this.ratingRepository.findRatingByAuthorAndWhoCanSee(author, Privacy.PUBLIC);
+        return this.ratingRepository.findAllByAuthor(author);
     }
+
+
 
     public Rating getRatingById(Long ratingId)
     {

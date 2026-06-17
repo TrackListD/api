@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import tracklistd.api.Dto.User.UserRegisterRequestDTO;
 import tracklistd.api.Dto.User.UserUpdatePerfilRequestDTO;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.UserRepository;
 
 @Service
@@ -78,5 +79,21 @@ public class UserService {
 
             userRepository.save(me);
         }
+    }
+
+    public User findUserById(Long id)
+    {
+        return this.userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado")
+        );
+    }
+
+    public User findUserByUid(String uid)
+    {
+        User user = this.userRepository.findByIdLoginApi(uid).orElseThrow(
+                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado")
+        );
+
+        return user;
     }
 }
