@@ -7,15 +7,12 @@ import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.RatingsExceptions.InvalidRatingNote;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingAlreadyExists;
-import tracklistd.api.Exceptions.RatingsExceptions.RatingException;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingOwnershipViolation;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.CommentRepository;
 import tracklistd.api.Repository.LikeRepository;
-import tracklistd.api.Repository.MediaRepository;
 import tracklistd.api.Repository.RatingRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -82,7 +79,7 @@ public class RatingService {
     {
         Rating rating = findRatingAndValidateOwner(ratingId,authorId);
 
-        rating.setPrivacy(newPrivacy);
+        rating.setWhoCanSee(newPrivacy);
         ratingRepository.save(rating);
 
     }

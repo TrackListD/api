@@ -73,6 +73,6 @@ class RatingServiceIntegrationTest {
         assertEquals(target.getSpotifyID(), foundRating.getTargetMedia().getSpotifyID());
         assertEquals(ratingNote, foundRating.getRatingNote());
         assertEquals(review, foundRating.getReview());
-        assertEquals(privacy, foundRating.getPrivacy());
+        assertEquals(privacy, foundRating.getWhoCanSee());
     }
 }

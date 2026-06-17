@@ -62,6 +62,8 @@ public abstract class Publication {
         return comments;
     }
 
+    public User getAuthor(){return this.author;}
+
     public void setAuthor(User author) {
         this.author = author;
     }
