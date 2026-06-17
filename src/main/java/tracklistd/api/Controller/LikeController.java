@@ -16,7 +16,7 @@ import tracklistd.api.Entity.User;
 import tracklistd.api.Service.LikeService;
 
 @RestController
-@RequestMapping("/publicationActions")
+@RequestMapping("/api/publications")
 public class LikeController {
 
     private final LikeService likeService;
@@ -25,13 +25,13 @@ public class LikeController {
         this.likeService = likeService;
     }
 
-    @PostMapping("{id}/like")
+    @PostMapping("/{id}/like")
     public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long id, @AuthenticationPrincipal User user) {
         LikeResponseDTO response = likeService.toggleLike(user, id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("{id}/likes")
+    @GetMapping("/{id}/likes")
     public ResponseEntity<List<UserMinResponseDTO>> seeWhoLiked(@PathVariable Long id) {
         List<UserMinResponseDTO> usersWhoLiked = likeService.getWhoLiked(id);
         return ResponseEntity.ok(usersWhoLiked);
