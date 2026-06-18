@@ -59,14 +59,26 @@ public class CommentService {
         this.commentRepository.delete(comment);
     }
 
+    public List<Comment> getCommentsByPost(Publication post)
+    {
+        return this.commentRepository.findAllByPost(post);
+    }
+
+    public Comment getCommentById(Long commentId)
+    {
+        return this.commentRepository.findById(commentId).orElseThrow(
+                () -> new ResourceNotFoundException("Esse comentario não existe")
+        );
+    }
+
     public List<Comment> getCommentsByUser(User author)
     {
         return this.commentRepository.getCommentsByAuthor(author);
     }
 
-    public Long getCommentLikes(Rating rating)
+    public Long getCommentLikes(Publication post)
     {
-        return this.likeRepository.countByPublicationId(rating.getId());
+        return this.likeRepository.countByPublicationId(post.getId());
     }
 
     //Metodos Privados
