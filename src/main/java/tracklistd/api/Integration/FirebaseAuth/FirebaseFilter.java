@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import com.google.firebase.auth.FirebaseToken;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 @Component
 public class FirebaseFilter extends OncePerRequestFilter {
@@ -50,10 +52,13 @@ public class FirebaseFilter extends OncePerRequestFilter {
 
             User user = userService.findOrCreateUser(decodedToken);
 
+            String roleName = "ROLE_" + user.getRole().name();
+            List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleName));
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     user,
                     null,
-                    Collections.emptyList());
+                    authorities);
 
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
