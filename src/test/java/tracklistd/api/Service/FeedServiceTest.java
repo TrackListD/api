@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
+import tracklistd.api.Dto.Feed.PublicationFeedDTO;
 import tracklistd.api.Entity.Music;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.Rating;
@@ -79,7 +80,7 @@ public class FeedServiceTest {
 
         publicationRepository.save(rating);
 
-        List<Publication> feed = feedService.getSocialFeed(1L);
+        List<PublicationFeedDTO> feed = feedService.getSocialFeed(1L);
 
         assertNotNull(feed);
     }
