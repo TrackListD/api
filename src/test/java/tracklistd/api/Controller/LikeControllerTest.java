@@ -34,6 +34,7 @@ import tracklistd.api.Integration.FirebaseAuth.FirebaseFilter;
 import tracklistd.api.Integration.FirebaseAuth.Config.SecurityConfig;
 import tracklistd.api.Service.FirebaseService;
 import tracklistd.api.Service.LikeService;
+import tracklistd.api.Service.UserService;
 
 @WebMvcTest(controllers = LikeController.class, includeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
@@ -51,6 +52,9 @@ class LikeControllerTest {
 
     @MockitoBean
     private FirebaseService firebaseService;
+
+    @MockitoBean
+    private UserService userService;
 
     private User mockUser;
     private UsernamePasswordAuthenticationToken mockAuth;

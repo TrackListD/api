@@ -9,7 +9,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import tracklistd.api.Dto.User.UserRegisterRequestDTO;
+import tracklistd.api.Entity.User;
+import tracklistd.api.Repository.UserRepository;
 import tracklistd.api.Service.FirebaseService;
+import tracklistd.api.Service.UserService;
+
 import com.google.firebase.auth.FirebaseToken;
 
 import java.io.IOException;
@@ -19,9 +25,11 @@ import java.util.Collections;
 public class FirebaseFilter extends OncePerRequestFilter {
 
     private final FirebaseService firebaseService;
+    private final UserService userService;
 
-    public FirebaseFilter(FirebaseService firebaseService) {
+    public FirebaseFilter(FirebaseService firebaseService, UserService userService) {
         this.firebaseService = firebaseService;
+        this.userService = userService;
     }
 
     @Override
@@ -38,18 +46,19 @@ public class FirebaseFilter extends OncePerRequestFilter {
         String token = header.substring(7);
 
         try {
-
             FirebaseToken decodedToken = firebaseService.verify(token);
 
+            User user = userService.findOrCreateUser(decodedToken);
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    decodedToken, null, Collections.emptyList());
+                    user,
+                    null,
+                    Collections.emptyList());
 
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception e) {
-
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token inválido ou expirado: " + e.getMessage());

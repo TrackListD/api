@@ -8,24 +8,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.firebase.auth.FirebaseToken;
 import tracklistd.api.Dto.User.UserRegisterResponseDTO;
 import tracklistd.api.Entity.User;
-import tracklistd.api.Service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
-    private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+    public AuthController() {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserRegisterResponseDTO> login(@AuthenticationPrincipal FirebaseToken token) {
-        User user = authService.loginOrRegister(token);
+    public ResponseEntity<UserRegisterResponseDTO> login(@AuthenticationPrincipal User user) {
 
         UserRegisterResponseDTO response = new UserRegisterResponseDTO(user);
-
         return ResponseEntity.ok(response);
     }
 }
