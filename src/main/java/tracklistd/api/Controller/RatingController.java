@@ -42,10 +42,9 @@ public class RatingController {
     private final AuthService authService;
 
     @PostMapping
-    public ResponseEntity<RatingResponseDto> createRating(@AuthenticationPrincipal FirebaseToken token,
+    public ResponseEntity<RatingResponseDto> createRating(@AuthenticationPrincipal User user,
                                                           @Valid @RequestBody RatingRequestDto ratingRequestDto)
     {
-        User user = userService.findUserByUid(token.getUid());
 
         Media media = mediaService.getMediaById(ratingRequestDto.targetId());
 
@@ -61,7 +60,7 @@ public class RatingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getRating(@AuthenticationPrincipal FirebaseToken token,
+    public ResponseEntity<?> getRating(@AuthenticationPrincipal User user,
                                         @PathVariable Long id)
     {
 
@@ -73,10 +72,8 @@ public class RatingController {
 
         RatingResponseDto responseDto = ratingMapper.toResponseDto(rating, commentCount, likeCount);
 
-        if(token == null)
+        if(user == null)
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-
-        User user = userService.findUserByUid(token.getUid());
 
         boolean isOwner = Objects.equals(rating.getAuthorPublication().getId(), user.getId());
 
@@ -92,23 +89,21 @@ public class RatingController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getRatings(
-            @AuthenticationPrincipal FirebaseToken token,
+            @AuthenticationPrincipal User user,
             @PathVariable Long userId
     )
     {
 
         User userWantedRatings = this.userService.findUserById(userId);
 
-        if(token == null )
+        if(user == null )
         {
             List<Rating> publicRatings = this.ratingService.getRatingsByUserPrivacy(userWantedRatings,Privacy.PUBLIC);
 
             return buildRatingsResponse(publicRatings);
         }
 
-        User userAuth = this.userService.findUserByUid(token.getUid());
-
-        boolean isOwner = Objects.equals(userWantedRatings.getId(), userAuth.getId());
+        boolean isOwner = Objects.equals(userWantedRatings.getId(), user.getId());
 
         if(isOwner)
         {
@@ -130,15 +125,13 @@ public class RatingController {
     @PatchMapping("/{id}/review")
     public ResponseEntity<?> editRatingReview
             (
-                    @AuthenticationPrincipal FirebaseToken token,
+                    @AuthenticationPrincipal User user,
                     @PathVariable Long id,
                     @RequestBody @Valid RatingEditRequestDto.EditReviewRequestDto editDto
                     )
     {
-        if(token == null)
+        if(user == null)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-
-        User user = this.userService.findUserByUid(token.getUid());
 
         this.ratingService.editReview(editDto.newReview(), id , user.getId());
 
@@ -151,15 +144,13 @@ public class RatingController {
     @PatchMapping("/{id}/note")
     public ResponseEntity<?> editRatingNote
     (
-            @AuthenticationPrincipal FirebaseToken token,
+            @AuthenticationPrincipal User user,
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditRatingNoteRequestDto editRatingNote
     )
     {
-        if(token == null)
+        if(user == null)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-
-        User user = this.userService.findUserByUid(token.getUid());
 
         this.ratingService.editRatingNote(editRatingNote.newRatingNote(), id, user.getId());
 
@@ -171,15 +162,13 @@ public class RatingController {
     @PatchMapping("/{id}/privacy")
     public ResponseEntity<?> editRatingPrivacy
     (
-            @AuthenticationPrincipal FirebaseToken token,
+            @AuthenticationPrincipal User user,
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditPrivacyRequestDto editPrivacy
     )
     {
-        if(token == null)
+        if(user == null)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-
-        User user = this.userService.findUserByUid(token.getUid());
 
         this.ratingService.changePrivacy(editPrivacy.newPrivacy(), id, user.getId());
 
@@ -192,14 +181,12 @@ public class RatingController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRating
     (
-            @AuthenticationPrincipal FirebaseToken token,
+            @AuthenticationPrincipal User user,
             @PathVariable Long id
     )
     {
-        if(token == null)
+        if(user == null)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
-        User user = this.userService.findUserByUid(token.getUid());
 
         this.ratingService.deleteRating(id, user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
