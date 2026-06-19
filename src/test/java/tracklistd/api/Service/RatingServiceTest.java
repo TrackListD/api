@@ -12,7 +12,6 @@ import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.RatingsExceptions.InvalidRatingNote;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingAlreadyExists;
-import tracklistd.api.Exceptions.RatingsExceptions.RatingException;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingOwnershipViolation;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.RatingRepository;
@@ -259,14 +258,14 @@ class RatingServiceTest {
     // --- getRatingsByUser Tests ---
 
     @Test
-    void getRatingsByUser_whenSuccess_shouldReturnOnlyPublicRatings() {
+    void getRatingsByUser_whenSuccess_shouldReturnOnlyPublicRatingsPrivacy() {
         // Arrange
         Rating rating = new Rating(author, target, 4.0f, "Public Review", Privacy.PUBLIC);
         List<Rating> expectedRatings = Collections.singletonList(rating);
         when(ratingRepository.findRatingByAuthorAndWhoCanSee(author, Privacy.PUBLIC)).thenReturn(expectedRatings);
 
         // Act
-        List<Rating> result = ratingService.getRatingsByUser(author);
+        List<Rating> result = ratingService.getRatingsByUserPrivacy(author, Privacy.PRIVATE);
 
         // Assert
         assertNotNull(result);
