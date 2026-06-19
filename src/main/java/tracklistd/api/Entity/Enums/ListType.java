@@ -5,17 +5,27 @@ import tracklistd.api.Entity.Media;
 import tracklistd.api.Entity.Music;
 
 public enum ListType {
-    ALBUM{
+    ALBUM {
         @Override
         public boolean matches(Media media) {
             return media instanceof Album;
         }
 
+        @Override
+        public String toString() {
+            return "ALBUM";
+        }
+
     },
-    MUSIC{
+    MUSIC {
         @Override
         public boolean matches(Media media) {
             return media instanceof Music;
+        }
+
+        @Override
+        public String toString() {
+            return "MUSIC";
         }
 
     };
