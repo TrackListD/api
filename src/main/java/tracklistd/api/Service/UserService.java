@@ -11,14 +11,21 @@ import tracklistd.api.Entity.User;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Enums.Role;
 import tracklistd.api.Repository.UserRepository;
+import tracklistd.api.Entity.Report;
+import tracklistd.api.Entity.Enums.Punishment;
+import tracklistd.api.Entity.Enums.ReportStatus;
+import tracklistd.api.Entity.Enums.ModerationStatus;
+import java.time.LocalDateTime;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ReportService reportService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, ReportService reportService) {
         this.userRepository = userRepository;
+        this.reportService = reportService;
     }
 
     @Transactional
@@ -93,5 +100,49 @@ public class UserService {
                             decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "");
                     return register(dto);
                 });
+    }
+
+    public Report moderateReport(Long adminID, Long reportID, ReportStatus status, Punishment punishment){
+        User adimin = userRepository.findById(adminID).orElseThrow(
+                () -> new RuntimeException("Administrador não encontrado.")
+        );
+        if(adimin.getRole() != Role.ADMIN)
+            throw new RuntimeException("Acesso negado: apenas administradores podem moderar denúncias.");
+
+        Report report = reportService.resolveReport(reportID, status, punishment);
+
+        if(status == ReportStatus.RESOLVED){
+            User userTarget = null;
+
+            if(report.getCommentTarget() != null){
+                report.getCommentTarget().setModerationStatus(ModerationStatus.OCULT);
+                userTarget = report.getCommentTarget().getAuthorPublication();
+            }
+            else if(report.getRatingTarget() != null){
+                report.getRatingTarget().setStatus(ModerationStatus.OCULT);
+                userTarget = report.getRatingTarget().getAuthorPublication();
+            }
+            else if(report.getUserTarget() != null){
+                userTarget = report.getUserTarget();
+            }
+
+            if(userTarget != null){
+                switch (punishment){
+                    case WARNING:
+                        break;
+                    case TEMPORARY_SUSPENSION:
+                        userTarget.setModerationStatus(ModerationStatus.SUSPENDED);
+                        userTarget.setSuspensionEndDate(LocalDateTime.now().plusDays(7));//padrão 7 dias
+                        //Deve ser feito uma maneira de receber o tempo de suspensão?
+                        break;
+                    case ACCOUNT_DELETION:
+                        userTarget.setModerationStatus(ModerationStatus.BANNED);
+                        //devemos deletar a conta?
+                        break;
+                }
+            }
+        }
+
+        return report;
     }
 }
