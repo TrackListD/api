@@ -20,6 +20,11 @@ import tracklistd.api.Service.CommentService;
 import tracklistd.api.Service.PublicationService;
 import tracklistd.api.Service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +32,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/api/comments")
 @RequiredArgsConstructor
+@Tag(name = "Comments", description = "Endpoints para gerenciamento de comentários em publicações")
 public class CommentController {
 
     private final CommentService commentService;
@@ -34,45 +40,56 @@ public class CommentController {
     private final CommentMapper commentMapper;
     private final UserService userService;
 
-    //Criar
+
     @PostMapping
+    @Operation(summary = "Criar comentário", description = "Adiciona um comentário a uma publicação existente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Comentário criado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "422", description = "Tentativa de comentar na própria publicação")
+    })
     public ResponseEntity<CommentResponseDto> createComment(
             @AuthenticationPrincipal User user,
             @Valid @RequestBody CommentRequestDto commentRequestDto
-            )
-    {
+    ) {
         Publication post = this.publicationService.getPublicationById(commentRequestDto.idPost());
 
         String commentText = commentRequestDto.text();
 
-        Comment comment = this.commentService.createComment(user,post,commentText);
+        Comment comment = this.commentService.createComment(user, post, commentText);
 
         Long commentLikeCount = this.commentService.getCommentLikes(post);
 
         CommentResponseDto commentResponseDto = this.commentMapper.toResponseDTO(comment, commentLikeCount);
 
-        return  ResponseEntity.status(HttpStatus.CREATED).body(commentResponseDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(commentResponseDto);
     }
 
-    //buscar um comentário (uso : moderação)
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommentOwnerResponseDto> getUserComment
-    (
+    @Operation(summary = "Buscar comentário por ID", description = "Recupera os detalhes completos de um comentário. Apenas para administradores.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Comentário retornado com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer cargo ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Comentário não encontrado")
+    })
+    public ResponseEntity<CommentOwnerResponseDto> getUserComment(
             @PathVariable Long id
-    )
-    {
+    ) {
         return ResponseEntity.status(HttpStatus.OK).body(buildOwnerResponse(id));
     }
 
 
-    //listar comentários de um post
     @GetMapping("/post/{postId}")
-    public ResponseEntity<List<CommentResponseDto>> getPostComments
-    (
+    @Operation(summary = "Listar comentários de um post", description = "Lista todos os comentários vinculados a uma publicação específica")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de comentários retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Publicação não encontrada")
+    })
+    public ResponseEntity<List<CommentResponseDto>> getPostComments(
             @PathVariable Long postId
-    )
-    {
+    ) {
         Publication publication = this.publicationService.getPublicationById(postId);
 
         List<Comment> postComments = this.commentService.getCommentsByPost(publication);
@@ -80,27 +97,27 @@ public class CommentController {
         List<CommentResponseDto> responseDtos = buildCommentResponseList(postComments);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDtos);
-
     }
 
-    //listar comentários de um usuário
+
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getUserComments
-    (
+    @Operation(summary = "Listar comentários de um usuário", description = "Retorna os comentários feitos por um usuário específico")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de comentários retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
+    public ResponseEntity<?> getUserComments(
             @AuthenticationPrincipal User user,
             @PathVariable Long userId
-    )
-    {
-
+    ) {
         User userWanted = this.userService.findUserById(userId);
 
         List<Comment> postComments = this.commentService.getCommentsByUser(userWanted);
 
         List<CommentResponseDto> responseDtos = buildCommentResponseList(postComments);
 
-        if(!Objects.equals(userWanted.getId(), user.getId()))
+        if (user == null || !Objects.equals(userWanted.getId(), user.getId()))
             return ResponseEntity.status(HttpStatus.OK).body(responseDtos);
-
 
         List<CommentOwnerResponseDto> responseOwnerDtos = new ArrayList<>();
 
@@ -109,49 +126,52 @@ public class CommentController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(responseOwnerDtos);
-
     }
 
-    //editar texto
+
     @PatchMapping("/{id}/text")
-    public ResponseEntity<CommentOwnerResponseDto> editCommentText
-    (
+    @Operation(summary = "Editar texto do comentário", description = "Atualiza o conteúdo de texto de um comentário")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Texto do comentário atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado (não é o autor)"),
+            @ApiResponse(responseCode = "404", description = "Comentário não encontrado")
+    })
+    public ResponseEntity<CommentOwnerResponseDto> editCommentText(
             @AuthenticationPrincipal User user,
             @PathVariable Long id,
             @RequestBody @Valid CommentEditRequestDto editRequestDto
-    )
-
-    {
-        if(user == null)
+    ) {
+        if (user == null)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
-        this.commentService.editCommentText(editRequestDto.newText(), id,user.getId());
+        this.commentService.editCommentText(editRequestDto.newText(), id, user.getId());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
     }
 
-    //apagar
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComment
-    (
+    @Operation(summary = "Excluir comentário", description = "Remove um comentário existente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Comentário excluído com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado (não é o autor)"),
+            @ApiResponse(responseCode = "404", description = "Comentário não encontrado")
+    })
+    public ResponseEntity<Void> deleteComment(
             @AuthenticationPrincipal User user,
             @PathVariable Long id
-    )
-
-    {
-
-        if(user == null)
+    ) {
+        if (user == null)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.commentService.deleteComment(id, user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
     }
 
-
     // Métodos privados
-    private CommentOwnerResponseDto buildOwnerResponse(Long commentId) {
 
+    private CommentOwnerResponseDto buildOwnerResponse(Long commentId) {
         Comment comment = this.commentService.getCommentById(commentId);
 
         Long likeCount = this.commentService.getCommentLikes(comment.getPost());
@@ -166,16 +186,13 @@ public class CommentController {
         Long likeCount;
         List<CommentResponseDto> responseDtos = new ArrayList<>();
 
-        for(Comment comment : postComments)
-        {
-
+        for (Comment comment : postComments) {
             likeCount = this.commentService.getCommentLikes(comment.getPost());
 
-            CommentResponseDto commentResponseDto = this.commentMapper.toResponseDTO(comment,likeCount);
+            CommentResponseDto commentResponseDto = this.commentMapper.toResponseDTO(comment, likeCount);
             responseDtos.add(commentResponseDto);
         }
 
         return responseDtos;
     }
-
 }
