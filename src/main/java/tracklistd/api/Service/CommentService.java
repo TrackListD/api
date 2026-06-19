@@ -2,6 +2,7 @@ package tracklistd.api.Service;
 
 import org.springframework.stereotype.Service;
 import tracklistd.api.Entity.Comment;
+import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
@@ -99,5 +100,10 @@ public class CommentService {
             throw new CommentOwershipViolation();
 
         return comment;
+    }
+
+    protected User hideComment(Comment comment){
+        comment.setModerationStatus(ModerationStatus.OCULT);
+        return comment.getAuthorPublication();
     }
 }

@@ -7,32 +7,34 @@ import com.google.firebase.auth.FirebaseToken;
 
 import tracklistd.api.Dto.User.UserRegisterRequestDTO;
 import tracklistd.api.Dto.User.UserUpdatePerfilRequestDTO;
+import tracklistd.api.Entity.Enums.ModerationStatus;
+import tracklistd.api.Entity.Enums.Punishment;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Enums.Role;
+import tracklistd.api.Exceptions.UserExceptions.FollowYourself;
+import tracklistd.api.Exceptions.UserExceptions.FriendDoesNotExist;
+import tracklistd.api.Exceptions.UserExceptions.LoginApiAlreadyUsed;
+import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
 import tracklistd.api.Repository.UserRepository;
-import tracklistd.api.Entity.Report;
-import tracklistd.api.Entity.Enums.Punishment;
-import tracklistd.api.Entity.Enums.ReportStatus;
-import tracklistd.api.Entity.Enums.ModerationStatus;
+
 import java.time.LocalDateTime;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ReportService reportService;
 
-    public UserService(UserRepository userRepository, ReportService reportService) {
+
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.reportService = reportService;
     }
 
     @Transactional
     public User register(UserRegisterRequestDTO dto) {
         if (userRepository.existsByIdLoginApi((dto.idLoginApi())))
-            throw new RuntimeException("Usuário já está cadastrado no sistema!");
+            throw new LoginApiAlreadyUsed();
 
         User newUser = new User();
         newUser.setName(dto.name());
@@ -47,7 +49,7 @@ public class UserService {
     @Transactional
     public User perfilUpdate(Long id, UserUpdatePerfilRequestDTO dto) {
         User perfil = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new UserDoesNotExist(id));
 
         if (dto.name() != null)
             perfil.setName(dto.name());
@@ -59,15 +61,16 @@ public class UserService {
         return userRepository.save(perfil);
     }
 
+    @Transactional
     public void followUser(Long myId, Long friendId) {
         if (myId.equals(friendId))
-            throw new RuntimeException("Você não pode seguir você mesmo!");
+            throw new FollowYourself();
 
         User me = userRepository.findById(myId)
-                .orElseThrow(() -> new RuntimeException("Seu usuário não foi encontrado."));
+                .orElseThrow(() -> new UserDoesNotExist(myId));
 
         User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new RuntimeException("Usuário que você deseja seguir não foi encontrado."));
+                .orElseThrow(() -> new FriendDoesNotExist());
 
         if (!me.getFollowing().contains(friend)) {
             me.getFollowing().add(friend);
@@ -76,16 +79,17 @@ public class UserService {
         }
     }
 
+    @Transactional
     public void unfollowUser(Long myId, Long friendId) {
         if (myId.equals(friendId))
-            throw new RuntimeException("Você não pode deixar de seguir você mesmo!");
+            throw new FollowYourself();
 
         User me = userRepository.findById(myId)
-                .orElseThrow(() -> new RuntimeException("Seu usuário não foi encontrado."));
+                .orElseThrow(() -> new UserDoesNotExist(myId));
 
         User friend = userRepository.findById(friendId)
                 .orElseThrow(
-                        () -> new RuntimeException("Usuário que você deseja deixar de seguir não foi encontrado."));
+                        () -> new FriendDoesNotExist());
 
         if (me.getFollowing().contains(friend)) {
             me.getFollowing().remove(friend);
@@ -112,47 +116,22 @@ public class UserService {
                 });
     }
 
-    public Report moderateReport(Long adminID, Long reportID, ReportStatus status, Punishment punishment){
-        User adimin = userRepository.findById(adminID).orElseThrow(
-                () -> new RuntimeException("Administrador não encontrado.")
-        );
-        if(adimin.getRole() != Role.ADMIN)
-            throw new RuntimeException("Acesso negado: apenas administradores podem moderar denúncias.");
-
-        Report report = reportService.resolveReport(reportID, status, punishment);
-
-        if(status == ReportStatus.RESOLVED){
-            User userTarget = null;
-
-            if(report.getCommentTarget() != null){
-                report.getCommentTarget().setModerationStatus(ModerationStatus.OCULT);
-                userTarget = report.getCommentTarget().getAuthorPublication();
-            }
-            else if(report.getRatingTarget() != null){
-                report.getRatingTarget().setStatus(ModerationStatus.OCULT);
-                userTarget = report.getRatingTarget().getAuthorPublication();
-            }
-            else if(report.getUserTarget() != null){
-                userTarget = report.getUserTarget();
-            }
-
-            if(userTarget != null){
-                switch (punishment){
-                    case WARNING:
-                        break;
-                    case TEMPORARY_SUSPENSION:
-                        userTarget.setModerationStatus(ModerationStatus.SUSPENDED);
-                        userTarget.setSuspensionEndDate(LocalDateTime.now().plusDays(7));//padrão 7 dias
-                        //Deve ser feito uma maneira de receber o tempo de suspensão?
-                        break;
-                    case ACCOUNT_DELETION:
-                        userTarget.setModerationStatus(ModerationStatus.BANNED);
-                        //devemos deletar a conta?
-                        break;
-                }
-            }
+    @Transactional
+    protected void applyPunishment(User target, Punishment punishment, Long daysOfSuspension){
+        switch (punishment){
+            case WARNING:
+                break;
+            case TEMPORARY_SUSPENSION:
+                Long days = 7L;//padrão 7 dias
+                target.setModerationStatus(ModerationStatus.SUSPENDED);
+                if(daysOfSuspension != null)
+                    days = daysOfSuspension;
+                target.setSuspensionEndDate(LocalDateTime.now().plusDays(days));
+                break;
+            case ACCOUNT_DELETION:
+                target.setModerationStatus(ModerationStatus.BANNED);
+                //devemos deletar a conta?
+                break;
         }
-
-        return report;
     }
 }
