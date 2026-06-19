@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseToken;
 import tracklistd.api.Dto.User.UserRegisterRequestDTO;
 import tracklistd.api.Dto.User.UserUpdatePerfilRequestDTO;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Enums.Role;
 import tracklistd.api.Repository.UserRepository;
@@ -86,6 +87,15 @@ public class UserService {
         }
     }
 
+    public User findUserById(Long id)
+    {
+        return this.userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado")
+        );
+    }
+
+  
+    @Transactional
     public User findOrCreateUser(FirebaseToken decodedToken) {
         return userRepository.findByIdLoginApi(decodedToken.getUid())
                 .orElseGet(() -> {

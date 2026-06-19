@@ -13,6 +13,7 @@ import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.MediaListRepository;
 import tracklistd.api.Repository.MediaRepository;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -63,6 +64,15 @@ public class MediaListService {
 
     }
 
+
+    public void changeMediaListPrivacy(Long mediaListId, Long userId, Privacy newPrivacy)
+    {
+        MediaList mediaList = this.findMediaListAndValidateOwner(mediaListId, userId);
+
+        mediaList.changePrivacy(newPrivacy);
+        this.mediaListRepository.save(mediaList);
+    }
+
     public void deleteMediaList(Long mediaListId, Long authorId)
     {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
@@ -71,12 +81,12 @@ public class MediaListService {
 
     }
 
-    public void addMediaToList(Long mediaListId, Long mediaId, Long authorId)
+    public void addMediaToList(Long mediaListId, String mediaId, Long authorId)
     {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
 
         //Procuro a media pelo Id
-        Media media = this.mediaRepository.findById(mediaId).orElseThrow(
+        Media media = this.mediaRepository.findMediaBySpotifyID(mediaId).orElseThrow(
                 () -> new ResourceNotFoundException("Essa midia não existe")
         );
         //Com a midia retornada, verifico se elá é do tipo da lista
@@ -89,16 +99,15 @@ public class MediaListService {
 
     }
 
-    public void removeMediaFromList(Long mediaListId, Long mediaId, Long authorId)
-    {
+    public void removeMediaFromList(Long mediaListId, String mediaId, Long authorId) {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
 
         //Procura a media pelo id
-        Media media = this.mediaRepository.findById(mediaId).orElseThrow(
+        Media media = this.mediaRepository.findMediaBySpotifyID(mediaId).orElseThrow(
                 () -> new ResourceNotFoundException("Essa midia não existe")
         );
         //Com a media retornada, verifico se ela está na lista
-        if(!mediaList.getMedia().contains(media))
+        if (!mediaList.getMedia().contains(media))
             throw new ResourceNotFoundException("Essa midia não está na lista");
         //Se não estiver, lanço exceção
 
@@ -122,6 +131,25 @@ public class MediaListService {
 
         mediaList.setFavorite(false);
         this.mediaListRepository.save(mediaList);
+    }
+
+    public List<MediaList> getAllByUser(User user)
+    {
+        return this.mediaListRepository.findAllByAuthor(user);
+    }
+
+    public MediaList getOneByUser(Long userId)
+    {
+        return this.mediaListRepository.findMediaListByAuthor(userId).orElseThrow(
+                () -> new ResourceNotFoundException("Esse usuario ainda não criou nenhuma Lista")
+        );
+    }
+
+    public MediaList getMediaListById(Long mediaId)
+    {
+        return this.mediaListRepository.findById(mediaId).orElseThrow(
+                () -> new ResourceNotFoundException("Essa Lista não existe ou não foi encontrada")
+        );
     }
 
     //Métodos Privados
