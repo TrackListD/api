@@ -26,6 +26,11 @@ import tracklistd.api.Service.MediaService;
 import tracklistd.api.Service.RatingService;
 import tracklistd.api.Service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +38,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/api/ratings")
 @RequiredArgsConstructor
+@Tag(name = "Ratings", description = "Endpoints para gerenciamento de avaliações e reviews de mídias")
 public class RatingController {
 
     private final RatingService ratingService;
@@ -41,29 +47,42 @@ public class RatingController {
     private final RatingMapper ratingMapper;
     private final AuthService authService;
 
-    @PostMapping
-    public ResponseEntity<RatingResponseDto> createRating(@AuthenticationPrincipal User user,
-                                                          @Valid @RequestBody RatingRequestDto ratingRequestDto)
-    {
 
+    @PostMapping
+    @Operation(summary = "Criar avaliação", description = "Registra uma nova avaliação musical")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Avaliação criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "409", description = "Avaliação já cadastrada para esta mídia")
+    })
+    public ResponseEntity<RatingResponseDto> createRating(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody RatingRequestDto ratingRequestDto
+    ) {
         Media media = mediaService.getMediaById(ratingRequestDto.targetId());
 
         Float ratingNote = ratingRequestDto.ratingNote();
         String review = ratingRequestDto.review();
         Privacy whoCanSee = ratingRequestDto.whoCanSee();
 
-        Rating rating = ratingService.createRating(user,media, ratingNote, review, whoCanSee);
+        Rating rating = ratingService.createRating(user, media, ratingNote, review, whoCanSee);
 
         RatingResponseDto response = ratingMapper.toResponseDto(rating, 0, 0L);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getRating(@AuthenticationPrincipal User user,
-                                        @PathVariable Long id)
-    {
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar avaliação por ID", description = "Obtém os detalhes públicos ou de proprietário de uma avaliação")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Avaliação retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
+    })
+    public ResponseEntity<?> getRating(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id
+    ) {
         Rating rating = this.ratingService.getRatingById(id);
 
         Integer commentCount = this.ratingService.getRatingComments(rating);
@@ -72,120 +91,126 @@ public class RatingController {
 
         RatingResponseDto responseDto = ratingMapper.toResponseDto(rating, commentCount, likeCount);
 
-        if(user == null)
+        if (user == null)
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 
         boolean isOwner = Objects.equals(rating.getAuthorPublication().getId(), user.getId());
 
-        if(isOwner)
-        {
+        if (isOwner) {
             RatingOwnerResponseDto ownerResponseDto = ratingMapper.toOwnerResponseDTO(rating, responseDto);
             return ResponseEntity.status(HttpStatus.OK).body(ownerResponseDto);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-
     }
 
+
     @GetMapping("/user/{userId}")
+    @Operation(summary = "Listar avaliações por usuário", description = "Recupera as avaliações de um usuário respeitando as regras de privacidade")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de avaliações retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
     public ResponseEntity<?> getRatings(
             @AuthenticationPrincipal User user,
             @PathVariable Long userId
-    )
-    {
-
+    ) {
         User userWantedRatings = this.userService.findUserById(userId);
 
-        if(user == null )
-        {
-            List<Rating> publicRatings = this.ratingService.getRatingsByUserPrivacy(userWantedRatings,Privacy.PUBLIC);
-
+        if (user == null) {
+            List<Rating> publicRatings = this.ratingService.getRatingsByUserPrivacy(userWantedRatings, Privacy.PUBLIC);
             return buildRatingsResponse(publicRatings);
         }
 
         boolean isOwner = Objects.equals(userWantedRatings.getId(), user.getId());
 
-        if(isOwner)
-        {
+        if (isOwner) {
             List<Rating> allRatings = this.ratingService.getRatingsByUser(userWantedRatings);
-
             return buildRatingsResponse(allRatings);
-
-        }
-        else
-        {
-            List<Rating> publicRatings = this.ratingService.getRatingsByUserPrivacy(userWantedRatings,Privacy.PUBLIC);
-
+        } else {
+            List<Rating> publicRatings = this.ratingService.getRatingsByUserPrivacy(userWantedRatings, Privacy.PUBLIC);
             return buildRatingsResponse(publicRatings);
         }
-
     }
-//    PATCH  /ratings/{id}/review            → editar review
+
 
     @PatchMapping("/{id}/review")
-    public ResponseEntity<?> editRatingReview
-            (
-                    @AuthenticationPrincipal User user,
-                    @PathVariable Long id,
-                    @RequestBody @Valid RatingEditRequestDto.EditReviewRequestDto editDto
-                    )
-    {
-        if(user == null)
+    @Operation(summary = "Editar review", description = "Atualiza o comentário textual de uma avaliação")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Review atualizada com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado"),
+            @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
+    })
+    public ResponseEntity<?> editRatingReview(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id,
+            @RequestBody @Valid RatingEditRequestDto.EditReviewRequestDto editDto
+    ) {
+        if (user == null)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
-        this.ratingService.editReview(editDto.newReview(), id , user.getId());
+        this.ratingService.editReview(editDto.newReview(), id, user.getId());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
-
-
     }
 
-//    PATCH  /ratings/{id}/note              → editar nota
+
     @PatchMapping("/{id}/note")
-    public ResponseEntity<?> editRatingNote
-    (
+    @Operation(summary = "Editar nota", description = "Atualiza a nota atribuída em uma avaliação")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Nota atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Nota inválida fornecida"),
+            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado"),
+            @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
+    })
+    public ResponseEntity<?> editRatingNote(
             @AuthenticationPrincipal User user,
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditRatingNoteRequestDto editRatingNote
-    )
-    {
-        if(user == null)
+    ) {
+        if (user == null)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.ratingService.editRatingNote(editRatingNote.newRatingNote(), id, user.getId());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
-
     }
 
-//    PATCH  /ratings/{id}/privacy           → mudar privacidade
+
     @PatchMapping("/{id}/privacy")
-    public ResponseEntity<?> editRatingPrivacy
-    (
+    @Operation(summary = "Editar privacidade", description = "Altera as configurações de privacidade de uma avaliação")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Privacidade atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Privacidade inválida fornecida"),
+            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado"),
+            @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
+    })
+    public ResponseEntity<?> editRatingPrivacy(
             @AuthenticationPrincipal User user,
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditPrivacyRequestDto editPrivacy
-    )
-    {
-        if(user == null)
+    ) {
+        if (user == null)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.ratingService.changePrivacy(editPrivacy.newPrivacy(), id, user.getId());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
-
     }
 
 
-//    DELETE /ratings/{id}                   → apagar
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRating
-    (
+    @Operation(summary = "Excluir avaliação", description = "Remove uma avaliação existente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Avaliação excluída com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado"),
+            @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
+    })
+    public ResponseEntity<Void> deleteRating(
             @AuthenticationPrincipal User user,
             @PathVariable Long id
-    )
-    {
-        if(user == null)
+    ) {
+        if (user == null)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.ratingService.deleteRating(id, user.getId());
@@ -196,7 +221,6 @@ public class RatingController {
 
     @NonNull
     private ResponseEntity<?> buildRatingsResponse(List<Rating> ratings) {
-
         List<RatingResponseDto> responseDtos = new ArrayList<>();
 
         Integer commentCount;
@@ -213,7 +237,6 @@ public class RatingController {
 
     @NonNull
     private RatingOwnerResponseDto buildOwnerResponse(Long ratingId) {
-
         Rating rating = this.ratingService.getRatingById(ratingId);
 
         Integer commentCount = this.ratingService.getRatingComments(rating);
@@ -223,7 +246,4 @@ public class RatingController {
 
         return this.ratingMapper.toOwnerResponseDTO(rating, responseDto);
     }
-
-
-
 }
