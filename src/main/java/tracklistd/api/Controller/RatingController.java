@@ -21,7 +21,6 @@ import tracklistd.api.Entity.Media;
 import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Mapper.RatingMapper;
-import tracklistd.api.Service.AuthService;
 import tracklistd.api.Service.MediaService;
 import tracklistd.api.Service.RatingService;
 import tracklistd.api.Service.UserService;
@@ -45,8 +44,6 @@ public class RatingController {
     private final UserService userService;
     private final MediaService mediaService;
     private final RatingMapper ratingMapper;
-    private final AuthService authService;
-
 
     @PostMapping
     @Operation(summary = "Criar avaliação", description = "Registra uma nova avaliação musical")

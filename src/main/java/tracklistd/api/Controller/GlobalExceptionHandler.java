@@ -9,6 +9,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tracklistd.api.Dto.ErrorDto;
 import tracklistd.api.Exceptions.CommentExceptions.CommentOnCommentException;
 import tracklistd.api.Exceptions.CommentExceptions.CommentOwershipViolation;
@@ -145,6 +146,13 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errorDto, HttpStatus.UNPROCESSABLE_CONTENT);
+    }
+
+    //Para erro do Swagger
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex) {
+        // Retorna 404 sem corpo, ou com uma mensagem amigável de "Recurso não encontrado"
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Recurso não encontrado.");
     }
 
     //Captura quaisquer exceções não esperada
