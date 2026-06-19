@@ -75,7 +75,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             CommentOwershipViolation.class,
             MediaListaOwnershipViolation.class,
-            RatingOwnershipViolation.class
+            RatingOwnershipViolation.class,
+            org.springframework.security.access.AccessDeniedException.class,
+            org.springframework.security.authorization.AuthorizationDeniedException.class
     })
     public ResponseEntity<ErrorDto> forbiddenException(RuntimeException ex)
     {
