@@ -1,6 +1,8 @@
 package tracklistd.api.Service;
 
 import org.springframework.stereotype.Service;
+import tracklistd.api.Entity.Comment;
+import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Media;
 import tracklistd.api.Entity.Rating;
@@ -88,6 +90,11 @@ public class RatingService {
     {
         Rating rating = findRatingAndValidateOwner(ratingId, authorId);
         ratingRepository.delete(rating);
+    }
+
+    protected User hideRating(Rating rating){
+        rating.setStatus(ModerationStatus.OCULT);
+        return rating.getAuthorPublication();
     }
 
     public List<Rating> getRatingsByUserPrivacy(User author, Privacy privacy)
