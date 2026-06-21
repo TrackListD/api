@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import tracklistd.api.Entity.User;
 import tracklistd.api.Entity.Enums.Punishment;
@@ -100,16 +101,23 @@ public class ReportService {
                 .toList();
     }
 
-    public Report resolveReport(Long reportId, ReportStatus newStatus, Punishment newPunishment){
+    @Transactional
+    public ReportResponseDto resolveReport(Long reportId, ReportStatus newStatus, Punishment newPunishment){
         Report report = reportRepository.findById(reportId).orElseThrow( 
             () -> new ReportDoesNotExist(("This report dos not exist. ID: " + reportId)));
 
         report.solveReport(newStatus, newPunishment);
 
-        return report;
+        Report updateReport = reportRepository.save(report);
+
+        return new ReportResponseDto(updateReport);
     }
 
-    public List<Report> getReportHistoryUser(Long userId){
-        return reportRepository.findByUserTargetId(userId);
+    public List<ReportResponseDto> getReportHistoryUser(Long userId){
+        List<Report> list = reportRepository.findByUserTargetId(userId);
+
+        return list.stream()
+                .map(ReportResponseDto::new)
+                .toList();
     }
 }
