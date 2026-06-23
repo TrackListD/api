@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import tracklistd.api.Dto.Spotify.SpotifyMusicResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifySearchResponseDTO;
 import tracklistd.api.Integration.Spotify.Auth.SpotifyAuth;
 
@@ -23,27 +22,19 @@ public class SpotifyClient {
 
     private static final String BASE_URL = "https://api.spotify.com/v1";
 
-    // Busca pelo id do spotify
-    public SpotifyMusicResponseDTO getTrackById(String trackId) {
-        String url = BASE_URL + "/tracks/" + trackId;
-        return executeGet(url, SpotifyMusicResponseDTO.class);
-    }
-
-    public SpotifySearchResponseDTO search(String query) {
+    // Procura pela busca feita no banco de dados, caso não encontrado, busca pela API do Spotify e salva no banco de dados
+    public SpotifySearchResponseDTO searchByString(String query) {
         String url = BASE_URL + "/search?q=" + query + "&type=track,album&limit=10";
-        return executeGet(url, SpotifySearchResponseDTO.class);
-    }
 
-    private <T> T executeGet(String url, Class<T> responseType) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + authService.getAccessToken());
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
-        ResponseEntity<T> response = restTemplate.exchange(
+        ResponseEntity<SpotifySearchResponseDTO> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 entity,
-                responseType);
+                SpotifySearchResponseDTO.class);
 
         return response.getBody();
     }
