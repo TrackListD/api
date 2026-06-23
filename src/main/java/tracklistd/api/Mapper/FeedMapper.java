@@ -29,7 +29,7 @@ public class FeedMapper {
 
         String content = switch (publication) {
             case Rating r -> r.getReview();
-            case MediaList m -> m.getTypeOfList().toString();
+            case MediaList m -> m.getListName() + " (" + m.getTypeOfList().toString() + ")";
             default -> "";
         };
 
