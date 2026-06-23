@@ -23,7 +23,7 @@ public class MediaList extends Publication {
     @Column(name = "is_favorite")
     private Boolean isFavorite;
 
-    @OneToMany
+    @ManyToMany
     @JoinTable(name = "media_list_media", joinColumns = @JoinColumn(name = "media_list_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private Set<Media> media = new LinkedHashSet<Media>();
 
