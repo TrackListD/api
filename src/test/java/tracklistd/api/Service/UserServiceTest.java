@@ -28,7 +28,7 @@ class UserServiceTest {
     private User regularUser;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         adminUser = new User();
         adminUser.setId(1L);
         adminUser.setRole(Role.ADMIN);
@@ -41,7 +41,8 @@ class UserServiceTest {
     @Test
     void shouldThrowExceptionWhenRegisteringUserWithExistingIdLoginApi() {
         // Arrange: simulando que o repositório já encontrou o identificador no banco
-        UserRegisterRequestDTO dto = new UserRegisterRequestDTO("Nome", "uid_duplicado", Role.MEMBER, Privacy.PUBLIC, "Bio");
+        UserRegisterRequestDTO dto = new UserRegisterRequestDTO("Nome", "uid_duplicado", Role.MEMBER, Privacy.PUBLIC,
+                "Bio", "imagem-teste");
 
         when(userRepository.existsByIdLoginApi("uid_duplicado")).thenReturn(true);
         // Act & Assert: garantindo que a exceção correta seja lançada
@@ -57,7 +58,8 @@ class UserServiceTest {
     @Test
     void shouldRegisterUserSuccessfullyWhenIdLoginApiIsNew() {
         // Arrange: simulando que o identificador está livre para uso
-        UserRegisterRequestDTO dto = new UserRegisterRequestDTO("Nome", "uid_novo", Role.MEMBER, Privacy.PUBLIC, "Bio");
+        UserRegisterRequestDTO dto = new UserRegisterRequestDTO("Nome", "uid_novo", Role.MEMBER, Privacy.PUBLIC, "Bio",
+                "imagem-teste");
 
         User savedUser = new User();
         savedUser.setId(10L);

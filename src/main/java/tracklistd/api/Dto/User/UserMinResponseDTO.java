@@ -1,6 +1,7 @@
 package tracklistd.api.Dto.User;
 
 public record UserMinResponseDTO(
-        Long id,
-        String username) {
+                Long id,
+                String username,
+                String profilePic) {
 }

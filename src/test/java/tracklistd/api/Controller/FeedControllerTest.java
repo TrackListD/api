@@ -62,7 +62,7 @@ class FeedControllerTest {
                 mockUser = new User("João Pedro", "auth0|123456", Role.MEMBER, Privacy.PUBLIC);
                 mockAuth = new UsernamePasswordAuthenticationToken(mockUser, null, Collections.emptyList());
 
-                UserMinResponseDTO authorMin = new UserMinResponseDTO(2L, "Autor Teste");
+                UserMinResponseDTO authorMin = new UserMinResponseDTO(2L, "Autor Teste", "imagem-teste");
 
                 samplePublication = new PublicationFeedDTO(
                                 10L,
@@ -72,7 +72,8 @@ class FeedControllerTest {
                                 LocalDateTime.now(),
                                 authorMin,
                                 5L,
-                                true);
+                                true,
+                                null);
         }
 
         @Test
@@ -107,10 +108,10 @@ class FeedControllerTest {
 
         @Test
         void shouldReturnGlobalFeedForAnonymousUser() throws Exception {
-                UserMinResponseDTO authorMin = new UserMinResponseDTO(2L, "Autor Teste");
+                UserMinResponseDTO authorMin = new UserMinResponseDTO(2L, "Autor Teste", "imagem-teste");
                 PublicationFeedDTO anonymousPublication = new PublicationFeedDTO(
                                 10L, "Excelente Álbum!", "RATING", 4.5f, LocalDateTime.now(),
-                                authorMin, 5L, false);
+                                authorMin, 5L, false, null);
 
                 List<PublicationFeedDTO> mockFeed = List.of(anonymousPublication);
                 when(feedService.getGlobalFeed(null)).thenReturn(mockFeed);
