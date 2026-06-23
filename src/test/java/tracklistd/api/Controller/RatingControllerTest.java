@@ -63,9 +63,6 @@ public class RatingControllerTest {
     private RatingMapper ratingMapper;
 
     @MockitoBean
-    private AuthService authService;
-
-    @MockitoBean
     private FirebaseService firebaseService;
 
     private User testUser;
