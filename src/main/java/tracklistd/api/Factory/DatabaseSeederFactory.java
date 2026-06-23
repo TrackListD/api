@@ -2,9 +2,12 @@ package tracklistd.api.Factory;
 
 import org.springframework.stereotype.Component;
 
+import tracklistd.api.Entity.Media;
+import tracklistd.api.Entity.MediaList;
 import tracklistd.api.Entity.Music;
 import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Entity.Enums.ListType;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Enums.Role;
@@ -51,5 +54,19 @@ public class DatabaseSeederFactory {
         rating.setWhoCanSee(Privacy.PUBLIC);
         rating.setStatus(ModerationStatus.ACTIVE);
         return publicationRepository.save(rating);
+    }
+
+    public MediaList createAndSaveMediaList(User author, ListType listType, String listName, Privacy privacy,
+            Boolean isFavorite, Media... medias) {
+        MediaList mediaList = new MediaList(author, listType, listName, privacy, isFavorite);
+        mediaList.changePrivacy(Privacy.PUBLIC);
+
+        if (medias != null) {
+            for (Media media : medias) {
+                mediaList.addMedia(media);
+            }
+        }
+
+        return publicationRepository.save(mediaList);
     }
 }

@@ -26,7 +26,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -42,6 +41,7 @@ public class UserService {
         newUser.setRole(dto.role());
         newUser.setWhoCanComment(dto.whoCanComment());
         newUser.setBio(dto.bio());
+        newUser.setProfilePic(dto.profilePic());
 
         return userRepository.save(newUser);
     }
@@ -98,39 +98,36 @@ public class UserService {
         }
     }
 
-    public User findUserById(Long id)
-    {
+    public User findUserById(Long id) {
         return this.userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado")
-        );
+                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado"));
     }
 
-  
     @Transactional
     public User findOrCreateUser(FirebaseToken decodedToken) {
         return userRepository.findByIdLoginApi(decodedToken.getUid())
                 .orElseGet(() -> {
                     UserRegisterRequestDTO dto = new UserRegisterRequestDTO(decodedToken.getName(),
-                            decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "");
+                            decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "", decodedToken.getPicture());
                     return register(dto);
                 });
     }
 
     @Transactional
-    protected void applyPunishment(User target, Punishment punishment, Long daysOfSuspension){
-        switch (punishment){
+    protected void applyPunishment(User target, Punishment punishment, Long daysOfSuspension) {
+        switch (punishment) {
             case WARNING:
                 break;
             case TEMPORARY_SUSPENSION:
-                Long days = 7L;//padrão 7 dias
+                Long days = 7L;// padrão 7 dias
                 target.setModerationStatus(ModerationStatus.SUSPENDED);
-                if(daysOfSuspension != null)
+                if (daysOfSuspension != null)
                     days = daysOfSuspension;
                 target.setSuspensionEndDate(LocalDateTime.now().plusDays(days));
                 break;
             case ACCOUNT_DELETION:
                 target.setModerationStatus(ModerationStatus.BANNED);
-                //devemos deletar a conta?
+                // devemos deletar a conta?
                 break;
         }
     }

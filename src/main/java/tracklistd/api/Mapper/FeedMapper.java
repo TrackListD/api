@@ -3,6 +3,7 @@ package tracklistd.api.Mapper;
 import org.springframework.stereotype.Component;
 
 import tracklistd.api.Dto.Feed.PublicationFeedDTO;
+import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Entity.MediaList;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.Rating;
@@ -13,10 +14,12 @@ public class FeedMapper {
 
     private final LikeRepository likeRepository;
     private final LikeMapper likeMapper;
+    private final MediaMapper mediaMapper;
 
-    public FeedMapper(LikeRepository likeRepository, LikeMapper likeMapper) {
+    public FeedMapper(LikeRepository likeRepository, LikeMapper likeMapper, MediaMapper mediaMapper) {
         this.likeRepository = likeRepository;
         this.likeMapper = likeMapper;
+        this.mediaMapper = mediaMapper;
     }
 
     public PublicationFeedDTO toFeedDTO(Publication publication, Long currentUserId) {
@@ -26,7 +29,7 @@ public class FeedMapper {
 
         String content = switch (publication) {
             case Rating r -> r.getReview();
-            case MediaList m -> m.getTypeOfList().toString();
+            case MediaList m -> m.getListName() + " (" + m.getTypeOfList().toString() + ")";
             default -> "";
         };
 
@@ -41,6 +44,11 @@ public class FeedMapper {
             default -> null;
         };
 
+        MediaMinDTO mediaDTO = switch (publication) {
+            case Rating r -> r.getTargetMedia() != null ? mediaMapper.toMinDTO(r.getTargetMedia()) : null;
+            default -> null;
+        };
+
         return new PublicationFeedDTO(
                 publication.getId(),
                 content,
@@ -49,6 +57,7 @@ public class FeedMapper {
                 publication.getPublicationDate(),
                 likeMapper.toUserMinDTO(publication.getAuthor()),
                 likesCount,
-                likedByMe);
+                likedByMe,
+                mediaDTO);
     }
 }
