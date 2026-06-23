@@ -24,12 +24,4 @@ public class MediaService {
         );
         return media;
     }
-
-    @Transactional
-    public Media getOrCreateBySpotifyId(String spotifyId, String mediaType) {
-        
-        // 1. Tenta achar no MySQL local primeiro
-        return mediaRepository.findMediaBySpotifyID(spotifyId)
-                .orElseGet(() -> fabricarSalvarNovaMedia(spotifyId, mediaType));
-    }
 }
