@@ -1,13 +1,13 @@
 package tracklistd.api.Service;
 
 import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
 import tracklistd.api.Entity.Enums.Punishment;
 import tracklistd.api.Entity.Enums.ReportStatus;
 import tracklistd.api.Entity.Report;
 import tracklistd.api.Entity.User;
 
-import java.time.LocalDateTime;
-
+@Service
 public class AdminService {
 
     private final UserService userService;
