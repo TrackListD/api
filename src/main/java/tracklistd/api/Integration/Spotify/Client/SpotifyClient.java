@@ -8,34 +8,69 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.RequiredArgsConstructor;
+import tracklistd.api.Dto.SpotifyAPI.SpotifyAlbumResponseDTO;
+import tracklistd.api.Dto.SpotifyAPI.SpotifyMusicResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifySearchResponseDTO;
 import tracklistd.api.Integration.Spotify.Auth.SpotifyAuth;
 
 @Component
 public class SpotifyClient {
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
+
+    private final SpotifyAuth authManager;
+
+    private static final String SPOTIFY_API_URL = "https://api.spotify.com/v1";
 
     @Autowired
-    private SpotifyAuth authService;
+    public SpotifyClient(RestTemplate restTemplate, SpotifyAuth authManager) {
+        this.restTemplate = restTemplate;
+        this.authManager = authManager;
+    }
 
-    private static final String BASE_URL = "https://api.spotify.com/v1";
-
-    // Procura pela busca feita no banco de dados, caso não encontrado, busca pela API do Spotify e salva no banco de dados
-    public SpotifySearchResponseDTO searchByString(String query) {
-        String url = BASE_URL + "/search?q=" + query + "&type=track,album&limit=10";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + authService.getAccessToken());
-
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
+    public SpotifySearchResponseDTO search(String query) {
+        String url = SPOTIFY_API_URL + "/search?q=" + query + "&type=track,album,artist&limit=10";
+        
         ResponseEntity<SpotifySearchResponseDTO> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                entity,
-                SpotifySearchResponseDTO.class);
-
+                createRequestWithToken(),
+                SpotifySearchResponseDTO.class
+        );
+        
         return response.getBody();
+    }
+
+    public SpotifyMusicResponseDTO getMusicById(String spotifyId) {
+        String url = SPOTIFY_API_URL + "/tracks/" + spotifyId;
+        
+        ResponseEntity<SpotifyMusicResponseDTO> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                createRequestWithToken(),
+                SpotifyMusicResponseDTO.class
+        );
+        
+        return response.getBody();
+    }
+
+    public SpotifyAlbumResponseDTO getAlbumById(String spotifyId) {
+        String url = SPOTIFY_API_URL + "/albums/" + spotifyId;
+        
+        ResponseEntity<SpotifyAlbumResponseDTO> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                createRequestWithToken(),
+                SpotifyAlbumResponseDTO.class
+        );
+        
+        return response.getBody();
+    }
+
+    private HttpEntity<Void> createRequestWithToken() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authManager.getAccessToken()); 
+        return new HttpEntity<>(headers);
     }
 }

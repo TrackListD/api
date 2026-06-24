@@ -16,7 +16,7 @@ public class SpotifyService {
         if (query == null || query.strip().isEmpty())
             throw new IllegalArgumentException("Não é possóvel buscar por uma query vazia");
 
-        SpotifySearchResponseDTO data = spotifyClient.searchByString(query);
+        SpotifySearchResponseDTO data = spotifyClient.search(query);
         return data;
     }
 }
