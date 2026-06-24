@@ -12,6 +12,7 @@ import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "artists")
 @NoArgsConstructor
 public class Artist {
@@ -22,11 +23,9 @@ public class Artist {
     @Column(nullable = false, length = 150)
     private String name;
 
-    @Setter
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    @Setter
     @Column(name = "profile_picture_url")
     private String profilePictureURL;
 
