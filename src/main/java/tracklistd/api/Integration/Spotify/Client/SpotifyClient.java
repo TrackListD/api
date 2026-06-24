@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import lombok.RequiredArgsConstructor;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyAlbumResponseDTO;
+import tracklistd.api.Dto.SpotifyAPI.SpotifyArtistResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyMusicResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifySearchResponseDTO;
 import tracklistd.api.Integration.Spotify.Auth.SpotifyAuth;
@@ -66,6 +66,11 @@ public class SpotifyClient {
         );
         
         return response.getBody();
+    }
+
+    public SpotifyArtistResponseDTO getArtistById(String spotifyId) {
+        String url = SPOTIFY_API_URL + "/artists/" + spotifyId;
+        return restTemplate.exchange(url, HttpMethod.GET, createRequestWithToken(), SpotifyArtistResponseDTO.class).getBody();
     }
 
     private HttpEntity<Void> createRequestWithToken() {
