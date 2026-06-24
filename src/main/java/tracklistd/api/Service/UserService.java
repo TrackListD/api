@@ -63,11 +63,9 @@ public class UserService {
         return userRepository.save(perfil);
     }
 
-    public User findUserById(Long id)
-    {
+    public User findUserById(Long id) {
         return this.userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado")
-        );
+                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado"));
     }
 
     @Transactional
@@ -112,6 +110,7 @@ public class UserService {
         User user = findUserById(userId);
         return user.getFollowers().stream().collect(Collectors.toList());
     }
+
     @Transactional
     public List<User> getFollowing(Long userId) {
         User user = findUserById(userId);
@@ -144,5 +143,12 @@ public class UserService {
                 target.setModerationStatus(ModerationStatus.BANNED);
                 break;
         }
+    }
+
+    @Transactional
+    public void deleteAccount(Long id) {
+        User target = userRepository.findById(id)
+                .orElseThrow(() -> new UserDoesNotExist(id));
+        userRepository.delete(target);
     }
 }
