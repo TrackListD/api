@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.validation.Valid;
 
 import tracklistd.api.Mapper.UserMapper;
@@ -91,9 +92,9 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Tentativa ilógica flagrada: requisição bloqueada por regra interna", content = @Content),
             @ApiResponse(responseCode = "404", description = "Falha de consistência: um dos identificadores não tem registro correspondente ativo", content = @Content)
     })
-    @PostMapping("/{myId}/follow/{friendId}")
-    public ResponseEntity<Void> followUser(@PathVariable Long myId, @PathVariable Long friendId) {
-        userService.followUser(myId, friendId);
+    @PostMapping("/follow/{friendId}")
+    public ResponseEntity<Void> followUser(@AuthenticationPrincipal User user, @PathVariable Long friendId) {
+        userService.followUser(user.getId(), friendId);
         return ResponseEntity.noContent().build();
     }
 
@@ -103,9 +104,9 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Tentativa ilógica flagrada: requisição bloqueada por regra interna", content = @Content),
             @ApiResponse(responseCode = "404", description = "Falha de consistência: um dos identificadores não tem registro correspondente ativo", content = @Content)
     })
-    @DeleteMapping("/{myId}/follow/{friendId}")
-    public ResponseEntity<Void> unfollowUser(@PathVariable Long myId, @PathVariable Long friendId) {
-        userService.unfollowUser(myId, friendId);
+    @DeleteMapping("/follow/{friendId}")
+    public ResponseEntity<Void> unfollowUser(@AuthenticationPrincipal User user, @PathVariable Long friendId) {
+        userService.unfollowUser(user.getId(), friendId);
         return ResponseEntity.noContent().build();
     }
 

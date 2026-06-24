@@ -146,7 +146,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("followUser deve retornar 204 ao seguir com sucesso")
     void followUser_deveRetornar204() throws Exception {
-        mockMvc.perform(post("/api/users/1/follow/2")
+        mockMvc.perform(post("/api/users/follow/2")
                         .with(authentication(mockAuth))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -155,7 +155,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("unfollowUser deve retornar 204 ao deixar de seguir com sucesso")
     void unfollowUser_deveRetornar204() throws Exception {
-        mockMvc.perform(delete("/api/users/1/follow/2")
+        mockMvc.perform(delete("/api/users/follow/2")
                         .with(authentication(mockAuth))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
