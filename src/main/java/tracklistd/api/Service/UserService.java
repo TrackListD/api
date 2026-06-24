@@ -130,7 +130,6 @@ public class UserService {
                 break;
             case ACCOUNT_DELETION:
                 target.setModerationStatus(ModerationStatus.BANNED);
-                //devemos deletar a conta?
                 break;
         }
     }

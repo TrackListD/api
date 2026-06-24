@@ -13,6 +13,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import tracklistd.api.Mapper.UserMapper;
+import tracklistd.api.Dto.User.UserRegisterResponseDTO;
+import tracklistd.api.Dto.User.UserPerfilResponseDTO;
 import tracklistd.api.Dto.User.UserRegisterRequestDTO;
 import tracklistd.api.Dto.User.UserUpdatePerfilRequestDTO;
 import tracklistd.api.Entity.User;
@@ -22,6 +25,7 @@ import tracklistd.api.Integration.FirebaseAuth.FirebaseFilter;
 import tracklistd.api.Integration.FirebaseAuth.Config.SecurityConfig;
 import tracklistd.api.Service.FirebaseService;
 import tracklistd.api.Service.UserService;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 
 import java.util.Collections;
 
@@ -50,6 +54,9 @@ public class UserControllerTest {
 
     @MockitoBean
     private FirebaseService firebaseService;
+
+    @MockitoBean
+    private UserMapper userMapper;
 
     private User testUser;
     private UsernamePasswordAuthenticationToken mockAuth;
@@ -80,6 +87,9 @@ public class UserControllerTest {
 
         when(userService.register(any(UserRegisterRequestDTO.class))).thenReturn(testUser);
 
+        UserRegisterResponseDTO responseDto = new UserRegisterResponseDTO(1L, "Usuário Teste", Role.MEMBER, Privacy.PUBLIC, "Bio", null, null);
+        when(userMapper.toRegisterDto(any())).thenReturn(responseDto);
+
         mockMvc.perform(post("/api/users")
                         .with(authentication(mockAuth))
                         .with(csrf())
@@ -94,6 +104,9 @@ public class UserControllerTest {
     @DisplayName("findUserById deve retornar 200 e os dados do usuário")
     void findUserById_deveRetornar200() throws Exception {
         when(userService.findUserById(1L)).thenReturn(testUser);
+
+        UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Usuário Teste", "Bio", Role.MEMBER, Privacy.PUBLIC, null, true);
+        when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
 
         mockMvc.perform(get("/api/users/1")
                         .with(authentication(mockAuth)))
@@ -113,6 +126,9 @@ public class UserControllerTest {
         updatedUser.setName("Novo Nome");
 
         when(userService.perfilUpdate(eq(1L), any(UserUpdatePerfilRequestDTO.class))).thenReturn(updatedUser);
+
+        UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Novo Nome", "Nova Bio", Role.MEMBER, Privacy.PUBLIC, null, true);
+        when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
 
         mockMvc.perform(put("/api/users/1")
                         .with(authentication(mockAuth))
@@ -139,5 +155,39 @@ public class UserControllerTest {
                         .with(authentication(mockAuth))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("register deve retornar 400 Bad Request quando nome estiver em branco (Validação)")
+    void register_deveRetornar400_quandoNomeEmBranco() throws Exception {
+
+        // Enviando um DTO com o campo nome em branco propositalmente
+        UserRegisterRequestDTO invalidRequest = new UserRegisterRequestDTO(
+                "",
+                "firebase-uid-xyz",
+                Role.MEMBER,
+                Privacy.PUBLIC,
+                "Bio exemplo"
+        );
+
+        mockMvc.perform(post("/api/users")
+                        .with(authentication(mockAuth))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codeError").value(400));
+    }
+
+    @Test
+    @DisplayName("findUserById deve retornar 404 Not Found quando ID não existe (Exceção de Negócio)")
+    void findUserById_deveRetornar404_quandoNaoExiste() throws Exception {
+
+        when(userService.findUserById(999L)).thenThrow(new ResourceNotFoundException("Usuário não encontrado"));
+
+        mockMvc.perform(get("/api/users/999")
+                        .with(authentication(mockAuth)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.codeError").value(404));
     }
 }

@@ -23,6 +23,10 @@ import tracklistd.api.Exceptions.RatingsExceptions.InvalidRatingNote;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingAlreadyExists;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingOwnershipViolation;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
+import tracklistd.api.Exceptions.UserExceptions.FollowYourself;
+import tracklistd.api.Exceptions.UserExceptions.FriendDoesNotExist;
+import tracklistd.api.Exceptions.UserExceptions.LoginApiAlreadyUsed;
+import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -97,7 +101,9 @@ public class GlobalExceptionHandler {
 
     //Captura exceções personalizadas que retornam um erro do tipo 404
     @ExceptionHandler({
-            ResourceNotFoundException.class
+            ResourceNotFoundException.class,
+            FriendDoesNotExist.class,
+            UserDoesNotExist.class
     })
     public ResponseEntity<ErrorDto> notFoundException(RuntimeException ex)
     {
@@ -114,7 +120,8 @@ public class GlobalExceptionHandler {
     //Captura exceções personalizadas que retornam um erro do tipo 409
     @ExceptionHandler({
             MediaListNameAlreadyExitsException.class,
-            RatingAlreadyExists.class
+            RatingAlreadyExists.class,
+            LoginApiAlreadyUsed.class
     })
     public ResponseEntity<ErrorDto> conflictException(RuntimeException ex)
     {
@@ -133,7 +140,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             CommentOnCommentException.class,
             SelfCommentException.class,
-            InvalidMediaTypeForListException.class
+            InvalidMediaTypeForListException.class,
+            FollowYourself.class
     })
     public ResponseEntity<ErrorDto> unprocessableContentException(RuntimeException ex)
     {
