@@ -14,6 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import tracklistd.api.Mapper.UserMapper;
+import tracklistd.api.Dto.User.UserMinResponseDTO;
 import tracklistd.api.Dto.User.UserRegisterResponseDTO;
 import tracklistd.api.Dto.User.UserPerfilResponseDTO;
 import tracklistd.api.Dto.User.UserRegisterRequestDTO;
@@ -27,6 +28,8 @@ import tracklistd.api.Service.FirebaseService;
 import tracklistd.api.Service.UserService;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -189,5 +192,35 @@ public class UserControllerTest {
                         .with(authentication(mockAuth)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.codeError").value(404));
+    }
+
+    @Test
+    @DisplayName("getFollowers deve retornar 200 e a lista de seguidores formatada")
+    void getFollowers_deveRetornar200() throws Exception {
+        when(userService.getFollowers(1L)).thenReturn(Collections.singletonList(testUser));
+
+        UserMinResponseDTO minDto = new UserMinResponseDTO(1L, "Usuário Teste");
+        when(userMapper.toMinDto(any())).thenReturn(minDto);
+        
+        mockMvc.perform(get("/api/users/1/followers")
+                        .with(authentication(mockAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].username").value("Usuário Teste"));
+    }
+
+    @Test
+    @DisplayName("getFollowing deve retornar 200 e a lista de quem a pessoa segue formatada")
+    void getFollowing_deveRetornar200() throws Exception {
+        when(userService.getFollowing(1L)).thenReturn(Collections.singletonList(testUser));
+
+        UserMinResponseDTO minDto = new UserMinResponseDTO(1L, "Usuário Teste");
+        when(userMapper.toMinDto(any())).thenReturn(minDto);
+
+        mockMvc.perform(get("/api/users/1/following")
+                        .with(authentication(mockAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].username").value("Usuário Teste"));
     }
 }

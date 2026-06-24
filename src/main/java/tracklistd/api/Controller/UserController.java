@@ -1,23 +1,24 @@
 package tracklistd.api.Controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import tracklistd.api.Service.UserService;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import jakarta.validation.Valid;
+
 import tracklistd.api.Mapper.UserMapper;
+import tracklistd.api.Dto.User.UserMinResponseDTO;
 import tracklistd.api.Dto.User.UserRegisterResponseDTO;
 import tracklistd.api.Dto.User.UserPerfilResponseDTO;
 import tracklistd.api.Dto.User.UserRegisterRequestDTO;
 import tracklistd.api.Dto.User.UserUpdatePerfilRequestDTO;
+import tracklistd.api.Service.UserService;
 import tracklistd.api.Entity.User;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +26,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -103,5 +107,35 @@ public class UserController {
     public ResponseEntity<Void> unfollowUser(@PathVariable Long myId, @PathVariable Long friendId) {
         userService.unfollowUser(myId, friendId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Listar Seguidores", description = "Retorna uma lista resumida das pessoas que seguem o usuário especificado.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Seguidores listados com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserMinResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Falha na busca: este perfil não existe",
+                    content = @Content)
+    })
+    @GetMapping("/{id}/followers")
+    public ResponseEntity<List<UserMinResponseDTO>> getFollowers(@PathVariable Long id) {
+        List<UserMinResponseDTO> followers = userService.getFollowers(id).stream()
+                .map(userMapper::toMinDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(followers);
+    }
+
+    @Operation(summary = "Listar Seguindo", description = "Retorna uma lista resumida das pessoas que o usuário especificado está seguindo.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Amigos listados",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserMinResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Falha na busca: este perfil não existe",
+                    content = @Content)
+    })
+    @GetMapping("/{id}/following")
+    public ResponseEntity<List<UserMinResponseDTO>> getFollowing(@PathVariable Long id) {
+        List<UserMinResponseDTO> following = userService.getFollowing(id).stream()
+                .map(userMapper::toMinDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(following);
     }
 }
