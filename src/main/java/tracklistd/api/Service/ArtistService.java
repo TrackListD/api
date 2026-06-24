@@ -1,0 +1,57 @@
+package tracklistd.api.Service;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import tracklistd.api.Dto.SpotifyAPI.SpotifyAlbumResponseDTO;
+import tracklistd.api.Dto.SpotifyAPI.SpotifyArtistResponseDTO;
+import tracklistd.api.Entity.Album;
+import tracklistd.api.Entity.Artist;
+import tracklistd.api.Integration.Spotify.Client.SpotifyClient;
+import tracklistd.api.Mapper.SpotifyEntityMapper;
+import tracklistd.api.Repository.ArtistRepository;
+import tracklistd.api.Repository.MediaRepository;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ArtistService {
+
+    private final ArtistRepository artistRepository;
+    private final MediaRepository mediaRepository;
+    private final SpotifyClient spotifyClient;
+    private final SpotifyEntityMapper mapper;
+
+    @Transactional
+    public Artist syncArtistAndMedia(String spotifyId) {
+        SpotifyArtistResponseDTO artistDto = spotifyClient.getArtistById(spotifyId);
+
+        Artist artist = artistRepository.findArtistBySpotifyID(spotifyId)
+                .orElseGet(() -> mapper.toArtistEntity(artistDto));
+
+        artist.setProfilePictureURL(artistDto.getProfilePictureURL());
+        
+        artist = artistRepository.save(artist);
+
+        syncReleasedMedia(artist, spotifyId);
+
+        return artist;
+    }
+
+    private void syncReleasedMedia(Artist artist, String spotifyId) {
+        List<SpotifyAlbumResponseDTO> artistAlbums = spotifyClient.getArtistAlbums(spotifyId);
+
+        for (SpotifyAlbumResponseDTO albumDto : artistAlbums) {
+            boolean exists = mediaRepository.findMediaBySpotifyID(albumDto.id()).isPresent();
+            
+            if (!exists) {
+                Album newAlbum = mapper.toAlbumEntity(albumDto, List.of(artist));
+                newAlbum.setSingle("single".equalsIgnoreCase(albumDto.albumType()));
+                
+                newAlbum.setAuthors(List.of(artist));
+                mediaRepository.save(newAlbum);
+            }
+        }
+    }
+}
