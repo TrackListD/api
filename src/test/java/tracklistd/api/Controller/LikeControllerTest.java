@@ -95,7 +95,7 @@ class LikeControllerTest {
     @Test
     void shouldReturnUsersWhoLikedPublication() throws Exception {
         Long publicationId = 1L;
-        UserMinResponseDTO userMin = new UserMinResponseDTO(1L, "João Pedro");
+        UserMinResponseDTO userMin = new UserMinResponseDTO(1L, "João Pedro", "imagem-teste");
         List<UserMinResponseDTO> mockList = List.of(userMin);
 
         when(likeService.getWhoLiked(publicationId)).thenReturn(mockList);

@@ -85,7 +85,8 @@ public class UserControllerTest {
                 "firebase-uid-xyz",
                 Role.MEMBER,
                 Privacy.PUBLIC,
-                "Bio exemplo"
+                "Bio exemplo",
+                "Pic exemplo"
         );
 
         when(userService.register(any(UserRegisterRequestDTO.class))).thenReturn(testUser);
@@ -170,7 +171,8 @@ public class UserControllerTest {
                 "firebase-uid-xyz",
                 Role.MEMBER,
                 Privacy.PUBLIC,
-                "Bio exemplo"
+                "Bio exemplo",
+                "Pic exemplo"
         );
 
         mockMvc.perform(post("/api/users")
@@ -199,14 +201,15 @@ public class UserControllerTest {
     void getFollowers_deveRetornar200() throws Exception {
         when(userService.getFollowers(1L)).thenReturn(Collections.singletonList(testUser));
 
-        UserMinResponseDTO minDto = new UserMinResponseDTO(1L, "Usuário Teste");
+        UserMinResponseDTO minDto = new UserMinResponseDTO(1L, "Usuário Teste", "Pic exemplo");
         when(userMapper.toMinDto(any())).thenReturn(minDto);
         
         mockMvc.perform(get("/api/users/1/followers")
                         .with(authentication(mockAuth)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].username").value("Usuário Teste"));
+                .andExpect(jsonPath("$[0].name").value("Usuário Teste"))
+                .andExpect(jsonPath("$[0].profilePic").value("Pic exemplo"));
     }
 
     @Test
@@ -214,13 +217,14 @@ public class UserControllerTest {
     void getFollowing_deveRetornar200() throws Exception {
         when(userService.getFollowing(1L)).thenReturn(Collections.singletonList(testUser));
 
-        UserMinResponseDTO minDto = new UserMinResponseDTO(1L, "Usuário Teste");
+        UserMinResponseDTO minDto = new UserMinResponseDTO(1L, "Usuário Teste", "Pic exemplo");
         when(userMapper.toMinDto(any())).thenReturn(minDto);
 
         mockMvc.perform(get("/api/users/1/following")
                         .with(authentication(mockAuth)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].username").value("Usuário Teste"));
+                .andExpect(jsonPath("$[0].name").value("Usuário Teste"))
+                .andExpect(jsonPath("$[0].profilePic").value("Pic exemplo"));
     }
 }

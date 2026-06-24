@@ -28,7 +28,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -44,6 +43,7 @@ public class UserService {
         newUser.setRole(dto.role());
         newUser.setWhoCanComment(dto.whoCanComment());
         newUser.setBio(dto.bio());
+        newUser.setProfilePic(dto.profilePic());
 
         return userRepository.save(newUser);
     }
@@ -117,26 +117,26 @@ public class UserService {
         User user = findUserById(userId);
         return user.getFollowing().stream().collect(Collectors.toList());
     }
-  
+
     @Transactional
     public User findOrCreateUser(FirebaseToken decodedToken) {
         return userRepository.findByIdLoginApi(decodedToken.getUid())
                 .orElseGet(() -> {
                     UserRegisterRequestDTO dto = new UserRegisterRequestDTO(decodedToken.getName(),
-                            decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "");
+                            decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "", decodedToken.getPicture());
                     return register(dto);
                 });
     }
 
     @Transactional
-    protected void applyPunishment(User target, Punishment punishment, Long daysOfSuspension){
-        switch (punishment){
+    protected void applyPunishment(User target, Punishment punishment, Long daysOfSuspension) {
+        switch (punishment) {
             case WARNING:
                 break;
             case TEMPORARY_SUSPENSION:
-                Long days = 7L;//padrão 7 dias
+                Long days = 7L;// padrão 7 dias
                 target.setModerationStatus(ModerationStatus.SUSPENDED);
-                if(daysOfSuspension != null)
+                if (daysOfSuspension != null)
                     days = daysOfSuspension;
                 target.setSuspensionEndDate(LocalDateTime.now().plusDays(days));
                 break;

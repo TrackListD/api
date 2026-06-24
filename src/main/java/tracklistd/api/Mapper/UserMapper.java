@@ -14,6 +14,5 @@ public interface UserMapper {
 
     UserPerfilResponseDTO toPerfilDto(User user);
 
-    @Mapping(source = "name", target = "username")
     UserMinResponseDTO toMinDto(User user);
 }

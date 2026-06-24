@@ -29,6 +29,9 @@ public class User implements Reportable {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Column(name = "profile_pic", length = 250)
+    private String profilePic;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

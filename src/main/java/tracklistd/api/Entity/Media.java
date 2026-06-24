@@ -26,6 +26,9 @@ public abstract class Media {
     @Column(nullable = false, length = 150)
     protected String title;
 
+    @Column(name = "cover_url", length = 500) // Links de imagens do Spotify podem ser longos, 500 é um tamanho seguro
+    protected String coverUrl;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "media_artists", joinColumns = @JoinColumn(name = "media_id"), inverseJoinColumns = @JoinColumn(name = "artist_id"))
     @OrderColumn(name = "artist_order")
