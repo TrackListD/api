@@ -22,5 +22,7 @@ public record SpotifyAlbumResponseDTO(
 }
 
 record SpotifyAlbumImageDTO(
-        @JsonProperty("url") String url) {
+        @JsonProperty("url") String url,
+        @JsonProperty("height") Integer height,
+        @JsonProperty("width") Integer width) {
 }
