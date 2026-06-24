@@ -71,6 +71,16 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toPerfilDto(user));
     }
 
+    @Operation(summary = "Buscar meu próprio perfil", description = "Retorna as informações completas do perfil logado.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Meu perfil carregado com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserPerfilResponseDTO.class)))
+    })
+    @GetMapping("/me")
+    public ResponseEntity<UserPerfilResponseDTO> findMyProfile(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(userMapper.toPerfilDto(user));
+    }
+
     @Operation(summary = "Atualizar perfil", description = "Edita os campos alteráveis de exibição ou configurações do perfil informado.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Perfil atualizado com êxito",

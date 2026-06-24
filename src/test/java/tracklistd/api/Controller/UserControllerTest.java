@@ -144,6 +144,20 @@ public class UserControllerTest {
     }
 
     @Test
+    @DisplayName("findMyProfile deve retornar 200 e os dados do meu perfil")
+    void findMyProfile_deveRetornar200() throws Exception {
+
+        UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Usuário Teste", "Bio", Role.MEMBER, Privacy.PUBLIC, null, true);
+        when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
+
+        mockMvc.perform(get("/api/users/me")
+                        .with(authentication(mockAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Usuário Teste"));
+    }
+
+    @Test
     @DisplayName("followUser deve retornar 204 ao seguir com sucesso")
     void followUser_deveRetornar204() throws Exception {
         mockMvc.perform(post("/api/users/follow/2")
