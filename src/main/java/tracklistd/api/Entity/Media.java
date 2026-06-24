@@ -22,9 +22,11 @@ public abstract class Media {
     @Id
     protected String spotifyID;
 
-    @Setter
     @Column(nullable = false, length = 150)
     protected String title;
+
+    @Column(name = "cover_url", columnDefinition = "TEXT")
+    protected String coverUrl;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "media_artists", joinColumns = @JoinColumn(name = "media_id"), inverseJoinColumns = @JoinColumn(name = "artist_id"))
@@ -36,7 +38,6 @@ public abstract class Media {
     @Column(name = "genre")
     protected Set<String> musicGenres = new LinkedHashSet<>();
 
-    @Setter
     @Column(name = "release_date")
     protected LocalDate releaseDate;
 
