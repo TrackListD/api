@@ -1,5 +1,6 @@
 package tracklistd.api.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,10 +50,12 @@ public class User implements Reportable {
     @Column(name = "bio", length = 500)
     private String bio;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "following", joinColumns = @JoinColumn(name = "follower_id"), inverseJoinColumns = @JoinColumn(name = "followed_id"))
     private Set<User> following = new HashSet<>(); // sets para evitar duplicatas
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "following")
     private Set<User> followers = new HashSet<>();
 
@@ -81,6 +84,7 @@ public class User implements Reportable {
         return moderationStatus;
     }
 
+    @JsonIgnore
     @Override
     public Reportable getTarget() {
         return this;

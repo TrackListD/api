@@ -20,6 +20,8 @@ import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
 import tracklistd.api.Repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -61,6 +63,11 @@ public class UserService {
         return userRepository.save(perfil);
     }
 
+    public User findUserById(Long id) {
+        return this.userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado"));
+    }
+
     @Transactional
     public void followUser(Long myId, Long friendId) {
         if (myId.equals(friendId))
@@ -98,9 +105,16 @@ public class UserService {
         }
     }
 
-    public User findUserById(Long id) {
-        return this.userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Esse Usuario não foi encontrado"));
+    @Transactional
+    public List<User> getFollowers(Long userId) {
+        User user = findUserById(userId);
+        return user.getFollowers().stream().collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<User> getFollowing(Long userId) {
+        User user = findUserById(userId);
+        return user.getFollowing().stream().collect(Collectors.toList());
     }
 
     @Transactional
@@ -127,8 +141,14 @@ public class UserService {
                 break;
             case ACCOUNT_DELETION:
                 target.setModerationStatus(ModerationStatus.BANNED);
-                // devemos deletar a conta?
                 break;
         }
+    }
+
+    @Transactional
+    public void deleteAccount(Long id) {
+        User target = userRepository.findById(id)
+                .orElseThrow(() -> new UserDoesNotExist(id));
+        userRepository.delete(target);
     }
 }
