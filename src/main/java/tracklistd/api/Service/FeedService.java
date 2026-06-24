@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import tracklistd.api.Dto.Feed.PublicationFeedDTO;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
 import tracklistd.api.Mapper.FeedMapper;
 import tracklistd.api.Repository.PublicationRepository;
 import tracklistd.api.Repository.UserRepository;
@@ -32,7 +33,7 @@ public class FeedService {
         public List<PublicationFeedDTO> getSocialFeed(Long userId) {
 
                 User user = userRepository.findById(userId)
-                                .orElseThrow();
+                                .orElseThrow(() -> new UserDoesNotExist(userId));
 
                 List<Publication> publications = publicationRepository
                                 .findByAuthorInOrderByPublicationDateDesc(user.getFollowing());
