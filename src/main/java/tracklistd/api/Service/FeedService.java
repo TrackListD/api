@@ -33,7 +33,7 @@ public class FeedService {
         public List<PublicationFeedDTO> getSocialFeed(Long userId) {
 
                 User user = userRepository.findById(userId)
-                                .orElseThrow();
+                                .orElseThrow(() -> new UserDoesNotExist(userId));
 
                 List<Publication> publications = publicationRepository
                                 .findByAuthorInOrderByPublicationDateDesc(user.getFollowing());
