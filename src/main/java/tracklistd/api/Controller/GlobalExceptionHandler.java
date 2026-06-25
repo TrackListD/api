@@ -6,22 +6,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tracklistd.api.Dto.ErrorDto;
 import tracklistd.api.Exceptions.CommentExceptions.CommentOnCommentException;
-import tracklistd.api.Exceptions.CommentExceptions.CommentOwershipViolation;
 import tracklistd.api.Exceptions.CommentExceptions.CommentTextBlankException;
 import tracklistd.api.Exceptions.CommentExceptions.SelfCommentException;
 import tracklistd.api.Exceptions.MediaListExceptions.InvalidMediaTypeForListException;
 import tracklistd.api.Exceptions.MediaListExceptions.ListNameBlankException;
 import tracklistd.api.Exceptions.MediaListExceptions.MediaListNameAlreadyExitsException;
-import tracklistd.api.Exceptions.MediaListExceptions.MediaListaOwnershipViolation;
+import tracklistd.api.Exceptions.OwnershipViolationException;
 import tracklistd.api.Exceptions.RatingsExceptions.InvalidRatingNote;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingAlreadyExists;
-import tracklistd.api.Exceptions.RatingsExceptions.RatingOwnershipViolation;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Exceptions.UserExceptions.FollowYourself;
 import tracklistd.api.Exceptions.UserExceptions.FriendDoesNotExist;
@@ -80,23 +79,35 @@ public class GlobalExceptionHandler {
 
     //Captura exceções personalizadas que retornam um erro do tipo 403
     @ExceptionHandler({
-            CommentOwershipViolation.class,
-            MediaListaOwnershipViolation.class,
-            RatingOwnershipViolation.class,
             AccessDeniedException.class,
-            AuthorizationDeniedException.class
+            AuthorizationDeniedException.class,
+            OwnershipViolationException.class
     })
-    public ResponseEntity<ErrorDto> forbiddenException(RuntimeException ex)
+    public ResponseEntity<ErrorDto> forbiddenException(Exception ex)
     {
         ErrorDto errorDto = ErrorDto
                 .builder()
                 .timestamp(LocalDateTime.now())
                 .codeError(HttpStatus.FORBIDDEN.value())
                 .status(HttpStatus.FORBIDDEN.name())
-                .errors(List.of(ex.getMessage()))
+                .errors(List.of("Sem permissão"))
                 .build();
 
         return new ResponseEntity<>(errorDto, HttpStatus.FORBIDDEN);
+    }
+
+    //Captura as exceções de autenticação e retorna 401
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorDto> unauthorizedException(AuthenticationException ex) {
+        ErrorDto errorDto = ErrorDto
+                .builder()
+                .timestamp(LocalDateTime.now())
+                .codeError(HttpStatus.UNAUTHORIZED.value())
+                .status(HttpStatus.UNAUTHORIZED.name())
+                .errors(List.of("Não autenticado"))
+                .build();
+
+        return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
     }
 
     //Captura exceções personalizadas que retornam um erro do tipo 404
