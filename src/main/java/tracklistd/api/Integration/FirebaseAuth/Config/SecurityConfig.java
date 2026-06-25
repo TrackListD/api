@@ -33,13 +33,23 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests
+                    (auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/feed/global").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/publications/*/likes").permitAll()
+
+                        //Listas
                         .requestMatchers(HttpMethod.GET, "/api/mediaList/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "api/mediaList/*/favorite").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "api/mediaList/*/favorite").authenticated()
-                        .anyRequest().authenticated())
+
+                        //Comentarios
+                        .requestMatchers(HttpMethod.GET, "/api/comments/post/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/comments/user/*").permitAll()
+
+                        //Avaliações
+                        .requestMatchers(HttpMethod.GET, "/api/ratings/*").permitAll()
+
+                        .anyRequest().authenticated()
+                    )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED,
