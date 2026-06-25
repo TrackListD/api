@@ -22,7 +22,6 @@ public abstract class Media {
     @Id
     protected String spotifyID;
 
-    @Setter
     @Column(nullable = false, length = 150)
     protected String title;
 
@@ -39,7 +38,6 @@ public abstract class Media {
     @Column(name = "genre")
     protected Set<String> musicGenres = new LinkedHashSet<>();
 
-    @Setter
     @Column(name = "release_date")
     protected LocalDate releaseDate;
 
