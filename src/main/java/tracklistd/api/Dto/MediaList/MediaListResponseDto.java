@@ -14,7 +14,7 @@ public record MediaListResponseDto(
         @Schema(description = "Indica se a lista está favoritada pelo autor", example = "false")
         Boolean isFavorite,
 
-        Long authorId,
+        Long idAuthor,
         String authorName,
 
         @Schema(description = "Array com os IDs das mídias (IDs do Spotify) contidas na lista", example = "[\"6rqhFgbbKwnb9MLmUQDhG6\"]")

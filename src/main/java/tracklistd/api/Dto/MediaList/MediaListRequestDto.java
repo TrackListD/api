@@ -23,6 +23,6 @@ public record MediaListRequestDto(
         Privacy whoCanSee,
 
         @Schema(description = "Lista de IDs das mídias (IDs do banco de dados) a serem adicionadas", example = "[1, 2, 3]")
-        Long[] mediaIds
+        String[] mediaIds
 ) {
 }

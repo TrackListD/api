@@ -6,15 +6,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Music;
 import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.RatingsExceptions.InvalidRatingNote;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingAlreadyExists;
-import tracklistd.api.Exceptions.RatingsExceptions.RatingException;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingOwnershipViolation;
+import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.RatingRepository;
 
 import java.util.Collections;
@@ -41,7 +40,7 @@ class RatingServiceTest {
     void setUp() {
         author = new User();
         author.setId(1L);
-        
+
         target = new Music();
         target.setTitle("Test Song");
     }
@@ -54,9 +53,8 @@ class RatingServiceTest {
         Float invalidNote = 5.2f;
 
         // Act & Assert
-        assertThrows(InvalidRatingNote.class, () -> 
-            ratingService.createRating(author, target, invalidNote, "Great song", Privacy.PUBLIC)
-        );
+        assertThrows(InvalidRatingNote.class,
+                () -> ratingService.createRating(author, target, invalidNote, "Great song", Privacy.PUBLIC));
         verify(ratingRepository, never()).save(any(Rating.class));
     }
 
@@ -68,9 +66,8 @@ class RatingServiceTest {
         when(ratingRepository.findRatingByAuthorAndTarget(author, target)).thenReturn(Optional.of(existingRating));
 
         // Act & Assert
-        assertThrows(RatingAlreadyExists.class, () ->
-            ratingService.createRating(author, target, validNote, "New review", Privacy.PUBLIC)
-        );
+        assertThrows(RatingAlreadyExists.class,
+                () -> ratingService.createRating(author, target, validNote, "New review", Privacy.PUBLIC));
         verify(ratingRepository, never()).save(any(Rating.class));
     }
 
@@ -91,7 +88,7 @@ class RatingServiceTest {
         assertEquals(target, result.getTargetMedia());
         assertEquals(validNote, result.getRatingNote());
         assertEquals(review, result.getReview());
-        assertEquals(privacy, result.getPrivacy());
+        assertEquals(privacy, result.getWhoCanSee());
 
         verify(ratingRepository, times(1)).save(result);
     }
@@ -106,9 +103,10 @@ class RatingServiceTest {
         when(ratingRepository.findById(ratingId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RatingException.class, () ->
-            ratingService.editRatingNote(newNote, ratingId, author.getId())
-        );
+
+        // Service
+        assertThrows(ResourceNotFoundException.class,
+                () -> ratingService.editRatingNote(newNote, ratingId, author.getId()));
         verify(ratingRepository, never()).save(any(Rating.class));
     }
 
@@ -121,8 +119,13 @@ class RatingServiceTest {
         when(ratingRepository.findById(ratingId)).thenReturn(Optional.of(rating));
 
         // Act & Assert
-        assertThrows(RatingOwnershipViolation.class, () ->
-            ratingService.editRatingNote(newNote, ratingId, 999L) // 999L is not the author's ID (1L)
+        assertThrows(RatingOwnershipViolation.class, () -> ratingService.editRatingNote(newNote, ratingId, 999L) // 999L
+                                                                                                                 // is
+                                                                                                                 // not
+                                                                                                                 // the
+                                                                                                                 // author's
+                                                                                                                 // ID
+                                                                                                                 // (1L)
         );
         verify(ratingRepository, never()).save(any(Rating.class));
     }
@@ -136,9 +139,8 @@ class RatingServiceTest {
         when(ratingRepository.findById(ratingId)).thenReturn(Optional.of(rating));
 
         // Act & Assert
-        assertThrows(InvalidRatingNote.class, () ->
-            ratingService.editRatingNote(invalidNote, ratingId, author.getId())
-        );
+        assertThrows(InvalidRatingNote.class,
+                () -> ratingService.editRatingNote(invalidNote, ratingId, author.getId()));
         verify(ratingRepository, never()).save(any(Rating.class));
     }
 
@@ -168,9 +170,10 @@ class RatingServiceTest {
         when(ratingRepository.findById(ratingId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RatingException.class, () ->
-            ratingService.editReview(newReview, ratingId, author.getId())
-        );
+
+        // Service
+        assertThrows(ResourceNotFoundException.class,
+                () -> ratingService.editReview(newReview, ratingId, author.getId()));
         verify(ratingRepository, never()).save(any(Rating.class));
     }
 
@@ -183,8 +186,12 @@ class RatingServiceTest {
         when(ratingRepository.findById(ratingId)).thenReturn(Optional.of(rating));
 
         // Act & Assert
-        assertThrows(RatingOwnershipViolation.class, () ->
-            ratingService.editReview(newReview, ratingId, 999L) // 999L is not the author's ID (1L)
+        assertThrows(RatingOwnershipViolation.class, () -> ratingService.editReview(newReview, ratingId, 999L) // 999L
+                                                                                                               // is not
+                                                                                                               // the
+                                                                                                               // author's
+                                                                                                               // ID
+                                                                                                               // (1L)
         );
         verify(ratingRepository, never()).save(any(Rating.class));
     }
@@ -214,9 +221,8 @@ class RatingServiceTest {
         when(ratingRepository.findById(ratingId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RatingException.class, () ->
-            ratingService.deleteRating(ratingId, author.getId())
-        );
+        // Service
+        assertThrows(ResourceNotFoundException.class, () -> ratingService.deleteRating(ratingId, author.getId()));
         verify(ratingRepository, never()).delete(any(Rating.class));
     }
 
@@ -228,8 +234,9 @@ class RatingServiceTest {
         when(ratingRepository.findById(ratingId)).thenReturn(Optional.of(rating));
 
         // Act & Assert
-        assertThrows(RatingOwnershipViolation.class, () ->
-            ratingService.deleteRating(ratingId, 999L) // 999L is not the author's ID (1L)
+        assertThrows(RatingOwnershipViolation.class, () -> ratingService.deleteRating(ratingId, 999L) // 999L is not the
+                                                                                                      // author's ID
+                                                                                                      // (1L)
         );
         verify(ratingRepository, never()).delete(any(Rating.class));
     }
@@ -251,14 +258,14 @@ class RatingServiceTest {
     // --- getRatingsByUser Tests ---
 
     @Test
-    void getRatingsByUser_whenSuccess_shouldReturnOnlyPublicRatings() {
+    void getRatingsByUser_whenSuccess_shouldReturnOnlyPublicRatingsPrivacy() {
         // Arrange
         Rating rating = new Rating(author, target, 4.0f, "Public Review", Privacy.PUBLIC);
         List<Rating> expectedRatings = Collections.singletonList(rating);
         when(ratingRepository.findRatingByAuthorAndWhoCanSee(author, Privacy.PUBLIC)).thenReturn(expectedRatings);
 
         // Act
-        List<Rating> result = ratingService.getRatingsByUser(author);
+        List<Rating> result = ratingService.getRatingsByUserPrivacy(author, Privacy.PRIVATE);
 
         // Assert
         assertNotNull(result);

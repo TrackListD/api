@@ -5,10 +5,18 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record SpotifyMusicResponseDTO(
-                @JsonProperty("id") String id,
-                @JsonProperty("title") String title,
-                @JsonProperty("duration_ms") Integer durationMS,
-                @JsonProperty("track_number") Integer trackNumber,
-                @JsonProperty("artists") List<SpotifyArtistResponseDTO> artists,
-                @JsonProperty("album") SpotifyAlbumResponseDTO album) {
+        @JsonProperty("id") String id,
+        @JsonProperty("name") String title,
+        @JsonProperty("release_date") String releaseDate,
+        @JsonProperty("cover_url") List<SpotifyAlbumImageDTO> images,
+        @JsonProperty("artists") List<SpotifyArtistResponseDTO> artists,
+        @JsonProperty("album_type") String albumType,
+        @JsonProperty("genres") List<String> musicGenres,
+        @JsonProperty("duration_ms") Integer durationMS) {
+
+    public String getCoverURL() {
+        if (images != null && !images.isEmpty())
+            return images.get(0).url();
+        return null;
+    }
 }

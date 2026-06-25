@@ -7,7 +7,7 @@ import tracklistd.api.Dto.SpotifyAPI.SpotifySearchResponseDTO;
 import tracklistd.api.Integration.Spotify.Client.SpotifyClient;
 
 @Service
-public class SpotifyService {
+public class SpotifySearchService {
 
     @Autowired
     private SpotifyClient spotifyClient;

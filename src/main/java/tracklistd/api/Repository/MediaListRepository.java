@@ -14,6 +14,9 @@ public interface MediaListRepository extends JpaRepository<MediaList, Long> {
 
     // Métodos CRUD básicos já vêm inclusos (save, findById, findAll, delete, etc.)
 
+    //Método que retorna uma lista de um Usuario
+    Optional<MediaList> findMediaListByAuthor(Long userId);
+
     //Método que retorna todas as Listas de um User
     List<MediaList> findAllByAuthor(User author);
 
