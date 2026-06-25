@@ -67,13 +67,16 @@ public class User implements Reportable {
     @Column(name = "moderation_status", nullable = false, updatable = true)
     private ModerationStatus moderationStatus = ModerationStatus.ACTIVE;
 
-    @Column(name = "favorite_music", updatable = true)
+    @ManyToOne
+    @JoinColumn(name = "favorite_music")
     private Music favoriteMusic;
 
-    @Column(name = "favorite_album", updatable = true)
+    @ManyToOne
+    @JoinColumn(name = "favorite_album")
     private Album favoriteAlbum;
 
-    @Column(name = "favorite_artist", updatable = true)
+    @ManyToOne
+    @JoinColumn(name = "favorite_artist")
     private Artist favoriteArtist;
 
     public User(String name, String idLoginApi, Role role, Privacy privacy) {
