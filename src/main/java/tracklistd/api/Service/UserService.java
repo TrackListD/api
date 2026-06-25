@@ -9,6 +9,9 @@ import tracklistd.api.Dto.User.UserRegisterRequestDTO;
 import tracklistd.api.Dto.User.UserUpdatePerfilRequestDTO;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Punishment;
+import tracklistd.api.Entity.Album;
+import tracklistd.api.Entity.Artist;
+import tracklistd.api.Entity.Music;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Entity.Enums.Privacy;
@@ -59,6 +62,12 @@ public class UserService {
             perfil.setBio(dto.bio());
         if (dto.whoCanComment() != null)
             perfil.setWhoCanComment(dto.whoCanComment());
+        if (dto.favoriteAlbum() != null)
+            perfil.setFavoriteAlbum(dto.favoriteAlbum());
+        if (dto.favoriteArtist() != null)
+            perfil.setFavoriteArtist(dto.favoriteArtist());
+        if (dto.favoriteMusic() != null)
+            perfil.setFavoriteArtist(dto.favoriteArtist());
 
         return userRepository.save(perfil);
     }
@@ -151,4 +160,5 @@ public class UserService {
                 .orElseThrow(() -> new UserDoesNotExist(id));
         userRepository.delete(target);
     }
+
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import org.hibernate.annotations.CreationTimestamp;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
@@ -65,6 +66,15 @@ public class User implements Reportable {
     @Enumerated(EnumType.STRING)
     @Column(name = "moderation_status", nullable = false, updatable = true)
     private ModerationStatus moderationStatus = ModerationStatus.ACTIVE;
+
+    @Column(name = "favorite_music", updatable = true)
+    private Music favoriteMusic;
+
+    @Column(name = "favorite_album", updatable = true)
+    private Album favoriteAlbum;
+
+    @Column(name = "favorite_artist", updatable = true)
+    private Artist favoriteArtist;
 
     public User(String name, String idLoginApi, Role role, Privacy privacy) {
         this.name = name;
