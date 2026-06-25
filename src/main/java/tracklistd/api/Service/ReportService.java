@@ -120,4 +120,12 @@ public class ReportService {
                 .map(ReportResponseDto::new)
                 .toList();
     }
+
+    public List<ReportResponseDto> getPendingReportAgainstUser(Long userId){
+        List<Report> list = reportRepository.findByUserTargetIdAndStatusReport(userId, ReportStatus.PENDING);
+
+        return list.stream()
+                .map(ReportResponseDto::new)
+                .toList();
+    }
 }

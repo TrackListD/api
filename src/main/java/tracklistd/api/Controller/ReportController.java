@@ -57,7 +57,7 @@ public class ReportController {
         return ResponseEntity.ok(response);
     }
 
-    
+
     @GetMapping("/history/{userId}")
     public ResponseEntity <List<ReportResponseDto>> getReportHistoryAgainstUser(@PathVariable Long userId) {
         List<ReportResponseDto> reports = reportService.getReportHistoryUser(userId);
@@ -65,5 +65,13 @@ public class ReportController {
         return ResponseEntity.ok(reports);
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/pending")
+    public ResponseEntity <List<ReportResponseDto>> getPendingReportsAgainstUser(Long userId){
+        List<ReportResponseDto> list = reportService.getPendingReportAgainstUser(userId);
+
+        return ResponseEntity.ok(list);
+    }
 
 }
