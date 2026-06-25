@@ -73,7 +73,8 @@ class FeedControllerTest {
                                 authorMin,
                                 5L,
                                 true,
-                                null);
+                                null,
+                                false);
         }
 
         @Test
@@ -111,7 +112,7 @@ class FeedControllerTest {
                 UserMinResponseDTO authorMin = new UserMinResponseDTO(2L, "Autor Teste", "imagem-teste");
                 PublicationFeedDTO anonymousPublication = new PublicationFeedDTO(
                                 10L, "Excelente Álbum!", "RATING", 4.5f, LocalDateTime.now(),
-                                authorMin, 5L, false, null);
+                                authorMin, 5L, false, null, false);
 
                 List<PublicationFeedDTO> mockFeed = List.of(anonymousPublication);
                 when(feedService.getGlobalFeed(null)).thenReturn(mockFeed);

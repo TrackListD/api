@@ -7,19 +7,25 @@ import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Entity.MediaList;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.Rating;
+import tracklistd.api.Entity.User;
+import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
 import tracklistd.api.Repository.LikeRepository;
+import tracklistd.api.Repository.UserRepository;
 
 @Component
 public class FeedMapper {
 
     private final LikeRepository likeRepository;
     private final LikeMapper likeMapper;
+    private final UserRepository userRepository;
     private final MediaMapper mediaMapper;
 
-    public FeedMapper(LikeRepository likeRepository, LikeMapper likeMapper, MediaMapper mediaMapper) {
+    public FeedMapper(LikeRepository likeRepository, LikeMapper likeMapper, MediaMapper mediaMapper,
+            UserRepository userRepository) {
         this.likeRepository = likeRepository;
         this.likeMapper = likeMapper;
         this.mediaMapper = mediaMapper;
+        this.userRepository = userRepository;
     }
 
     public PublicationFeedDTO toFeedDTO(Publication publication, Long currentUserId) {
@@ -49,6 +55,18 @@ public class FeedMapper {
             default -> null;
         };
 
+        boolean authorFollowedByAuthUser = false;
+
+        if (currentUserId != null) {
+            User currentUser = userRepository.findById(currentUserId)
+                    .orElseThrow(() -> new UserDoesNotExist(currentUserId));
+            if (currentUser != null) {
+                authorFollowedByAuthUser = currentUser.getFollowing()
+                        .stream()
+                        .anyMatch(u -> u.getId().equals(publication.getAuthor().getId()));
+            }
+        }
+
         return new PublicationFeedDTO(
                 publication.getId(),
                 content,
@@ -58,6 +76,7 @@ public class FeedMapper {
                 likeMapper.toUserMinDTO(publication.getAuthor()),
                 likesCount,
                 likedByMe,
-                mediaDTO);
+                mediaDTO,
+                authorFollowedByAuthUser);
     }
 }
