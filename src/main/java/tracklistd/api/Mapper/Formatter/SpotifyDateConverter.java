@@ -5,6 +5,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class SpotifyDateConverter {
 
     // Define um formatador flexível que aceita diferentes precisões
@@ -17,7 +20,8 @@ public class SpotifyDateConverter {
             .toFormatter();
 
     public LocalDate toLocalDate(String dateString) {
-        if (dateString == null || dateString.isEmpty()) return null;
+        if (dateString == null || dateString.isEmpty())
+            return null;
         return LocalDate.parse(dateString, FORMATTER);
     }
 }
