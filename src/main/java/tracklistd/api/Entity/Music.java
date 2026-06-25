@@ -19,8 +19,4 @@ public class Music extends Media {
 
     @Column(name = "duration")
     private Integer duration;
-
-    public boolean isSingle() {
-        return this.album == null;
-    }
 }

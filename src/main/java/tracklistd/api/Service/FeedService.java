@@ -7,36 +7,50 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import tracklistd.api.Dto.Feed.PublicationFeedDTO;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
+import tracklistd.api.Mapper.FeedMapper;
 import tracklistd.api.Repository.PublicationRepository;
 import tracklistd.api.Repository.UserRepository;
 
 @Service
 public class FeedService {
 
-    private final PublicationRepository publicationRepository;
-    private final UserRepository userRepository;
+        private final PublicationRepository publicationRepository;
+        private final UserRepository userRepository;
+        private final FeedMapper feedMapper;
 
-    public FeedService(PublicationRepository publicationRepository, UserRepository userRepository) {
-        this.publicationRepository = publicationRepository;
-        this.userRepository = userRepository;
-    }
+        public FeedService(PublicationRepository publicationRepository, UserRepository userRepository,
+                        FeedMapper feedMapper) {
+                this.publicationRepository = publicationRepository;
+                this.userRepository = userRepository;
+                this.feedMapper = feedMapper;
+        }
 
-    @Transactional
-    public List<Publication> getSocialFeed(Long userId) {
+        @Transactional
+        public List<PublicationFeedDTO> getSocialFeed(Long userId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow();
+                User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new UserDoesNotExist(userId));
 
-        return publicationRepository
-                .findByAuthorInOrderByPublicationDateDesc(
-                        user.getFollowing());
-    }
+                List<Publication> publications = publicationRepository
+                                .findByAuthorInOrderByPublicationDateDesc(user.getFollowing());
 
-    public List<Publication> getGlobalFeed() {
-        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+                return publications.stream()
+                                .map(publication -> feedMapper.toFeedDTO(publication, userId))
+                                .toList();
+        }
 
-        return publicationRepository.findTrending(oneWeekAgo);
-    }
+        @Transactional
+        public List<PublicationFeedDTO> getGlobalFeed(Long userId) {
+                LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+
+                List<Publication> trending = publicationRepository.findTrending(oneWeekAgo);
+
+                return trending.stream().map(publication -> feedMapper.toFeedDTO(publication, userId))
+                                .toList();
+
+        }
 }

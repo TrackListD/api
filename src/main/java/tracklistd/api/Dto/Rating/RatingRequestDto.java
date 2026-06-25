@@ -12,7 +12,7 @@ public record RatingRequestDto(
         @Schema(description = "O id que o spotifyAPI gera da midia que será avaliada ou seja, do Album ou Musica",
                 example = "6rqhFgbbKwnb9MLmUQDhG6",
                 requiredMode = Schema.RequiredMode.REQUIRED)
-        String idTarget,
+        String targetId,
 
         @Min(value = 0, message = "A nota deve ser maior ou igual a 0")
         @Max(value = 5, message = "A nota deve ser menor ou igual a 5")

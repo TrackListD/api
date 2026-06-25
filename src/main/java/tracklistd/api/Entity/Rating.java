@@ -51,6 +51,8 @@ public class Rating extends Publication implements Reportable {
         return target;
     }
 
+    public void setTarget(Media media){this.target = media;}
+
     public Float getRatingNote() {
         return ratingNote;
     }
@@ -75,11 +77,11 @@ public class Rating extends Publication implements Reportable {
         this.status = newStatus;
     }
 
-    public Privacy getPrivacy() {
+    public Privacy getWhoCanSee() {
         return whoCanSee;
     }
 
-    public void setPrivacy(Privacy whoCanSee) {
+    public void setWhoCanSee(Privacy whoCanSee) {
         this.whoCanSee = whoCanSee;
     }
 

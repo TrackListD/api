@@ -20,6 +20,6 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     //Método que retornar todas s Avaliações de um Usuario
     List<Rating> findAllByAuthor(User author);
 
-    //Método que busca todas as Avaliações Publicas de um Usuario
+    //Método que busca todas as Avaliações de um Usuario a partir da privacidade
     List<Rating> findRatingByAuthorAndWhoCanSee(User author,Privacy whoCanSee);
 }
