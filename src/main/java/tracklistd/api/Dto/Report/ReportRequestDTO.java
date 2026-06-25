@@ -5,16 +5,16 @@ import jakarta.validation.constraints.NotNull;
 
 public record ReportRequestDTO(
     @NotNull(message="Report must have a informer")
-    Long informer_id,
+    Long informerId,
 
     @NotNull(message="Report must have a user target")
-    Long user_target_id,
+    Long userTargetId,
 
     @NotBlank (message="Report must have a reason")
-    String report_reason,
+    String reportReason,
 
-    Long comment_target_id,
-    Long rating_target_id
+    Long commentTargetId,
+    Long ratingTargetId
 )   
 {}
 

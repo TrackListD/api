@@ -60,17 +60,17 @@ public class ReportService {
     }
 
     public Report createReport(ReportRequestDTO dto){
-        User informer = userRepository.findById(dto.informer_id())
+        User informer = userRepository.findById(dto.informerId())
             .orElseThrow(() -> new ReportException("Informer not found!"));
         
 
-        User target = dto.user_target_id() != null ? userRepository.findById(dto.user_target_id()).orElse(null) : null;
-        Comment commentTarget = dto.comment_target_id() != null ? commentRepository.findById(dto.comment_target_id()).orElse(null) : null;
-        Rating ratingTarget = dto.rating_target_id() != null ? ratingRepository.findById(dto.rating_target_id()).orElse(null) : null;
+        User target = dto.userTargetId() != null ? userRepository.findById(dto.userTargetId()).orElse(null) : null;
+        Comment commentTarget = dto.commentTargetId() != null ? commentRepository.findById(dto.commentTargetId()).orElse(null) : null;
+        Rating ratingTarget = dto.ratingTargetId() != null ? ratingRepository.findById(dto.ratingTargetId()).orElse(null) : null;
         
         LocalDateTime date = LocalDateTime.now();
         Report report = null;
-        String reason = dto.report_reason();
+        String reason = dto.reportReason();
         
         if (commentTarget != null){
             report = new Report(informer, reason, date, commentTarget);

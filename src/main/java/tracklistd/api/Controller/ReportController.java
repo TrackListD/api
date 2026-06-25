@@ -3,6 +3,9 @@ package tracklistd.api.Controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.transaction.Transactional;
 import tracklistd.api.Dto.Report.ReportRequestDTO;
 import tracklistd.api.Dto.Report.ReportResponseDto;
 import tracklistd.api.Entity.Report;
@@ -35,13 +37,17 @@ public class ReportController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/pending")
     public ResponseEntity<List<ReportResponseDto>> getPendingReports() {
     
         List<ReportResponseDto> pendingReports = reportService.getPendingReportsDto();
         return ResponseEntity.ok(pendingReports);
     }
 
-    @Transactional
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{reportId}/resolve")
     public ResponseEntity<ReportResponseDto> resolveReport(@PathVariable Long reportId, 
         @RequestParam ReportStatus newStatus, 
         @RequestParam(required = false) Punishment punishment) {
@@ -51,9 +57,13 @@ public class ReportController {
         return ResponseEntity.ok(response);
     }
 
+    
+    @GetMapping("/history/{userId}")
     public ResponseEntity <List<ReportResponseDto>> getReportHistoryAgainstUser(@PathVariable Long userId) {
         List<ReportResponseDto> reports = reportService.getReportHistoryUser(userId);
         
         return ResponseEntity.ok(reports);
     }
+
+
 }
