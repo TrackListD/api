@@ -142,8 +142,6 @@ public class CommentController {
             @PathVariable Long id,
             @RequestBody @Valid CommentEditRequestDto editRequestDto
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.commentService.editCommentText(editRequestDto.newText(), id, user.getId());
 
@@ -162,8 +160,6 @@ public class CommentController {
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
-        if (user == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.commentService.deleteComment(id, user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

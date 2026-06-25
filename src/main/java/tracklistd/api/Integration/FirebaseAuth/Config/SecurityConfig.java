@@ -36,6 +36,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/feed/global").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/publications/*/likes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/mediaList/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "api/mediaList/*/favorite").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "api/mediaList/*/favorite").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {

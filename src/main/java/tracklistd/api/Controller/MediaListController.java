@@ -142,8 +142,6 @@ public class MediaListController {
             @PathVariable Long id,
             @RequestBody @Valid MediaListEditRequestDto.EditNameRequestDto editNameDto
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.mediaListService.renameMediaList(editNameDto.newName(), id, user.getId());
 
@@ -164,8 +162,6 @@ public class MediaListController {
             @PathVariable Long id,
             @RequestBody @Valid MediaListEditRequestDto.EditPrivacyRequestDto editNameDto
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.mediaListService.changeMediaListPrivacy(id, user.getId(), editNameDto.newPrivacy());
 
@@ -185,8 +181,6 @@ public class MediaListController {
             @PathVariable Long id,
             @PathVariable String mediaId
     ) {
-        if (user == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.mediaListService.addMediaToList(id, mediaId, user.getId());
 
@@ -206,8 +200,6 @@ public class MediaListController {
             @PathVariable Long id,
             @PathVariable String mediaId
     ) {
-        if (user == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.mediaListService.removeMediaFromList(id, mediaId, user.getId());
 
@@ -226,8 +218,6 @@ public class MediaListController {
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
-        if (user == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.mediaListService.favoriteMediaList(id);
 
@@ -246,8 +236,6 @@ public class MediaListController {
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
-        if (user == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.mediaListService.unfavoriteMediaList(id);
 
@@ -266,8 +254,6 @@ public class MediaListController {
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
-        if (user == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.mediaListService.deleteMediaList(id, user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

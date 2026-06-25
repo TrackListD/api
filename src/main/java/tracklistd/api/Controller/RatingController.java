@@ -143,8 +143,6 @@ public class RatingController {
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditReviewRequestDto editDto
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.ratingService.editReview(editDto.newReview(), id, user.getId());
 
@@ -165,8 +163,6 @@ public class RatingController {
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditRatingNoteRequestDto editRatingNote
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.ratingService.editRatingNote(editRatingNote.newRatingNote(), id, user.getId());
 
@@ -187,8 +183,6 @@ public class RatingController {
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditPrivacyRequestDto editPrivacy
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.ratingService.changePrivacy(editPrivacy.newPrivacy(), id, user.getId());
 
@@ -207,8 +201,6 @@ public class RatingController {
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
-        if (user == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.ratingService.deleteRating(id, user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
