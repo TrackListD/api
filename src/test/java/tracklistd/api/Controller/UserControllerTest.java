@@ -28,6 +28,7 @@ import tracklistd.api.Service.FirebaseService;
 import tracklistd.api.Service.UserService;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Collections;
@@ -109,8 +110,8 @@ public class UserControllerTest {
         void findUserById_deveRetornar200() throws Exception {
                 when(userService.findUserById(1L)).thenReturn(testUser);
 
-                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Usuário Teste", "Bio", Role.MEMBER,
-                                Privacy.PUBLIC, null, true);
+                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
+                                Privacy.PUBLIC, LocalDate.now(), true, null, null, null, null, null);
                 when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
 
                 mockMvc.perform(get("/api/users/1")
@@ -131,8 +132,8 @@ public class UserControllerTest {
 
                 when(userService.perfilUpdate(eq(1L), any(UserUpdatePerfilRequestDTO.class))).thenReturn(updatedUser);
 
-                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Novo Nome", "Nova Bio", Role.MEMBER,
-                                Privacy.PUBLIC, null, true);
+                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
+                                Privacy.PUBLIC, LocalDate.now(), true, null, null, null, null, null);
                 when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
 
                 mockMvc.perform(put("/api/users/1")
@@ -148,8 +149,8 @@ public class UserControllerTest {
         @DisplayName("findMyProfile deve retornar 200 e os dados do meu perfil")
         void findMyProfile_deveRetornar200() throws Exception {
 
-                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Usuário Teste", "Bio", Role.MEMBER,
-                                Privacy.PUBLIC, null, true);
+                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
+                                Privacy.PUBLIC, LocalDate.now(), true, 1L, 1L, null, null, null);
                 when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
 
                 mockMvc.perform(get("/api/users/me")

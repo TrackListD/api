@@ -1,9 +1,13 @@
 package tracklistd.api.Mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import tracklistd.api.Dto.Feed.PublicationFeedDTO;
 import tracklistd.api.Dto.Media.MediaMinDTO;
+import tracklistd.api.Dto.MediaList.MediaListResponseDto;
 import tracklistd.api.Entity.MediaList;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.Rating;
@@ -55,6 +59,14 @@ public class FeedMapper {
             default -> null;
         };
 
+        List<MediaMinDTO> mediaListItems = switch (publication) {
+            case MediaList m -> m.getMedia()
+                    .stream()
+                    .map(mediaMapper::toMinDTO)
+                    .toList();
+            default -> null;
+        };
+
         boolean authorFollowedByAuthUser = false;
 
         if (currentUserId != null) {
@@ -77,6 +89,7 @@ public class FeedMapper {
                 likesCount,
                 likedByMe,
                 mediaDTO,
-                authorFollowedByAuthUser);
+                authorFollowedByAuthUser,
+                mediaListItems);
     }
 }

@@ -72,7 +72,8 @@ public class UserController {
         })
         @GetMapping("/me")
         public ResponseEntity<UserPerfilResponseDTO> findMyProfile(@AuthenticationPrincipal User user) {
-                return ResponseEntity.ok(userMapper.toPerfilDto(user));
+                User fullUser = userService.findUserById(user.getId());
+                return ResponseEntity.ok(userMapper.toPerfilDto(fullUser));
         }
 
         @Operation(summary = "Atualizar perfil", description = "Edita os campos alteráveis de exibição ou configurações do perfil informado.")

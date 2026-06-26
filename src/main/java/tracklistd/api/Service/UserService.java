@@ -72,8 +72,9 @@ public class UserService {
         return userRepository.save(perfil);
     }
 
+    @Transactional
     public User findUserById(Long id) {
-        return this.userRepository.findById(id).orElseThrow(
+        return this.userRepository.findFullById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Esse Usuario não foi encontrado"));
     }
 
@@ -82,10 +83,10 @@ public class UserService {
         if (myId.equals(friendId))
             throw new FollowYourself();
 
-        User me = userRepository.findById(myId)
+        User me = userRepository.findFullById(myId)
                 .orElseThrow(() -> new UserDoesNotExist(myId));
 
-        User friend = userRepository.findById(friendId)
+        User friend = userRepository.findFullById(friendId)
                 .orElseThrow(() -> new FriendDoesNotExist());
 
         if (!me.getFollowing().contains(friend)) {
@@ -100,10 +101,10 @@ public class UserService {
         if (myId.equals(friendId))
             throw new FollowYourself();
 
-        User me = userRepository.findById(myId)
+        User me = userRepository.findFullById(myId)
                 .orElseThrow(() -> new UserDoesNotExist(myId));
 
-        User friend = userRepository.findById(friendId)
+        User friend = userRepository.findFullById(friendId)
                 .orElseThrow(
                         () -> new FriendDoesNotExist());
 
