@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import org.hibernate.annotations.CreationTimestamp;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
@@ -13,6 +14,7 @@ import tracklistd.api.Entity.Interfaces.Reportable;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -65,6 +67,18 @@ public class User implements Reportable {
     @Enumerated(EnumType.STRING)
     @Column(name = "moderation_status", nullable = false, updatable = true)
     private ModerationStatus moderationStatus = ModerationStatus.ACTIVE;
+
+    @ManyToOne
+    @JoinColumn(name = "favorite_music")
+    private Music favoriteMusic;
+
+    @ManyToOne
+    @JoinColumn(name = "favorite_album")
+    private Album favoriteAlbum;
+
+    @ManyToOne
+    @JoinColumn(name = "favorite_artist")
+    private Artist favoriteArtist;
 
     public User(String name, String idLoginApi, Role role, Privacy privacy) {
         this.name = name;

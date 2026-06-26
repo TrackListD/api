@@ -18,6 +18,8 @@ public interface PublicationRepository extends JpaRepository<Publication, Long> 
 
     public List<Publication> findByAuthorInOrderByPublicationDateDesc(Set<User> following);
 
+    public List<Publication> findByAuthorIdOrderByPublicationDateDesc(Long authorId);
+
     @Query("""
             SELECT p FROM Publication p
             WHERE p.publicationDate >= :date
