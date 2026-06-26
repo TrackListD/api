@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -134,7 +135,8 @@ public class CommentController {
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Texto do comentário atualizado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado (não é o autor)"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Comentário não encontrado")
     })
     public ResponseEntity<CommentOwnerResponseDto> editCommentText(
@@ -153,7 +155,8 @@ public class CommentController {
     @Operation(summary = "Excluir comentário", description = "Remove um comentário existente")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Comentário excluído com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado (não é o autor)"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Comentário não encontrado")
     })
     public ResponseEntity<Void> deleteComment(
@@ -163,6 +166,11 @@ public class CommentController {
 
         this.commentService.deleteComment(id, user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/api/comments/post/test")
+    public ResponseEntity<LocalDateTime> testDate() {
+        return ResponseEntity.ok(LocalDateTime.now());
     }
 
     // Métodos privados

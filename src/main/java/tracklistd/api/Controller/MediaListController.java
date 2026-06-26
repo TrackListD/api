@@ -134,7 +134,8 @@ public class MediaListController {
     @Operation(summary = "Renomear lista", description = "Permite alterar o nome de uma lista de mídias")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Nome alterado com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou sem autorização (não é dono)"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Lista não encontrada")
     })
     public ResponseEntity<MediaListOwnerResponseDto> editMediaListName(
@@ -154,7 +155,8 @@ public class MediaListController {
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Privacidade alterada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Privacidade inválida fornecida"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou sem autorização (não é dono)"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Lista não encontrada")
     })
     public ResponseEntity<MediaListOwnerResponseDto> editMediaListPrivacy(
@@ -173,7 +175,8 @@ public class MediaListController {
     @Operation(summary = "Adicionar mídia à lista", description = "Adiciona uma música ou álbum à lista especificada")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Mídia adicionada com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou sem autorização (não é dono)"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Lista ou mídia não encontrada")
     })
     public ResponseEntity<MediaListOwnerResponseDto> addMediaToList(
@@ -192,7 +195,8 @@ public class MediaListController {
     @Operation(summary = "Remover mídia da lista", description = "Remove uma música ou álbum de uma lista existente")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Mídia removida com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou sem autorização (não é dono)"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Lista ou mídia não encontrada")
     })
     public ResponseEntity<MediaListOwnerResponseDto> removeMediaFromList(
@@ -211,7 +215,8 @@ public class MediaListController {
     @Operation(summary = "Favoritar lista", description = "Adiciona a lista de mídias aos favoritos do usuário logado")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista favoritada com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Lista não encontrada")
     })
     public ResponseEntity<?> favoriteMediaList(
@@ -229,7 +234,8 @@ public class MediaListController {
     @Operation(summary = "Desfavoritar lista", description = "Remove a lista de mídias dos favoritos do usuário logado")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista desfavoritada com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Lista não encontrada")
     })
     public ResponseEntity<?> unfavoriteMediaList(
@@ -247,7 +253,8 @@ public class MediaListController {
     @Operation(summary = "Excluir lista", description = "Remove permanentemente a lista de mídias especificada")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Lista excluída com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou sem autorização (não é dono)"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Lista não encontrada")
     })
     public ResponseEntity<Void> deleteMediaList(
