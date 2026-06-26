@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 
 @Schema(description = "DTO de transferência de dados de uma Avaliação")
 public record RatingResponseDto(
+
+        Long id,
+
         Long authorId,
 
         @Schema(description = "ID que a spotifyAPI gera do Album ou Musica que será Avaliado", example = "6rqhFgbbKwnb9MLmUQDhG6")

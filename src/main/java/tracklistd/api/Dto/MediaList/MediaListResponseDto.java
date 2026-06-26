@@ -5,6 +5,9 @@ import tracklistd.api.Entity.Enums.ListType;
 
 @Schema(description = "DTO com os dados públicos de uma lista de mídias")
 public record MediaListResponseDto(
+
+        Long id,
+
         @Schema(description = "O tipo de mídias contidas na lista", example = "ALBUM", allowableValues = {"ALBUM", "MUSIC"})
         ListType typeOfList,
 
@@ -14,7 +17,7 @@ public record MediaListResponseDto(
         @Schema(description = "Indica se a lista está favoritada pelo autor", example = "false")
         Boolean isFavorite,
 
-        Long idAuthor,
+        Long authorId,
         String authorName,
 
         @Schema(description = "Array com os IDs das mídias (IDs do Spotify) contidas na lista", example = "[\"6rqhFgbbKwnb9MLmUQDhG6\"]")

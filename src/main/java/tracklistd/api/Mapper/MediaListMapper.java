@@ -15,13 +15,8 @@ import java.util.Set;
 public interface MediaListMapper {
 
 
-    @Mapping(target = "favorite",  source = "mediaListRequestDto.isFavorite")
-    @Mapping(target = "comments", ignore = true)
-    @Mapping(target = "media",    ignore = true)
-    MediaList toEntity(MediaListRequestDto mediaListRequestDto, User author);
-
     @Mapping(source = "author.name", target = "authorName")
-    @Mapping(source = "author.id", target = "idAuthor")
+    @Mapping(source = "author.id", target = "authorId")
     @Mapping(source = "media", target = "mediaIds")
     MediaListResponseDto toResponseDto(MediaList mediaList);
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Schema(description = "DTO contendo os dados da avaliação mais os campos específicos para o dono")
 public record RatingOwnerResponseDto(
         @Schema(description = "Dados públicos da avaliação")
-        RatingResponseDto publicDto,
+        RatingResponseDto publicData,
 
         LocalDateTime updatedAt,
 
