@@ -25,6 +25,12 @@ public record MediaListResponseDto(
         @Schema(description = "Array com os IDs das mídias (IDs do Spotify) contidas na lista", example = "[\"6rqhFgbbKwnb9MLmUQDhG6\"]")
         String[] mediaIds,
 
+        @Schema(description = "Duração total em milissegundos (dado bruto)", example = "6300000")
+        Integer totalDurationMs,
+
+        @Schema(description = "Duração total formatada para exibição", example = "1h 45m")
+        String formattedDuration,
+
         @Schema(description = "Descrição detalhada ou conceito da lista", example = "Os melhores álbuns de rap nacional lançados na última década.")
         String description,
 

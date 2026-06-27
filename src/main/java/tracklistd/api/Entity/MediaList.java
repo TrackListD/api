@@ -125,4 +125,13 @@ public class MediaList extends Publication {
             this.tags.addAll(newTags);
         }
     }
+
+    public Integer calculateTotalDurationMs() {
+        if (this.media == null || this.media.isEmpty()) {
+            return 0;
+        }
+        return this.media.stream()
+                .mapToInt(Media::getTotalDurationMs)
+                .sum();
+    }
 }

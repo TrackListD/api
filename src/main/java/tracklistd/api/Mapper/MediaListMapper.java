@@ -18,6 +18,8 @@ public interface MediaListMapper {
     @Mapping(source = "author.name", target = "authorName")
     @Mapping(source = "author.id", target = "authorId")
     @Mapping(source = "media", target = "mediaIds")
+    @Mapping(target = "totalDurationMs", expression = "java(mediaList.calculateTotalDurationMs())")
+    @Mapping(target = "formattedDuration", expression = "java(formatDuration(mediaList))")
     MediaListResponseDto toResponseDto(MediaList mediaList);
 
     //Transforma a Entidade em DTO de response "privado" do criador
@@ -33,5 +35,22 @@ public interface MediaListMapper {
         return media.stream()
                 .map(Media::getSpotifyID)
                 .toArray(String[]::new);
+    }
+
+    // Método para cuidar da formatação visual do tempo de duração da lista
+    default String formatDuration(MediaList mediaList) {
+        if (mediaList == null) return "0m";
+
+        Integer durationMs = mediaList.calculateTotalDurationMs();
+        if (durationMs == null || durationMs == 0) return "0m";
+
+        int totalSeconds = durationMs / 1000;
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+
+        if (hours > 0) {
+            return hours + "h " + minutes + "m";
+        }
+        return minutes + "m";
     }
 }

@@ -54,4 +54,6 @@ public abstract class Media {
     public void addAuthor(Artist author) {
         this.authors.add(author);
     }
+
+    public abstract Integer getTotalDurationMs();
 }

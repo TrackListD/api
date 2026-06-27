@@ -19,4 +19,11 @@ public class Music extends Media {
 
     @Column(name = "duration")
     private Integer duration;
+
+    @Override
+    public Integer getTotalDurationMs() {
+        if(this.duration == null)
+            return 0;
+        return this.duration;
+    }
 }
