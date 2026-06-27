@@ -12,17 +12,18 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record UserPerfilResponseDTO(
-        Long id,
-        String name,
-        String profilePic,
-        String bio,
-        Role role,
-        Privacy whoCanComment,
-        LocalDate creationDate,
-        boolean estaAtivo,
-        Long followersCount,
-        Long followingCount,
-        MediaMinDTO favoriteAlbum,
-        MediaMinDTO favoriteMusic,
-        Artist favoriteArtist) {
+                Long id,
+                String name,
+                String profilePic,
+                String bio,
+                Role role,
+                Privacy whoCanComment,
+                LocalDate creationDate,
+                boolean estaAtivo,
+                Long followersCount,
+                Long followingCount,
+                MediaMinDTO favoriteAlbum,
+                MediaMinDTO favoriteMusic,
+                Artist favoriteArtist,
+                boolean currentUserIsFollowing) {
 }

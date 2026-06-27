@@ -61,9 +61,15 @@ public class UserController {
                         @ApiResponse(responseCode = "404", description = "Recurso não encontrado: não existe perfil com este ID", content = @Content)
         })
         @GetMapping("/{id}")
-        public ResponseEntity<UserPerfilResponseDTO> findUserById(@PathVariable Long id) {
+        public ResponseEntity<UserPerfilResponseDTO> findUserById(@PathVariable Long id,
+                        @AuthenticationPrincipal User currentUser) {
                 User user = userService.findUserById(id);
-                return ResponseEntity.ok(userMapper.toPerfilDto(user));
+
+                boolean currentUserIsFollowing = currentUser != null
+                                && userService.isFollowing(currentUser.getId(), id);
+
+                return ResponseEntity
+                                .ok(userMapper.toPerfilDto(user, currentUserIsFollowing));
         }
 
         @Operation(summary = "Buscar meu próprio perfil", description = "Retorna as informações completas do perfil logado.")
@@ -73,7 +79,7 @@ public class UserController {
         @GetMapping("/me")
         public ResponseEntity<UserPerfilResponseDTO> findMyProfile(@AuthenticationPrincipal User user) {
                 User fullUser = userService.findUserById(user.getId());
-                return ResponseEntity.ok(userMapper.toPerfilDto(fullUser));
+                return ResponseEntity.ok(userMapper.toPerfilDto(fullUser, false));
         }
 
         @Operation(summary = "Atualizar perfil", description = "Edita os campos alteráveis de exibição ou configurações do perfil informado.")
@@ -86,7 +92,7 @@ public class UserController {
         public ResponseEntity<UserPerfilResponseDTO> perfilUpdate(@AuthenticationPrincipal User user,
                         @Valid @RequestBody UserUpdatePerfilRequestDTO dto) {
                 User updatedUser = userService.perfilUpdate(user.getId(), dto);
-                return ResponseEntity.ok(userMapper.toPerfilDto(updatedUser));
+                return ResponseEntity.ok(userMapper.toPerfilDto(updatedUser, false));
         }
 
         @Operation(summary = "Deletar conta", description = "Remove permanentemente o perfil do usuário autenticado e seus dados associados.")

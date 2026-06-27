@@ -111,8 +111,8 @@ public class UserControllerTest {
                 when(userService.findUserById(1L)).thenReturn(testUser);
 
                 UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
-                                Privacy.PUBLIC, LocalDate.now(), true, null, null, null, null, null);
-                when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
+                                Privacy.PUBLIC, LocalDate.now(), true, null, null, null, null, null, false);
+                when(userMapper.toPerfilDto(any(), false)).thenReturn(responseDto);
 
                 mockMvc.perform(get("/api/users/1")
                                 .with(authentication(mockAuth)))
@@ -133,8 +133,8 @@ public class UserControllerTest {
                 when(userService.perfilUpdate(eq(1L), any(UserUpdatePerfilRequestDTO.class))).thenReturn(updatedUser);
 
                 UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
-                                Privacy.PUBLIC, LocalDate.now(), true, null, null, null, null, null);
-                when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
+                                Privacy.PUBLIC, LocalDate.now(), true, null, null, null, null, null, false);
+                when(userMapper.toPerfilDto(any(), false)).thenReturn(responseDto);
 
                 mockMvc.perform(put("/api/users/1")
                                 .with(authentication(mockAuth))
@@ -150,8 +150,8 @@ public class UserControllerTest {
         void findMyProfile_deveRetornar200() throws Exception {
 
                 UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
-                                Privacy.PUBLIC, LocalDate.now(), true, 1L, 1L, null, null, null);
-                when(userMapper.toPerfilDto(any())).thenReturn(responseDto);
+                                Privacy.PUBLIC, LocalDate.now(), true, 1L, 1L, null, null, null, false);
+                when(userMapper.toPerfilDto(any(), false)).thenReturn(responseDto);
 
                 mockMvc.perform(get("/api/users/me")
                                 .with(authentication(mockAuth)))

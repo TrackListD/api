@@ -15,7 +15,8 @@ public interface UserMapper {
     @Mapping(target = "followersCount", expression = "java((long) user.getFollowers().size())")
     @Mapping(target = "followingCount", expression = "java((long) user.getFollowing().size())")
     @Mapping(target = "estaAtivo", expression = "java(user.getModerationStatus() == tracklistd.api.Entity.Enums.ModerationStatus.ACTIVE)")
-    UserPerfilResponseDTO toPerfilDto(User user);
+    @Mapping(target = "currentUserIsFollowing", expression = "java(currentUserIsFollowing)")
+    UserPerfilResponseDTO toPerfilDto(User user, Boolean currentUserIsFollowing);
 
     UserMinResponseDTO toMinDto(User user);
 }

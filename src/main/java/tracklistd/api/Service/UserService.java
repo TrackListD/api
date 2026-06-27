@@ -1,6 +1,8 @@
 package tracklistd.api.Service;
 
 import jakarta.transaction.Transactional;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import com.google.firebase.auth.FirebaseToken;
@@ -160,6 +162,14 @@ public class UserService {
         User target = userRepository.findById(id)
                 .orElseThrow(() -> new UserDoesNotExist(id));
         userRepository.delete(target);
+    }
+
+    @Transactional
+    public boolean isFollowing(Long followerId, Long followedId) {
+        User follower = userRepository.findFullById(followerId).orElseThrow(() -> new UserDoesNotExist(followerId));
+        return follower.getFollowing()
+                .stream()
+                .anyMatch(user -> user.getId().equals(followedId));
     }
 
 }
