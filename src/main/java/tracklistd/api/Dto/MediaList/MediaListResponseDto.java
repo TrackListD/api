@@ -3,6 +3,8 @@ package tracklistd.api.Dto.MediaList;
 import io.swagger.v3.oas.annotations.media.Schema;
 import tracklistd.api.Entity.Enums.ListType;
 
+import java.util.Set;
+
 @Schema(description = "DTO com os dados públicos de uma lista de mídias")
 public record MediaListResponseDto(
 
@@ -21,6 +23,15 @@ public record MediaListResponseDto(
         String authorName,
 
         @Schema(description = "Array com os IDs das mídias (IDs do Spotify) contidas na lista", example = "[\"6rqhFgbbKwnb9MLmUQDhG6\"]")
-        String[] mediaIds
+        String[] mediaIds,
+
+        @Schema(description = "Descrição detalhada ou conceito da lista", example = "Os melhores álbuns de rap nacional lançados na última década.")
+        String description,
+
+        @Schema(description = "URL da imagem de capa da lista")
+        String coverImageUrl,
+
+        @Schema(description = "Conjunto de tags associadas à lista para categorização e busca", example = "[\"Rap\", \"Nacional\", \"Classicos\"]")
+        Set<String> tags
 ) {
 }

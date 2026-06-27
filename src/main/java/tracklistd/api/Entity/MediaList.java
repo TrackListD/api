@@ -27,12 +27,29 @@ public class MediaList extends Publication {
     @JoinTable(name = "media_list_media", joinColumns = @JoinColumn(name = "media_list_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private Set<Media> media = new LinkedHashSet<Media>();
 
-    public MediaList(User author, ListType typeOfList, String listName, Privacy whoCanSee, Boolean isFavorite) {
+    @Column(name = "description", nullable = true)
+    private String description;
+
+    @Column(name = "cover_image_url", nullable = true)
+    private String coverImageUrl;
+
+    @ElementCollection
+    @CollectionTable(name = "media_list_tags", joinColumns = @JoinColumn(name = "media_list_id"))
+    @Column(name = "tag_name", length = 50)
+    private Set<String> tags = new HashSet<>();
+
+
+    public MediaList(User author, ListType typeOfList, String listName, Privacy whoCanSee,
+                     Boolean isFavorite, String description, String coverImageUrl, Set<String> tags)
+    {
         super(author);
         this.typeOfList = typeOfList;
         this.listName = listName;
         this.whoCanSee = whoCanSee;
         this.isFavorite = isFavorite;
+        this.description = description;
+        this.coverImageUrl = coverImageUrl;
+        this.tags = tags;
     }
 
     public MediaList() {
@@ -76,5 +93,36 @@ public class MediaList extends Publication {
 
     public void removeMedia(Media media) {
         this.media.remove(media);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCoverImageUrl() {
+        return coverImageUrl;
+    }
+
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImageUrl = coverImageUrl;
+    }
+
+    public Set<String> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
+
+    public void addTags(String tag) {
+        this.tags.add(tag);
+    }
+
+    public void updateTags(Set<String> newTags) {
+        this.tags.clear();
+        if (newTags != null) {
+            this.tags.addAll(newTags);
+        }
     }
 }

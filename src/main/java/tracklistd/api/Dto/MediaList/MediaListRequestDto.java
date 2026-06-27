@@ -3,8 +3,11 @@ package tracklistd.api.Dto.MediaList;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import tracklistd.api.Entity.Enums.ListType;
 import tracklistd.api.Entity.Enums.Privacy;
+
+import java.util.Set;
 
 @Schema(description = "DTO que recebe os dados necessários para criar/atualizar uma lista de mídias")
 public record MediaListRequestDto(
@@ -23,6 +26,18 @@ public record MediaListRequestDto(
         Privacy whoCanSee,
 
         @Schema(description = "Lista de IDs das mídias (IDs do banco de dados) a serem adicionadas", example = "[1, 2, 3]")
-        String[] mediaIds
+        String[] mediaIds,
+
+        @Size(max = 1000, message = "A descrição não pode passar de 1000 caracteres")
+        @Schema(description = "Descrição detalhada ou conceito da lista", example = "Os melhores álbuns de rap nacional lançados na última década.")
+        String description,
+
+        @Size(max = 255, message = "A URL da imagem de capa deve ter no máximo 255 caracteres")
+        @Schema(description = "URL da imagem de capa")
+        String coverImageUrl,
+
+        @Size(max = 5, message = "A lista pode ter no máximo 5 tags")
+        @Schema(description = "Tags de categorização da lista para buscas", example = "[\"Rap\", \"Nacional\", \"Classicos\"]")
+        Set<String> tags
 ) {
 }
