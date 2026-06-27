@@ -3,6 +3,7 @@ package tracklistd.api.Mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Dto.Rating.RatingOwnerResponseDto;
 import tracklistd.api.Dto.Rating.RatingRequestDto;
 import tracklistd.api.Dto.Rating.RatingResponseDto;
@@ -15,9 +16,7 @@ public interface RatingMapper {
 
     //Transforma a Entidade em DTO de response
     @Mapping(source = "rating.author.id", target = "authorId")
-    @Mapping(source = "rating.author.name", target = "authorName")
-    @Mapping(source = "rating.targetMedia.spotifyID", target = "targetId")
-    @Mapping(source = "rating.targetMedia.title", target = "targetName")
+    @Mapping(source = "rating.targetMedia", target = "targetMedia")
     @Mapping(source = "commentCount", target = "commentCount")
     @Mapping(source = "likeCount",    target = "likeCount")
     RatingResponseDto toResponseDto(Rating rating, Integer commentCount, Long likeCount);
@@ -28,5 +27,10 @@ public interface RatingMapper {
     @Mapping(source = "rating.whoCanSee", target = "whoCanSee") // Resolve o unmapped "whoCanSee"
     RatingOwnerResponseDto toOwnerResponseDTO(Rating rating, RatingResponseDto ratingResponseDto);
 
+
+    default MediaMinDTO mapMediaToMinDto(Media media) {
+        if (media == null) return null;
+        return new MediaMinDTO(media);
+    }
 
 }

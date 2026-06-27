@@ -1,6 +1,7 @@
 package tracklistd.api.Dto.Rating;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import tracklistd.api.Dto.Media.MediaMinDTO;
 
 import java.time.LocalDateTime;
 
@@ -11,8 +12,8 @@ public record RatingResponseDto(
 
         Long authorId,
 
-        @Schema(description = "ID que a spotifyAPI gera do Album ou Musica que será Avaliado", example = "6rqhFgbbKwnb9MLmUQDhG6")
-        String targetId,
+        @Schema(description = "Dados consolidados da mídia que foi avaliada")
+        MediaMinDTO targetMedia,
 
         LocalDateTime publicationDate,
         Float ratingNote,
@@ -21,9 +22,6 @@ public record RatingResponseDto(
         String review,
 
         String authorName,
-
-        @Schema(description = "Nome do Album ou Musica que será Avaliado", example = "Billie Jean")
-        String targetName,
 
         Long likeCount,
         Integer commentCount

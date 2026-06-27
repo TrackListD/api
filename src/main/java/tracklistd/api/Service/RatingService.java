@@ -41,8 +41,11 @@ public class RatingService {
         this.mediaService = mediaService;}
 
     @Transactional
-    public Rating createRating(User author, Media target, Float ratingNote, String review, Privacy whoCanSee )
+    public Rating createRating(User author, String targetId, Float ratingNote, String review, Privacy whoCanSee )
     {
+
+        Media target = mediaService.getMediaById(targetId);
+
         if(checkRatingNote(ratingNote))
             throw new InvalidRatingNote(ratingNote);
 
@@ -138,7 +141,9 @@ public class RatingService {
     @Transactional(readOnly = true)
     public Media getRatingTargetMedia(Rating rating)
     {
-        return this.mediaService.getMediaById(rating.getTargetMedia().getSpotifyID());
+        // Como usamos JOIN FETCH no repositório,
+        // a mídia já está hidratada na memória. Não precisamos chamar o MediaService.
+        return rating.getTargetMedia();
     }
 
     // Métodos Privados

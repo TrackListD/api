@@ -56,13 +56,12 @@ public class RatingController {
             @AuthenticationPrincipal User user,
             @Valid @RequestBody RatingRequestDto ratingRequestDto
     ) {
-        Media media = mediaService.getMediaById(ratingRequestDto.targetId());
-
+        String targetId = ratingRequestDto.targetId();
         Float ratingNote = ratingRequestDto.ratingNote();
         String review = ratingRequestDto.review();
         Privacy whoCanSee = ratingRequestDto.whoCanSee();
 
-        Rating rating = ratingService.createRating(user, media, ratingNote, review, whoCanSee);
+        Rating rating = ratingService.createRating(user, targetId, ratingNote, review, whoCanSee);
 
         RatingResponseDto response = ratingMapper.toResponseDto(rating, 0, 0L);
 
