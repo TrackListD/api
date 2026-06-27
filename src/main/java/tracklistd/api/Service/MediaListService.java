@@ -17,6 +17,7 @@ import tracklistd.api.Repository.MediaRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class MediaListService {
@@ -35,7 +36,7 @@ public class MediaListService {
     //Métodos Publicos
 
     @Transactional
-    public MediaList createMediaList(User author, ListType typeOfList, String listName, Privacy whoCanSee, Boolean isFavorite)
+    public MediaList createMediaList(User author, ListType typeOfList, String listName, Privacy whoCanSee, Boolean isFavorite, String description, String coverImageUrl, Set<String> tags)
     {
         if(listName.isBlank())
             throw new ListNameBlankException();
@@ -44,7 +45,7 @@ public class MediaListService {
         if(result)
             throw new MediaListNameAlreadyExitsException(listName);
 
-        MediaList mediaList = new MediaList(author, typeOfList, listName, whoCanSee, isFavorite);
+        MediaList mediaList = new MediaList(author, typeOfList, listName, whoCanSee, isFavorite, description, coverImageUrl, tags);
         mediaListRepository.save(mediaList);
 
         return mediaList;
@@ -72,6 +73,21 @@ public class MediaListService {
         MediaList mediaList = this.findMediaListAndValidateOwner(mediaListId, userId);
 
         mediaList.changePrivacy(newPrivacy);
+    }
+
+    @Transactional
+    public void changeMediaListDescription(Long mediaListId, Long userId, String newDescription)
+    {
+        MediaList mediaList = this.findMediaListAndValidateOwner(mediaListId, userId);
+
+        mediaList.setDescription(newDescription);
+    }
+
+    @Transactional
+    public void changeMediaListCoverImage(Long mediaListId, Long userId, String newCoverImageUrl) {
+        MediaList mediaList = this.findMediaListAndValidateOwner(mediaListId, userId);
+
+        mediaList.setCoverImageUrl(newCoverImageUrl);
     }
 
     @Transactional
@@ -119,6 +135,14 @@ public class MediaListService {
         mediaList.removeMedia(media);
         this.mediaListRepository.save(mediaList);
 
+    }
+
+    @Transactional
+    public void updateTagToList(Long mediaListId, Long userId, Set<String> tags)
+    {
+        MediaList mediaList = this.findMediaListAndValidateOwner(mediaListId, userId);
+
+        mediaList.updateTags(tags);
     }
 
     @Transactional

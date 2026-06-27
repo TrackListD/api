@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/mediaList")
@@ -60,7 +61,13 @@ public class MediaListController {
 
         boolean isFavorite = mediaListRequestDto.isFavorite();
 
-        MediaList mediaList = mediaListService.createMediaList(user, typeOfList, listName, privacy, isFavorite);
+        String description = mediaListRequestDto.description();
+
+        String coverImageUrl = mediaListRequestDto.coverImageUrl();
+
+        Set<String> tags = mediaListRequestDto.tags();
+
+        MediaList mediaList = mediaListService.createMediaList(user, typeOfList, listName, privacy, isFavorite, description, coverImageUrl, tags);
 
         MediaListResponseDto mediaListResponseDto = this.mediaListMapper.toResponseDto(mediaList);
 
@@ -168,6 +175,48 @@ public class MediaListController {
         this.mediaListService.changeMediaListPrivacy(id, user.getId(), editNameDto.newPrivacy());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
+    }
+
+    @PatchMapping("/{id}/description")
+    public ResponseEntity<MediaListOwnerResponseDto> editMediaListDescription
+            (
+                    @AuthenticationPrincipal User user,
+                    @PathVariable Long id,
+                    @RequestBody @Valid MediaListEditRequestDto.EditDescriptionRequestDto editDescriptionDto
+            )
+    {
+        this.mediaListService.changeMediaListDescription(id, user.getId(), editDescriptionDto.newDescription());
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
+
+    }
+
+    @PatchMapping("/{id}/coverImage")
+    public ResponseEntity<MediaListOwnerResponseDto> editMediaListcoverImage
+            (
+                    @AuthenticationPrincipal User user,
+                    @PathVariable Long id,
+                    @RequestBody @Valid MediaListEditRequestDto.EditCoverImageRequestDto editCoverImageRequestDto
+            )
+    {
+        this.mediaListService.changeMediaListCoverImage(id, user.getId(), editCoverImageRequestDto.newCoverImageUrl());
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
+
+    }
+
+    @PatchMapping("/{id}/tags")
+    public ResponseEntity<MediaListOwnerResponseDto> editMediaListTags
+            (
+                    @AuthenticationPrincipal User user,
+                    @PathVariable Long id,
+                    @RequestBody @Valid MediaListEditRequestDto.EditTagsRequestDto editTagsDto
+            )
+    {
+        this.mediaListService.updateTagToList(id, user.getId(), editTagsDto.newTags());
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
+
     }
 
 
