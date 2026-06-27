@@ -2,6 +2,7 @@ package tracklistd.api.Mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Dto.MediaList.MediaListOwnerResponseDto;
 import tracklistd.api.Dto.MediaList.MediaListRequestDto;
 import tracklistd.api.Dto.MediaList.MediaListResponseDto;
@@ -10,6 +11,7 @@ import tracklistd.api.Entity.MediaList;
 import tracklistd.api.Entity.User;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface MediaListMapper {
@@ -17,7 +19,7 @@ public interface MediaListMapper {
 
     @Mapping(source = "author.name", target = "authorName")
     @Mapping(source = "author.id", target = "authorId")
-    @Mapping(source = "media", target = "mediaIds")
+    @Mapping(source = "media", target = "medias")
     @Mapping(target = "totalDurationMs", expression = "java(mediaList.calculateTotalDurationMs())")
     @Mapping(target = "formattedDuration", expression = "java(formatDuration(mediaList))")
     MediaListResponseDto toResponseDto(MediaList mediaList);
@@ -27,14 +29,11 @@ public interface MediaListMapper {
     MediaListOwnerResponseDto toOwnerResponseDTO(MediaList mediaList, MediaListResponseDto mediaListResponseDto);
 
 
-    default String[] mapMediaSetToStringVector(Set<Media> media)
-    {
-        if(media == null)
-            return null;
-
-        return media.stream()
-                .map(Media::getSpotifyID)
-                .toArray(String[]::new);
+    default Set<MediaMinDTO> mapMediaSetToDtoList(Set<Media> mediaSet) {
+        if (mediaSet == null) return null;
+        return mediaSet.stream()
+                .map(MediaMinDTO::new)
+                .collect(Collectors.toSet());
     }
 
     // Método para cuidar da formatação visual do tempo de duração da lista

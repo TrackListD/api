@@ -1,6 +1,7 @@
 package tracklistd.api.Dto.MediaList;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Entity.Enums.ListType;
 
 import java.util.Set;
@@ -22,8 +23,8 @@ public record MediaListResponseDto(
         Long authorId,
         String authorName,
 
-        @Schema(description = "Array com os IDs das mídias (IDs do Spotify) contidas na lista", example = "[\"6rqhFgbbKwnb9MLmUQDhG6\"]")
-        String[] mediaIds,
+        @Schema(description = "Lista detalhada das mídias contidas na lista")
+        Set<MediaMinDTO> medias,
 
         @Schema(description = "Duração total em milissegundos (dado bruto)", example = "6300000")
         Integer totalDurationMs,
