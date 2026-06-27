@@ -1,6 +1,7 @@
 package tracklistd.api.Service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tracklistd.api.Entity.Enums.ListType;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Media;
@@ -33,6 +34,7 @@ public class MediaListService {
 
     //Métodos Publicos
 
+    @Transactional
     public MediaList createMediaList(User author, ListType typeOfList, String listName, Privacy whoCanSee, Boolean isFavorite)
     {
         if(listName.isBlank())
@@ -48,6 +50,7 @@ public class MediaListService {
         return mediaList;
     }
 
+    @Transactional
     public void renameMediaList(String newName, Long mediaListId, Long authorId)
     {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
@@ -60,19 +63,18 @@ public class MediaListService {
             throw new MediaListNameAlreadyExitsException(newName);
 
         mediaList.changeListName(newName);
-        mediaListRepository.save(mediaList);
 
     }
 
-
+    @Transactional
     public void changeMediaListPrivacy(Long mediaListId, Long userId, Privacy newPrivacy)
     {
         MediaList mediaList = this.findMediaListAndValidateOwner(mediaListId, userId);
 
         mediaList.changePrivacy(newPrivacy);
-        this.mediaListRepository.save(mediaList);
     }
 
+    @Transactional
     public void deleteMediaList(Long mediaListId, Long authorId)
     {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
@@ -81,6 +83,7 @@ public class MediaListService {
 
     }
 
+    @Transactional
     public void addMediaToList(Long mediaListId, String mediaId, Long authorId)
     {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
@@ -99,6 +102,7 @@ public class MediaListService {
 
     }
 
+    @Transactional
     public void removeMediaFromList(Long mediaListId, String mediaId, Long authorId) {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
 
@@ -117,27 +121,29 @@ public class MediaListService {
 
     }
 
+    @Transactional
     public void favoriteMediaList(Long mediaListId)
     {
         MediaList mediaList = findMediaList(mediaListId);
 
         mediaList.setFavorite(true);
-        this.mediaListRepository.save(mediaList);
     }
 
+    @Transactional
     public void unfavoriteMediaList(Long mediaListId)
     {
         MediaList mediaList = findMediaList(mediaListId);
 
         mediaList.setFavorite(false);
-        this.mediaListRepository.save(mediaList);
     }
 
+    @Transactional(readOnly = true)
     public List<MediaList> getAllByUser(User user)
     {
         return this.mediaListRepository.findAllByAuthor(user);
     }
 
+    @Transactional(readOnly = true)
     public MediaList getOneByUser(Long userId)
     {
         return this.mediaListRepository.findMediaListByAuthor(userId).orElseThrow(
@@ -145,6 +151,7 @@ public class MediaListService {
         );
     }
 
+    @Transactional(readOnly = true)
     public MediaList getMediaListById(Long mediaId)
     {
         return this.mediaListRepository.findById(mediaId).orElseThrow(

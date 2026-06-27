@@ -1,6 +1,7 @@
 package tracklistd.api.Service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tracklistd.api.Entity.Comment;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
@@ -39,6 +40,7 @@ public class RatingService {
         this.likeRepository = likeRepository;
         this.mediaService = mediaService;}
 
+    @Transactional
     public Rating createRating(User author, Media target, Float ratingNote, String review, Privacy whoCanSee )
     {
         if(checkRatingNote(ratingNote))
@@ -57,15 +59,16 @@ public class RatingService {
 
     }
 
+    @Transactional
     public void editReview(String newMessage, Long ratingId, Long authorId)
     {
        Rating rating = findRatingAndValidateOwner(ratingId, authorId);
 
         rating.editReview(newMessage);
-        ratingRepository.save(rating);
 
     }
 
+    @Transactional
     public void editRatingNote(Float newRatingNote, Long ratingId, Long authorId)
     {
         Rating rating = findRatingAndValidateOwner(ratingId, authorId);
@@ -74,18 +77,18 @@ public class RatingService {
             throw new InvalidRatingNote(newRatingNote);
 
         rating.editNote(newRatingNote);
-        ratingRepository.save(rating);
     }
 
+    @Transactional
     public void changePrivacy(Privacy newPrivacy, Long ratingId, Long authorId)
     {
         Rating rating = findRatingAndValidateOwner(ratingId,authorId);
 
         rating.setWhoCanSee(newPrivacy);
-        ratingRepository.save(rating);
 
     }
 
+    @Transactional
     public void deleteRating(Long ratingId, Long authorId)
     {
         Rating rating = findRatingAndValidateOwner(ratingId, authorId);
@@ -97,18 +100,20 @@ public class RatingService {
         return rating.getAuthorPublication();
     }
 
+    @Transactional(readOnly = true)
     public List<Rating> getRatingsByUserPrivacy(User author, Privacy privacy)
     {
         return this.ratingRepository.findRatingByAuthorAndWhoCanSee(author, privacy);
     }
 
+    @Transactional(readOnly = true)
     public List<Rating> getRatingsByUser(User author)
     {
         return this.ratingRepository.findAllByAuthor(author);
     }
 
 
-
+    @Transactional(readOnly = true)
     public Rating getRatingById(Long ratingId)
     {
        Rating rating =  this.ratingRepository.findById(ratingId).orElseThrow(
@@ -118,16 +123,19 @@ public class RatingService {
        return rating;
     }
 
+    @Transactional(readOnly = true)
     public Integer getRatingComments(Rating rating)
     {
        return this.commentRepository.countByPost(rating);
     }
 
+    @Transactional(readOnly = true)
     public Long getRatingLikes(Rating rating)
     {
         return this.likeRepository.countByPublicationId(rating.getId());
     }
 
+    @Transactional(readOnly = true)
     public Media getRatingTargetMedia(Rating rating)
     {
         return this.mediaService.getMediaById(rating.getTargetMedia().getSpotifyID());

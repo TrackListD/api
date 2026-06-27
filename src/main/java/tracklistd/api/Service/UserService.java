@@ -136,6 +136,7 @@ public class UserService {
                     UserRegisterRequestDTO dto = new UserRegisterRequestDTO(decodedToken.getName(),
                             decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "", decodedToken.getPicture());
                     return register(dto);
+
                 });
     }
 
