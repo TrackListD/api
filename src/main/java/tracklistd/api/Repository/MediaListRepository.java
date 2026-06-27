@@ -23,6 +23,9 @@ public interface MediaListRepository extends JpaRepository<MediaList, Long> {
     //Método que retorna todas as Listas de um User a depender da Privacidade
     List<MediaList> findAllByAuthorAndWhoCanSee(User author, Privacy whoCanSee);
 
+    // Método que retorna a qtd numerica de listas criadas por um User
+    Long countByAuthorId(Long authorId);
+
     //Método que retorna todas as Listas favoritas de um User
     List<MediaList> findAllByAuthorAndIsFavorite(User author, Boolean isFavorite);
 

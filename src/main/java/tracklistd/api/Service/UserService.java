@@ -1,9 +1,9 @@
 package tracklistd.api.Service;
 
-import jakarta.transaction.Transactional;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.firebase.auth.FirebaseToken;
 
@@ -22,6 +22,7 @@ import tracklistd.api.Exceptions.UserExceptions.FollowYourself;
 import tracklistd.api.Exceptions.UserExceptions.FriendDoesNotExist;
 import tracklistd.api.Exceptions.UserExceptions.LoginApiAlreadyUsed;
 import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
+import tracklistd.api.Repository.MediaListRepository;
 import tracklistd.api.Repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -32,9 +33,11 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final MediaListRepository mediaListRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, MediaListRepository mediaListRepository) {
         this.userRepository = userRepository;
+        this.mediaListRepository = mediaListRepository;
     }
 
     @Transactional
@@ -165,12 +168,35 @@ public class UserService {
         userRepository.delete(target);
     }
 
-    @Transactional
+    // NOVOS MÉTODOS DE CONTAGEM (Pura performance)
+    @Transactional(readOnly = true)
+    public Long countFollowers(Long userId) {
+        return userRepository.countFollowersByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countFollowing(Long userId) {
+        return userRepository.countFollowingByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countMediaLists(Long authorId) {
+        return mediaListRepository.countByAuthorId(authorId);
+    }
+
+//    @Transactional
+//    public boolean isFollowing(Long followerId, Long followedId) {
+//        User follower = userRepository.findFullById(followerId).orElseThrow(() -> new UserDoesNotExist(followerId));
+//        return follower.getFollowing()
+//                .stream()
+//                .anyMatch(user -> user.getId().equals(followedId));
+//    }
+
+    // REFATORAÇÃO: Otimizando o isFollowing para não explodir a memória
+    @Transactional(readOnly = true)
     public boolean isFollowing(Long followerId, Long followedId) {
-        User follower = userRepository.findFullById(followerId).orElseThrow(() -> new UserDoesNotExist(followerId));
-        return follower.getFollowing()
-                .stream()
-                .anyMatch(user -> user.getId().equals(followedId));
+        // Em vez de carregar a lista toda, delegamos a checagem para o banco
+        return userRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
     }
 
 }

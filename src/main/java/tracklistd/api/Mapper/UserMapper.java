@@ -12,11 +12,18 @@ public interface UserMapper {
 
     UserRegisterResponseDTO toRegisterDto(User user);
 
-    @Mapping(target = "followersCount", expression = "java((long) user.getFollowers().size())")
-    @Mapping(target = "followingCount", expression = "java((long) user.getFollowing().size())")
+    @Mapping(target = "followersCount", source = "followersCount")
+    @Mapping(target = "followingCount", source = "followingCount")
+    @Mapping(target = "mediaListsCount", source = "mediaListsCount")
     @Mapping(target = "estaAtivo", expression = "java(user.getModerationStatus() == tracklistd.api.Entity.Enums.ModerationStatus.ACTIVE)")
     @Mapping(target = "currentUserIsFollowing", expression = "java(currentUserIsFollowing)")
-    UserPerfilResponseDTO toPerfilDto(User user, Boolean currentUserIsFollowing);
+    UserPerfilResponseDTO toPerfilDto(
+            User user,
+            Boolean currentUserIsFollowing,
+            Long followersCount,
+            Long followingCount,
+            Long mediaListsCount
+    );
 
     UserMinResponseDTO toMinDto(User user);
 }
