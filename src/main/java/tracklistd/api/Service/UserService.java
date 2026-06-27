@@ -132,15 +132,54 @@ public class UserService {
         return user.getFollowing().stream().collect(Collectors.toList());
     }
 
+
+//    @Transactional
+//    public User findOrCreateUser(FirebaseToken decodedToken) {
+//        return userRepository.findByIdLoginApi(decodedToken.getUid())
+//                .orElseGet(() -> {
+//                    UserRegisterRequestDTO dto = new UserRegisterRequestDTO(decodedToken.getName(),
+//                            decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "", decodedToken.getPicture());
+//                    return register(dto);
+//
+//                });
+//    }
+
     @Transactional
     public User findOrCreateUser(FirebaseToken decodedToken) {
         return userRepository.findByIdLoginApi(decodedToken.getUid())
                 .orElseGet(() -> {
-                    UserRegisterRequestDTO dto = new UserRegisterRequestDTO(decodedToken.getName(),
-                            decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "", decodedToken.getPicture());
-                    return register(dto);
+                    String safeName = resolveDisplayName(decodedToken);
 
+                    UserRegisterRequestDTO dto = new UserRegisterRequestDTO(
+                            safeName,
+                            decodedToken.getUid(),
+                            Role.MEMBER,
+                            Privacy.PUBLIC,
+                            "", // Bio vazia
+                            decodedToken.getPicture()
+                    );
+
+                    return register(dto);
                 });
+    }
+
+    // Método Privado para Tratar casos em que decodedToken.getName() retorna null.
+    private String resolveDisplayName(FirebaseToken token) {
+        // Plano A: Nome da rede social
+        String name = token.getName();
+        if (name != null && !name.trim().isEmpty()) {
+            return name;
+        }
+
+        // Plano B: Prefixo do E-mail
+        String email = token.getEmail();
+        if (email != null && email.contains("@")) {
+            return email.substring(0, email.indexOf("@")); // Pega apenas a parte antes do @
+        }
+
+        // Plano C: Fallback absoluto com UID
+        String uid = token.getUid();
+        return "User_" + uid.substring(0, Math.min(6, uid.length()));
     }
 
     @Transactional
