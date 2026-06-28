@@ -38,10 +38,8 @@ public class MediaList extends Publication {
     @Column(name = "tag_name", length = 50)
     private Set<String> tags = new HashSet<>();
 
-
     public MediaList(User author, ListType typeOfList, String listName, Privacy whoCanSee,
-                     Boolean isFavorite, String description, String coverImageUrl, Set<String> tags)
-    {
+            Boolean isFavorite, String description, String coverImageUrl, Set<String> tags) {
         super(author);
         this.typeOfList = typeOfList;
         this.listName = listName;
@@ -49,7 +47,7 @@ public class MediaList extends Publication {
         this.isFavorite = isFavorite;
         this.description = description;
         this.coverImageUrl = coverImageUrl;
-        this.tags = tags;
+        this.tags = tags != null ? tags : new HashSet<>();
     }
 
     public MediaList() {
