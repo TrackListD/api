@@ -17,18 +17,25 @@ import java.util.Optional;
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     // Métodos CRUD básicos já vêm inclusos (save, findById, findAll, delete, etc.)
 
-    //Método de Unicidade de Avaliações
+    // Método de Unicidade de Avaliações
     Optional<Rating> findRatingByAuthorAndTarget(User author, Media target);
 
     // Método que retorna todas as Avaliações de um Usuario
-    @EntityGraph(attributePaths = {"target"})
+    @EntityGraph(attributePaths = { "target" })
     List<Rating> findAllByAuthor(User author);
 
     // Método que busca todas as Avaliações de um Usuario a partir da privacidade
-    @EntityGraph(attributePaths = {"target"})
+    @EntityGraph(attributePaths = { "target" })
     List<Rating> findRatingByAuthorAndWhoCanSee(User author, Privacy whoCanSee);
 
-    //listagem de avaliações otimizada (O JOIN FETCH mata o problema do N+1)
+    // listagem de avaliações otimizada (O JOIN FETCH mata o problema do N+1)
     @Query("SELECT r FROM Rating r JOIN FETCH r.target t WHERE r.author.id = :authorId")
     List<Rating> findAllByAuthorId(@Param("authorId") Long authorId);
+
+    @Query("SELECT r FROM Rating r " +
+            "JOIN FETCH r.author " +
+            "JOIN FETCH r.target t " +
+            "LEFT JOIN FETCH t.authors " +
+            "WHERE r.id = :id")
+    Optional<Rating> findByIdWithTarget(@Param("id") Long id);
 }

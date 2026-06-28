@@ -107,7 +107,7 @@ public class RatingService {
 
     @Transactional(readOnly = true)
     public Rating getRatingById(Long ratingId) {
-        Rating rating = this.ratingRepository.findById(ratingId).orElseThrow(
+        Rating rating = this.ratingRepository.findByIdWithTarget(ratingId).orElseThrow(
                 () -> new ResourceNotFoundException("Essa Avaliação não Existe"));
 
         return rating;
