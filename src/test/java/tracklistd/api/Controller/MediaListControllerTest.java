@@ -28,9 +28,11 @@ import tracklistd.api.Integration.FirebaseAuth.Config.SecurityConfig;
 import tracklistd.api.Integration.FirebaseAuth.FirebaseFilter;
 import tracklistd.api.Mapper.MediaListMapper;
 import tracklistd.api.Service.*;
+import tracklistd.api.Dto.Media.MediaMinDTO;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -45,8 +47,8 @@ public class MediaListControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private MediaListService mediaListService;
@@ -66,6 +68,10 @@ public class MediaListControllerTest {
     private MediaListResponseDto testResponseDto;
     private MediaListOwnerResponseDto testOwnerResponseDto;
 
+    private final UsernamePasswordAuthenticationToken mockAuth = new UsernamePasswordAuthenticationToken(
+            "test-user", null, Collections.emptyList()
+    );
+
     @BeforeEach
     void setUp() {
         testUser = new User();
@@ -76,11 +82,13 @@ public class MediaListControllerTest {
         otherUser.setId(2L);
         otherUser.setName("Other User");
 
-        testMediaList = Mockito.spy(new MediaList(testUser, ListType.ALBUM, "My Album List", Privacy.PUBLIC, false));
+        testMediaList = Mockito.spy(new MediaList(testUser, ListType.ALBUM, "My Album List", Privacy.PUBLIC, false, null, null, null));
         doReturn(10L).when(testMediaList).getId();
 
         testResponseDto = new MediaListResponseDto(
-                ListType.ALBUM, "My Album List", false, 1L, "User Test", new String[]{"media-1"}
+                10L, ListType.ALBUM, "My Album List", false, 1L, "User Test",
+                Set.of(new MediaMinDTO("media-1", "Media Title", "Artist Name", "album", "cover-url", 180000, "3m")),
+                180000, "3m", null, null, null
         );
 
         testOwnerResponseDto = new MediaListOwnerResponseDto(
@@ -93,9 +101,9 @@ public class MediaListControllerTest {
     @Test
     @DisplayName("createMediaList deve retornar 201 quando dados válidos")
     void createMediaList_deveRetornar201_quandoDadosValidos() throws Exception {
-        MediaListRequestDto request = new MediaListRequestDto(ListType.ALBUM, "My Album List", false, Privacy.PUBLIC, null);
+        MediaListRequestDto request = new MediaListRequestDto(ListType.ALBUM, "My Album List", false, Privacy.PUBLIC, null, null, null, null);
 
-        when(mediaListService.createMediaList(any(User.class), eq(ListType.ALBUM), eq("My Album List"), eq(Privacy.PUBLIC), eq(false)))
+        when(mediaListService.createMediaList(any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(testMediaList);
         when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
 
@@ -111,7 +119,7 @@ public class MediaListControllerTest {
     @Test
     @DisplayName("createMediaList deve retornar 400 quando nome da lista for em branco")
     void createMediaList_deveRetornar400_quandoNomeDaListaForEmBranco() throws Exception {
-        MediaListRequestDto request = new MediaListRequestDto(ListType.ALBUM, "  ", false, Privacy.PUBLIC, null);
+        MediaListRequestDto request = new MediaListRequestDto(ListType.ALBUM, "  ", false, Privacy.PUBLIC, null, null, null, null);
 
         mockMvc.perform(post("/api/mediaList")
                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null, Collections.emptyList())))
@@ -123,10 +131,10 @@ public class MediaListControllerTest {
     @Test
     @DisplayName("createMediaList deve retornar 409 quando nome da lista já existir")
     void createMediaList_deveRetornar409_quandoNomeDaListaJaExistir() throws Exception {
-        MediaListRequestDto request = new MediaListRequestDto(ListType.ALBUM, "My Album List", false, Privacy.PUBLIC, null);
+        MediaListRequestDto request = new MediaListRequestDto(ListType.ALBUM, "My Album List", false, Privacy.PUBLIC, null, null, null, null);
 
         MediaListNameAlreadyExitsException exception = new MediaListNameAlreadyExitsException("My Album List");
-        when(mediaListService.createMediaList(any(User.class), eq(ListType.ALBUM), eq("My Album List"), eq(Privacy.PUBLIC), eq(false)))
+        when(mediaListService.createMediaList(any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(exception);
 
         mockMvc.perform(post("/api/mediaList")

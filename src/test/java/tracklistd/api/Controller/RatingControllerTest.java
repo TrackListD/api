@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Dto.Rating.RatingEditRequestDto;
 import tracklistd.api.Dto.Rating.RatingOwnerResponseDto;
 import tracklistd.api.Dto.Rating.RatingRequestDto;
@@ -88,9 +89,10 @@ public class RatingControllerTest {
                 testRating = Mockito.spy(new Rating(testUser, testMedia, 4.5f, "Excellent review", Privacy.PUBLIC));
                 doReturn(10L).when(testRating).getId();
 
+                MediaMinDTO mediaMinDto = new MediaMinDTO("media-123", "Media Title", "Artist Name", "music", "cover-url", 180000, "3m");
                 testResponseDto = new RatingResponseDto(
-                                1L, "media-123", LocalDateTime.now(), 4.5f, "Excellent review",
-                                "User Test", "Media Title", 5L, 2);
+                                10L, 1L, mediaMinDto, LocalDateTime.now(), 4.5f, "Excellent review",
+                                "User Test", 5L, 2);
 
                 testOwnerResponseDto = new RatingOwnerResponseDto(
                                 testResponseDto, LocalDateTime.now(), ModerationStatus.ACTIVE, Privacy.PUBLIC);
@@ -104,10 +106,10 @@ public class RatingControllerTest {
                 RatingRequestDto request = new RatingRequestDto("media-123", 4.5f, "Excellent review", Privacy.PUBLIC);
 
                 when(mediaService.getMediaById("media-123")).thenReturn(testMedia);
-                when(ratingService.createRating(any(User.class), any(Media.class), eq(4.5f), eq("Excellent review"),
+                when(ratingService.createRating(any(), any(), eq(4.5f), eq("Excellent review"),
                                 eq(Privacy.PUBLIC)))
                                 .thenReturn(testRating);
-                when(ratingMapper.toResponseDto(any(Rating.class), anyInt(), anyLong())).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(any(), anyInt(), anyLong())).thenReturn(testResponseDto);
 
                 mockMvc.perform(post("/api/ratings")
                                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null,
@@ -115,7 +117,7 @@ public class RatingControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                                 .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.targetId").value("media-123"))
+                                .andExpect(jsonPath("$.targetMedia.id").value("media-123"))
                                 .andExpect(jsonPath("$.ratingNote").value(4.5));
         }
 
@@ -139,8 +141,8 @@ public class RatingControllerTest {
 
                 RatingAlreadyExists exception = new RatingAlreadyExists(testMedia);
                 when(mediaService.getMediaById("media-123")).thenReturn(testMedia);
-                when(ratingService.createRating(any(User.class), any(Media.class), any(Float.class), any(String.class),
-                                any(Privacy.class)))
+                when(ratingService.createRating(any(), any(), any(), any(),
+                                any()))
                                 .thenThrow(exception);
 
                 mockMvc.perform(post("/api/ratings")

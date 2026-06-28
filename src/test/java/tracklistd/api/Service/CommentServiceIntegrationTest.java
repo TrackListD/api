@@ -46,7 +46,7 @@ class CommentServiceIntegrationTest {
         entityManager.persist(commentAuthor);
 
         // 3. Create and persist the post (MediaList)
-        MediaList post = new MediaList(postAuthor, ListType.MUSIC, "My Music List", Privacy.PUBLIC, false);
+        MediaList post = new MediaList(postAuthor, ListType.MUSIC, "My Music List", Privacy.PUBLIC, false, null, null, null);
         entityManager.persist(post);
 
         entityManager.flush();

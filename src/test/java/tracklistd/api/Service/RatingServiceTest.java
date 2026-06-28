@@ -30,6 +30,9 @@ class RatingServiceTest {
     @Mock
     private RatingRepository ratingRepository;
 
+    @Mock
+    private MediaService mediaService;
+
     @InjectMocks
     private RatingService ratingService;
 
@@ -42,6 +45,7 @@ class RatingServiceTest {
         author.setId(1L);
 
         target = new Music();
+        target.setSpotifyID("spotify_id_test");
         target.setTitle("Test Song");
     }
 
@@ -51,10 +55,11 @@ class RatingServiceTest {
     void createRating_whenNoteIsInvalid_shouldThrowInvalidRatingNote() {
         // Arrange
         Float invalidNote = 5.2f;
+        when(mediaService.getMediaById(target.getSpotifyID())).thenReturn(target);
 
         // Act & Assert
         assertThrows(InvalidRatingNote.class,
-                () -> ratingService.createRating(author, target, invalidNote, "Great song", Privacy.PUBLIC));
+                () -> ratingService.createRating(author, target.getSpotifyID(), invalidNote, "Great song", Privacy.PUBLIC));
         verify(ratingRepository, never()).save(any(Rating.class));
     }
 
@@ -63,11 +68,12 @@ class RatingServiceTest {
         // Arrange
         Float validNote = 4.5f;
         Rating existingRating = new Rating(author, target, validNote, "Existing review", Privacy.PUBLIC);
+        when(mediaService.getMediaById(target.getSpotifyID())).thenReturn(target);
         when(ratingRepository.findRatingByAuthorAndTarget(author, target)).thenReturn(Optional.of(existingRating));
 
         // Act & Assert
         assertThrows(RatingAlreadyExists.class,
-                () -> ratingService.createRating(author, target, validNote, "New review", Privacy.PUBLIC));
+                () -> ratingService.createRating(author, target.getSpotifyID(), validNote, "New review", Privacy.PUBLIC));
         verify(ratingRepository, never()).save(any(Rating.class));
     }
 
@@ -77,10 +83,11 @@ class RatingServiceTest {
         Float validNote = 4.5f;
         String review = "Amazing track!";
         Privacy privacy = Privacy.PUBLIC;
+        when(mediaService.getMediaById(target.getSpotifyID())).thenReturn(target);
         when(ratingRepository.findRatingByAuthorAndTarget(author, target)).thenReturn(Optional.empty());
 
         // Act
-        Rating result = ratingService.createRating(author, target, validNote, review, privacy);
+        Rating result = ratingService.createRating(author, target.getSpotifyID(), validNote, review, privacy);
 
         // Assert
         assertNotNull(result);

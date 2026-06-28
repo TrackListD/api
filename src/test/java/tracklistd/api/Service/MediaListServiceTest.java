@@ -52,7 +52,7 @@ class MediaListServiceTest {
         author.setId(1L);
 
         // Configura lista padrão para os testes
-        mediaList = new MediaList(author, ListType.MUSIC, "Minha Playlist", Privacy.PUBLIC, false);
+        mediaList = new MediaList(author, ListType.MUSIC, "Minha Playlist", Privacy.PUBLIC, false, null, null, null);
         ReflectionTestUtils.setField(mediaList, "id", 10L);
     }
 
@@ -65,7 +65,7 @@ class MediaListServiceTest {
 
         // Act & Assert (Ação e Validação)
         assertThrows(ListNameBlankException.class,
-                () -> mediaListService.createMediaList(author, ListType.MUSIC, blankName, Privacy.PUBLIC, false));
+                () -> mediaListService.createMediaList(author, ListType.MUSIC, blankName, Privacy.PUBLIC, false, null, null, null));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -78,7 +78,7 @@ class MediaListServiceTest {
 
         // Act & Assert (Ação e Validação)
         assertThrows(MediaListNameAlreadyExitsException.class,
-                () -> mediaListService.createMediaList(author, ListType.MUSIC, listName, Privacy.PUBLIC, false));
+                () -> mediaListService.createMediaList(author, ListType.MUSIC, listName, Privacy.PUBLIC, false, null, null, null));
         verify(mediaListRepository, never()).save(any(MediaList.class));
     }
 
@@ -90,7 +90,7 @@ class MediaListServiceTest {
                 .thenReturn(Optional.empty());
 
         // Act (Ação)
-        MediaList result = mediaListService.createMediaList(author, ListType.MUSIC, listName, Privacy.PUBLIC, false);
+        MediaList result = mediaListService.createMediaList(author, ListType.MUSIC, listName, Privacy.PUBLIC, false, null, null, null);
 
         // Assert (Validação)
         assertNotNull(result);

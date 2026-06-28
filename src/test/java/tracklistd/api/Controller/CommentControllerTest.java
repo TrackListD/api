@@ -91,7 +91,7 @@ public class CommentControllerTest {
         doReturn(10L).when(testComment).getId();
 
         testResponseDto = new CommentResponseDto(
-                100L, 1L, "This is a comment", LocalDateTime.now(), 5L
+                10L, 100L, 1L, "This is a comment", LocalDateTime.now(), 5L
         );
 
         testOwnerResponseDto = new CommentOwnerResponseDto(
