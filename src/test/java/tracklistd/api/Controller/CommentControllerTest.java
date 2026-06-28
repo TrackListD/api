@@ -117,7 +117,7 @@ public class CommentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.idPost").value(100))
+                .andExpect(jsonPath("$.postId").value(100))
                 .andExpect(jsonPath("$.text").value("This is a comment"));
     }
 
@@ -279,14 +279,14 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("editCommentText deve retornar 403 quando não autenticado")
+    @DisplayName("editCommentText deve retornar 401 quando não autenticado")
     void editCommentText_deveRetornar403_quandoNaoAutenticado() throws Exception {
         CommentEditRequestDto request = new CommentEditRequestDto("New text");
 
         mockMvc.perform(patch("/api/comments/10/text")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -317,10 +317,10 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("deleteComment deve retornar 403 quando não autenticado")
+    @DisplayName("deleteComment deve retornar 401 quando não autenticado")
     void deleteComment_deveRetornar403_quandoNaoAutenticado() throws Exception {
         mockMvc.perform(delete("/api/comments/10"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

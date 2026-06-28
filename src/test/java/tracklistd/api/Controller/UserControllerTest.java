@@ -110,7 +110,7 @@ public class UserControllerTest {
         void findUserById_deveRetornar200() throws Exception {
                 when(userService.findUserById(1L)).thenReturn(testUser);
 
-                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
+                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Usuário Teste", "PIC", "Bio", Role.MEMBER,
                                 Privacy.PUBLIC, LocalDate.now(), true, null, null, null, null, null, null, false);
                 when(userMapper.toPerfilDto(any(), any(), any(), any(), any())).thenReturn(responseDto);
 
@@ -132,11 +132,11 @@ public class UserControllerTest {
 
                 when(userService.perfilUpdate(eq(1L), any(UserUpdatePerfilRequestDTO.class))).thenReturn(updatedUser);
 
-                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
+                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Novo Nome", "PIC", "Bio", Role.MEMBER,
                                 Privacy.PUBLIC, LocalDate.now(), true, null, null, null, null, null, null, false);
                 when(userMapper.toPerfilDto(any(), any(), any(), any(), any())).thenReturn(responseDto);
 
-                mockMvc.perform(put("/api/users/1")
+                mockMvc.perform(put("/api/users/me")
                                 .with(authentication(mockAuth))
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +149,7 @@ public class UserControllerTest {
         @DisplayName("findMyProfile deve retornar 200 e os dados do meu perfil")
         void findMyProfile_deveRetornar200() throws Exception {
 
-                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Teste", "PIC", "Bio", Role.MEMBER,
+                UserPerfilResponseDTO responseDto = new UserPerfilResponseDTO(1L, "Usuário Teste", "PIC", "Bio", Role.MEMBER,
                                 Privacy.PUBLIC, LocalDate.now(), true, 1L, 1L, null, null, null, null, false);
                 when(userMapper.toPerfilDto(any(), any(), any(), any(), any())).thenReturn(responseDto);
 

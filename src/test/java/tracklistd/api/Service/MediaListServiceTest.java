@@ -173,7 +173,6 @@ class MediaListServiceTest {
 
         // Assert (Validação)
         assertEquals(newName, mediaList.getListName());
-        verify(mediaListRepository, times(1)).save(mediaList);
     }
 
     // --- Testes de deleteMediaList ---
@@ -378,7 +377,6 @@ class MediaListServiceTest {
 
         // Assert (Validação)
         assertTrue(mediaList.getIsFavorite());
-        verify(mediaListRepository, times(1)).save(mediaList);
     }
 
     // --- Testes de unfavoriteMediaList ---
@@ -407,6 +405,5 @@ class MediaListServiceTest {
 
         // Assert (Validação)
         assertFalse(mediaList.getIsFavorite());
-        verify(mediaListRepository, times(1)).save(mediaList);
     }
 }

@@ -90,7 +90,7 @@ class FeedControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].id").value(10L))
                                 .andExpect(jsonPath("$[0].content").value("Excelente Álbum!"))
-                                .andExpect(jsonPath("$[0].author.username").value("Autor Teste"))
+                                .andExpect(jsonPath("$[0].author.name").value("Autor Teste"))
                                 .andExpect(jsonPath("$[0].likedByMe").value(true));
         }
 

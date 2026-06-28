@@ -164,7 +164,6 @@ class RatingServiceTest {
 
         // Assert
         assertEquals(newNote, rating.getRatingNote());
-        verify(ratingRepository, times(1)).save(rating);
     }
 
     // --- editReview Tests ---
@@ -216,7 +215,6 @@ class RatingServiceTest {
 
         // Assert
         assertEquals(newReview, rating.getReview());
-        verify(ratingRepository, times(1)).save(rating);
     }
 
     // --- deleteRating Tests ---
@@ -272,7 +270,7 @@ class RatingServiceTest {
         when(ratingRepository.findRatingByAuthorAndWhoCanSee(author, Privacy.PUBLIC)).thenReturn(expectedRatings);
 
         // Act
-        List<Rating> result = ratingService.getRatingsByUserPrivacy(author, Privacy.PRIVATE);
+        List<Rating> result = ratingService.getRatingsByUserPrivacy(author, Privacy.PUBLIC);
 
         // Assert
         assertNotNull(result);

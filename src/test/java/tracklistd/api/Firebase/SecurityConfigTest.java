@@ -15,7 +15,10 @@ import tracklistd.api.Service.FirebaseService;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.springframework.test.context.ActiveProfiles;
+
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class SecurityConfigTest {
 

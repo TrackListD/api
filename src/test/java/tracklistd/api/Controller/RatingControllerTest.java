@@ -169,7 +169,7 @@ public class RatingControllerTest {
                                                 Collections.emptyList()))))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.whoCanSee").value("PUBLIC"))
-                                .andExpect(jsonPath("$.publicDto.targetId").value("media-123"));
+                                .andExpect(jsonPath("$.publicData.targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -185,7 +185,7 @@ public class RatingControllerTest {
                                                 Collections.emptyList()))))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.whoCanSee").doesNotExist())
-                                .andExpect(jsonPath("$.targetId").value("media-123"));
+                                .andExpect(jsonPath("$.targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -199,7 +199,7 @@ public class RatingControllerTest {
                 mockMvc.perform(get("/api/ratings/10"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.whoCanSee").doesNotExist())
-                                .andExpect(jsonPath("$.targetId").value("media-123"));
+                                .andExpect(jsonPath("$.targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -226,7 +226,7 @@ public class RatingControllerTest {
                                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null,
                                                 Collections.emptyList()))))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].targetId").value("media-123"));
+                                .andExpect(jsonPath("$[0].targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -242,7 +242,7 @@ public class RatingControllerTest {
                                 .with(authentication(new UsernamePasswordAuthenticationToken(otherUser, null,
                                                 Collections.emptyList()))))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].targetId").value("media-123"));
+                                .andExpect(jsonPath("$[0].targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -256,7 +256,7 @@ public class RatingControllerTest {
 
                 mockMvc.perform(get("/api/ratings/user/1"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].targetId").value("media-123"));
+                                .andExpect(jsonPath("$[0].targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -294,7 +294,7 @@ public class RatingControllerTest {
         }
 
         @Test
-        @DisplayName("editRatingReview deve retornar 403 quando não autenticado")
+        @DisplayName("editRatingReview deve retornar 401 quando não autenticado")
         void editRatingReview_deveRetornar403_quandoNaoAutenticado() throws Exception {
                 RatingEditRequestDto.EditReviewRequestDto request = new RatingEditRequestDto.EditReviewRequestDto(
                                 "New review text");
@@ -302,7 +302,7 @@ public class RatingControllerTest {
                 mockMvc.perform(patch("/api/ratings/10/review")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -361,7 +361,7 @@ public class RatingControllerTest {
         }
 
         @Test
-        @DisplayName("editRatingNote deve retornar 403 quando não autenticado")
+        @DisplayName("editRatingNote deve retornar 401 quando não autenticado")
         void editRatingNote_deveRetornar403_quandoNaoAutenticado() throws Exception {
                 RatingEditRequestDto.EditRatingNoteRequestDto request = new RatingEditRequestDto.EditRatingNoteRequestDto(
                                 3.5f);
@@ -369,7 +369,7 @@ public class RatingControllerTest {
                 mockMvc.perform(patch("/api/ratings/10/note")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized());
         }
 
         // --- PATCH /api/ratings/{id}/privacy ---
@@ -411,7 +411,7 @@ public class RatingControllerTest {
         }
 
         @Test
-        @DisplayName("editRatingPrivacy deve retornar 403 quando não autenticado")
+        @DisplayName("editRatingPrivacy deve retornar 401 quando não autenticado")
         void editRatingPrivacy_deveRetornar403_quandoNaoAutenticado() throws Exception {
                 RatingEditRequestDto.EditPrivacyRequestDto request = new RatingEditRequestDto.EditPrivacyRequestDto(
                                 Privacy.PRIVATE);
@@ -419,7 +419,7 @@ public class RatingControllerTest {
                 mockMvc.perform(patch("/api/ratings/10/privacy")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized());
         }
 
         // --- DELETE /api/ratings/{id} ---
@@ -436,10 +436,10 @@ public class RatingControllerTest {
         }
 
         @Test
-        @DisplayName("deleteRating deve retornar 403 quando não autenticado")
+        @DisplayName("deleteRating deve retornar 401 quando não autenticado")
         void deleteRating_deveRetornar403_quandoNaoAutenticado() throws Exception {
                 mockMvc.perform(delete("/api/ratings/10"))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized());
         }
 
         @Test

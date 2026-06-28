@@ -106,6 +106,6 @@ class LikeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].username").value("João Pedro"));
+                .andExpect(jsonPath("$[0].name").value("João Pedro"));
     }
 }
