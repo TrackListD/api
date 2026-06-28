@@ -48,7 +48,6 @@ class ArtistServiceTest {
         artistEntity.setName("The Beatles");
 
         spotifyArtistDto = mock(SpotifyArtistResponseDTO.class);
-        when(spotifyArtistDto.name()).thenReturn("The Beatles");
 
         spotifyAlbumDto = mock(SpotifyAlbumResponseDTO.class);
         when(spotifyAlbumDto.id()).thenReturn("album-id-456"); 

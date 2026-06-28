@@ -1,6 +1,7 @@
 package tracklistd.api.Service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tracklistd.api.Entity.Comment;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Publication;
@@ -26,6 +27,7 @@ public class CommentService {
         this.likeRepository = likeRepository;
     }
 
+    @Transactional
     public Comment createComment(User author, Publication post, String text)
     {
         if(text.isBlank())
@@ -41,6 +43,7 @@ public class CommentService {
         return comment;
     }
 
+    @Transactional
     public void editCommentText(String newText, Long commentId, Long authorId)
     {
         Comment comment = findCommentAndValidateOwner(commentId,authorId);
@@ -49,10 +52,10 @@ public class CommentService {
             throw new CommentTextBlankException();
 
         comment.editText(newText);
-        this.commentRepository.save(comment);
 
     }
 
+    @Transactional
     public void deleteComment(Long commentId, Long authorId)
     {
         Comment comment = this.findCommentAndValidateOwner(commentId,authorId);
@@ -60,11 +63,13 @@ public class CommentService {
         this.commentRepository.delete(comment);
     }
 
+    @Transactional(readOnly = true)
     public List<Comment> getCommentsByPost(Publication post)
     {
         return this.commentRepository.findAllByPost(post);
     }
 
+    @Transactional(readOnly = true)
     public Comment getCommentById(Long commentId)
     {
         return this.commentRepository.findById(commentId).orElseThrow(
@@ -72,11 +77,13 @@ public class CommentService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<Comment> getCommentsByUser(User author)
     {
         return this.commentRepository.getCommentsByAuthor(author);
     }
 
+    @Transactional(readOnly = true)
     public Long getCommentLikes(Publication post)
     {
         return this.likeRepository.countByPublicationId(post.getId());

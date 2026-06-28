@@ -48,7 +48,7 @@ class MediaListServiceIntegrationTest {
         Boolean isFavorite = true;
 
         // Act (Ação)
-        MediaList createdList = mediaListService.createMediaList(author, typeOfList, listName, privacy, isFavorite);
+        MediaList createdList = mediaListService.createMediaList(author, typeOfList, listName, privacy, isFavorite, null, null, null);
         assertNotNull(createdList);
         assertNotNull(createdList.getId());
 

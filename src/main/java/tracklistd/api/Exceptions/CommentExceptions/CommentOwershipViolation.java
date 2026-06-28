@@ -1,6 +1,8 @@
 package tracklistd.api.Exceptions.CommentExceptions;
 
-public class CommentOwershipViolation extends CommentException {
+import tracklistd.api.Exceptions.OwnershipViolationException;
+
+public class CommentOwershipViolation extends OwnershipViolationException {
     public CommentOwershipViolation() {
         super("Esse comentario não te pertence, impossivel Editar");
     }

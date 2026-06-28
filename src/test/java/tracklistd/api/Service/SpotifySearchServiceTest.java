@@ -35,7 +35,7 @@ class SpotifySearchServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> spotifySearchService.search(null));
         
-        assertEquals("O termo de busca não pode ser vazio.", exception.getMessage());
+        assertEquals("Não é possóvel buscar por uma query vazia", exception.getMessage());
         verify(spotifyClient, never()).search(anyString());
     }
 
@@ -45,7 +45,7 @@ class SpotifySearchServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> spotifySearchService.search("   "));
         
-        assertEquals("O termo de busca não pode ser vazio.", exception.getMessage());
+        assertEquals("Não é possóvel buscar por uma query vazia", exception.getMessage());
         verify(spotifyClient, never()).search(anyString());
     }
 

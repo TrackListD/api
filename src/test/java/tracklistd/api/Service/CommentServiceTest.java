@@ -169,7 +169,6 @@ class CommentServiceTest {
 
         // Assert
         assertEquals(newText, comment.getText());
-        verify(commentRepository, times(1)).save(comment);
     }
 
     // --- deleteComment Tests ---

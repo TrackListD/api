@@ -4,6 +4,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,16 +14,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import tracklistd.api.Dto.User.UserRegisterRequestDTO;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import tracklistd.api.Entity.User;
-import tracklistd.api.Repository.UserRepository;
 import tracklistd.api.Service.FirebaseService;
 import tracklistd.api.Service.UserService;
 
 import com.google.firebase.auth.FirebaseToken;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -28,14 +29,17 @@ public class FirebaseFilter extends OncePerRequestFilter {
 
     private final FirebaseService firebaseService;
     private final UserService userService;
+    private final HandlerExceptionResolver exceptionResolver;
 
-    public FirebaseFilter(FirebaseService firebaseService, UserService userService) {
+    public FirebaseFilter(FirebaseService firebaseService, UserService userService, @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver) {
         this.firebaseService = firebaseService;
         this.userService = userService;
+        this.exceptionResolver = exceptionResolver;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    //Coloquei as annotation @NonNull, para remover warnings do intelliJ
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
@@ -66,7 +70,8 @@ public class FirebaseFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Token inválido ou expirado: " + e.getMessage());
+            // Em vez de escrever a resposta manualmente, delegamos para que o erro caia no método correto da GlobalExceptionHandler
+            exceptionResolver.resolveException(request, response, null, new InsufficientAuthenticationException("Token inválido ou expirado", e));
             return;
         }
 

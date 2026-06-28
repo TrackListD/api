@@ -22,6 +22,7 @@ public record UserPerfilResponseDTO(
                 boolean estaAtivo,
                 Long followersCount,
                 Long followingCount,
+                Long mediaListsCount,
                 MediaMinDTO favoriteAlbum,
                 MediaMinDTO favoriteMusic,
                 Artist favoriteArtist,

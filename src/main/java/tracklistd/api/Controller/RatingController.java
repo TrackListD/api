@@ -56,13 +56,12 @@ public class RatingController {
             @AuthenticationPrincipal User user,
             @Valid @RequestBody RatingRequestDto ratingRequestDto
     ) {
-        Media media = mediaService.getMediaById(ratingRequestDto.targetId());
-
+        String targetId = ratingRequestDto.targetId();
         Float ratingNote = ratingRequestDto.ratingNote();
         String review = ratingRequestDto.review();
         Privacy whoCanSee = ratingRequestDto.whoCanSee();
 
-        Rating rating = ratingService.createRating(user, media, ratingNote, review, whoCanSee);
+        Rating rating = ratingService.createRating(user, targetId, ratingNote, review, whoCanSee);
 
         RatingResponseDto response = ratingMapper.toResponseDto(rating, 0, 0L);
 
@@ -135,7 +134,8 @@ public class RatingController {
     @Operation(summary = "Editar review", description = "Atualiza o comentário textual de uma avaliação")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Review atualizada com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
     })
     public ResponseEntity<?> editRatingReview(
@@ -143,8 +143,6 @@ public class RatingController {
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditReviewRequestDto editDto
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.ratingService.editReview(editDto.newReview(), id, user.getId());
 
@@ -157,7 +155,8 @@ public class RatingController {
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Nota atualizada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Nota inválida fornecida"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
     })
     public ResponseEntity<?> editRatingNote(
@@ -165,8 +164,6 @@ public class RatingController {
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditRatingNoteRequestDto editRatingNote
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.ratingService.editRatingNote(editRatingNote.newRatingNote(), id, user.getId());
 
@@ -179,7 +176,8 @@ public class RatingController {
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Privacidade atualizada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Privacidade inválida fornecida"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
     })
     public ResponseEntity<?> editRatingPrivacy(
@@ -187,8 +185,6 @@ public class RatingController {
             @PathVariable Long id,
             @RequestBody @Valid RatingEditRequestDto.EditPrivacyRequestDto editPrivacy
     ) {
-        if (user == null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         this.ratingService.changePrivacy(editPrivacy.newPrivacy(), id, user.getId());
 
@@ -200,15 +196,14 @@ public class RatingController {
     @Operation(summary = "Excluir avaliação", description = "Remove uma avaliação existente")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Avaliação excluída com sucesso"),
-            @ApiResponse(responseCode = "403", description = "Usuário não autenticado ou não autorizado"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
     })
     public ResponseEntity<Void> deleteRating(
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
-        if (user == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         this.ratingService.deleteRating(id, user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -15,6 +15,8 @@ import tracklistd.api.Repository.MusicRepository;
 import tracklistd.api.Repository.PublicationRepository;
 import tracklistd.api.Repository.UserRepository;
 
+import java.util.Set;
+
 @Component
 public class DatabaseSeederFactory {
     private final UserRepository userRepository;
@@ -57,8 +59,8 @@ public class DatabaseSeederFactory {
     }
 
     public MediaList createAndSaveMediaList(User author, ListType listType, String listName, Privacy privacy,
-            Boolean isFavorite, Media... medias) {
-        MediaList mediaList = new MediaList(author, listType, listName, privacy, isFavorite);
+                                            Boolean isFavorite, String description, String coverImageUrl, Set<String> tags, Media... medias) {
+        MediaList mediaList = new MediaList(author, listType, listName, privacy, isFavorite, description, coverImageUrl, tags);
         mediaList.changePrivacy(Privacy.PUBLIC);
 
         if (medias != null) {

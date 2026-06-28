@@ -10,8 +10,7 @@ import java.util.List;
 @Builder
 @Schema(description = "DTO padrão para representação de erros da API")
 public record ErrorDto(
-        @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-        @Schema(description = "Data e hora do erro", example = "18-06-2026 22:47:20")
+        @Schema(description = "Data e hora do erro", example = "2026-06-25T22:47:20")
         LocalDateTime timestamp,
 
         @Schema(description = "Código do status HTTP", example = "400")

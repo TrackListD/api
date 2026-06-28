@@ -26,4 +26,14 @@ public class Album extends Media {
     public void addMusic(Music newMusic) {
         this.musics.add(newMusic);
     }
+
+    @Override
+    public Integer getTotalDurationMs() {
+        if (this.musics == null || this.musics.isEmpty()) {
+            return 0;
+        }
+        return this.musics.stream()
+                .mapToInt(Music::getTotalDurationMs)
+                .sum();
+    }
 }

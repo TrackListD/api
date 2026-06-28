@@ -61,15 +61,23 @@ public class UserController {
                         @ApiResponse(responseCode = "404", description = "Recurso não encontrado: não existe perfil com este ID", content = @Content)
         })
         @GetMapping("/{id}")
-        public ResponseEntity<UserPerfilResponseDTO> findUserById(@PathVariable Long id,
-                        @AuthenticationPrincipal User currentUser) {
+        public ResponseEntity<UserPerfilResponseDTO> findUserById
+                (       @PathVariable Long id,
+                        @AuthenticationPrincipal User currentUser
+                )
+        {
                 User user = userService.findUserById(id);
 
                 boolean currentUserIsFollowing = currentUser != null
                                 && userService.isFollowing(currentUser.getId(), id);
 
-                return ResponseEntity
-                                .ok(userMapper.toPerfilDto(user, currentUserIsFollowing));
+                Long followersCount = userService.countFollowers(id);
+                Long followingCount = userService.countFollowing(id);
+                Long mediaListsCount = userService.countMediaLists(id);
+
+                return ResponseEntity.ok(userMapper.toPerfilDto
+                        (user, currentUserIsFollowing, followersCount, followingCount, mediaListsCount)
+                );
         }
 
         @Operation(summary = "Buscar meu próprio perfil", description = "Retorna as informações completas do perfil logado.")
@@ -79,7 +87,12 @@ public class UserController {
         @GetMapping("/me")
         public ResponseEntity<UserPerfilResponseDTO> findMyProfile(@AuthenticationPrincipal User user) {
                 User fullUser = userService.findUserById(user.getId());
-                return ResponseEntity.ok(userMapper.toPerfilDto(fullUser, false));
+
+                Long followersCount = userService.countFollowers(user.getId());
+                Long followingCount = userService.countFollowing(user.getId());
+                Long mediaListsCount = userService.countMediaLists(user.getId());
+
+                return ResponseEntity.ok(userMapper.toPerfilDto(fullUser, false, followersCount, followingCount, mediaListsCount));
         }
 
         @Operation(summary = "Atualizar perfil", description = "Edita os campos alteráveis de exibição ou configurações do perfil informado.")
@@ -90,9 +103,15 @@ public class UserController {
         })
         @PutMapping("/me")
         public ResponseEntity<UserPerfilResponseDTO> perfilUpdate(@AuthenticationPrincipal User user,
-                        @Valid @RequestBody UserUpdatePerfilRequestDTO dto) {
+                        @Valid @RequestBody UserUpdatePerfilRequestDTO dto)
+        {
                 User updatedUser = userService.perfilUpdate(user.getId(), dto);
-                return ResponseEntity.ok(userMapper.toPerfilDto(updatedUser, false));
+
+                Long followersCount = userService.countFollowers(user.getId());
+                Long followingCount = userService.countFollowing(user.getId());
+                Long mediaListsCount = userService.countMediaLists(user.getId());
+
+                return ResponseEntity.ok(userMapper.toPerfilDto(updatedUser, false, followersCount, followingCount, mediaListsCount));
         }
 
         @Operation(summary = "Deletar conta", description = "Remove permanentemente o perfil do usuário autenticado e seus dados associados.")

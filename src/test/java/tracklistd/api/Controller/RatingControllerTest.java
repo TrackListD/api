@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Dto.Rating.RatingEditRequestDto;
 import tracklistd.api.Dto.Rating.RatingOwnerResponseDto;
 import tracklistd.api.Dto.Rating.RatingRequestDto;
@@ -88,9 +89,10 @@ public class RatingControllerTest {
                 testRating = Mockito.spy(new Rating(testUser, testMedia, 4.5f, "Excellent review", Privacy.PUBLIC));
                 doReturn(10L).when(testRating).getId();
 
+                MediaMinDTO mediaMinDto = new MediaMinDTO("media-123", "Media Title", "Artist Name", "music", "cover-url", 180000, "3m");
                 testResponseDto = new RatingResponseDto(
-                                1L, "media-123", LocalDateTime.now(), 4.5f, "Excellent review",
-                                "User Test", "Media Title", 5L, 2);
+                                10L, 1L, mediaMinDto, LocalDateTime.now(), 4.5f, "Excellent review",
+                                "User Test", 5L, 2);
 
                 testOwnerResponseDto = new RatingOwnerResponseDto(
                                 testResponseDto, LocalDateTime.now(), ModerationStatus.ACTIVE, Privacy.PUBLIC);
@@ -104,10 +106,10 @@ public class RatingControllerTest {
                 RatingRequestDto request = new RatingRequestDto("media-123", 4.5f, "Excellent review", Privacy.PUBLIC);
 
                 when(mediaService.getMediaById("media-123")).thenReturn(testMedia);
-                when(ratingService.createRating(any(User.class), any(Media.class), eq(4.5f), eq("Excellent review"),
+                when(ratingService.createRating(any(), any(), eq(4.5f), eq("Excellent review"),
                                 eq(Privacy.PUBLIC)))
                                 .thenReturn(testRating);
-                when(ratingMapper.toResponseDto(any(Rating.class), anyInt(), anyLong())).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(any(), anyInt(), anyLong())).thenReturn(testResponseDto);
 
                 mockMvc.perform(post("/api/ratings")
                                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null,
@@ -115,7 +117,7 @@ public class RatingControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                                 .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.targetId").value("media-123"))
+                                .andExpect(jsonPath("$.targetMedia.id").value("media-123"))
                                 .andExpect(jsonPath("$.ratingNote").value(4.5));
         }
 
@@ -139,8 +141,8 @@ public class RatingControllerTest {
 
                 RatingAlreadyExists exception = new RatingAlreadyExists(testMedia);
                 when(mediaService.getMediaById("media-123")).thenReturn(testMedia);
-                when(ratingService.createRating(any(User.class), any(Media.class), any(Float.class), any(String.class),
-                                any(Privacy.class)))
+                when(ratingService.createRating(any(), any(), any(), any(),
+                                any()))
                                 .thenThrow(exception);
 
                 mockMvc.perform(post("/api/ratings")
@@ -167,7 +169,7 @@ public class RatingControllerTest {
                                                 Collections.emptyList()))))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.whoCanSee").value("PUBLIC"))
-                                .andExpect(jsonPath("$.publicDto.targetId").value("media-123"));
+                                .andExpect(jsonPath("$.publicData.targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -183,7 +185,7 @@ public class RatingControllerTest {
                                                 Collections.emptyList()))))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.whoCanSee").doesNotExist())
-                                .andExpect(jsonPath("$.targetId").value("media-123"));
+                                .andExpect(jsonPath("$.targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -197,7 +199,7 @@ public class RatingControllerTest {
                 mockMvc.perform(get("/api/ratings/10"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.whoCanSee").doesNotExist())
-                                .andExpect(jsonPath("$.targetId").value("media-123"));
+                                .andExpect(jsonPath("$.targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -224,7 +226,7 @@ public class RatingControllerTest {
                                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null,
                                                 Collections.emptyList()))))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].targetId").value("media-123"));
+                                .andExpect(jsonPath("$[0].targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -240,7 +242,7 @@ public class RatingControllerTest {
                                 .with(authentication(new UsernamePasswordAuthenticationToken(otherUser, null,
                                                 Collections.emptyList()))))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].targetId").value("media-123"));
+                                .andExpect(jsonPath("$[0].targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -254,7 +256,7 @@ public class RatingControllerTest {
 
                 mockMvc.perform(get("/api/ratings/user/1"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].targetId").value("media-123"));
+                                .andExpect(jsonPath("$[0].targetMedia.id").value("media-123"));
         }
 
         @Test
@@ -292,7 +294,7 @@ public class RatingControllerTest {
         }
 
         @Test
-        @DisplayName("editRatingReview deve retornar 403 quando não autenticado")
+        @DisplayName("editRatingReview deve retornar 401 quando não autenticado")
         void editRatingReview_deveRetornar403_quandoNaoAutenticado() throws Exception {
                 RatingEditRequestDto.EditReviewRequestDto request = new RatingEditRequestDto.EditReviewRequestDto(
                                 "New review text");
@@ -300,7 +302,7 @@ public class RatingControllerTest {
                 mockMvc.perform(patch("/api/ratings/10/review")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -359,7 +361,7 @@ public class RatingControllerTest {
         }
 
         @Test
-        @DisplayName("editRatingNote deve retornar 403 quando não autenticado")
+        @DisplayName("editRatingNote deve retornar 401 quando não autenticado")
         void editRatingNote_deveRetornar403_quandoNaoAutenticado() throws Exception {
                 RatingEditRequestDto.EditRatingNoteRequestDto request = new RatingEditRequestDto.EditRatingNoteRequestDto(
                                 3.5f);
@@ -367,7 +369,7 @@ public class RatingControllerTest {
                 mockMvc.perform(patch("/api/ratings/10/note")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized());
         }
 
         // --- PATCH /api/ratings/{id}/privacy ---
@@ -409,7 +411,7 @@ public class RatingControllerTest {
         }
 
         @Test
-        @DisplayName("editRatingPrivacy deve retornar 403 quando não autenticado")
+        @DisplayName("editRatingPrivacy deve retornar 401 quando não autenticado")
         void editRatingPrivacy_deveRetornar403_quandoNaoAutenticado() throws Exception {
                 RatingEditRequestDto.EditPrivacyRequestDto request = new RatingEditRequestDto.EditPrivacyRequestDto(
                                 Privacy.PRIVATE);
@@ -417,7 +419,7 @@ public class RatingControllerTest {
                 mockMvc.perform(patch("/api/ratings/10/privacy")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized());
         }
 
         // --- DELETE /api/ratings/{id} ---
@@ -434,10 +436,10 @@ public class RatingControllerTest {
         }
 
         @Test
-        @DisplayName("deleteRating deve retornar 403 quando não autenticado")
+        @DisplayName("deleteRating deve retornar 401 quando não autenticado")
         void deleteRating_deveRetornar403_quandoNaoAutenticado() throws Exception {
                 mockMvc.perform(delete("/api/ratings/10"))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized());
         }
 
         @Test

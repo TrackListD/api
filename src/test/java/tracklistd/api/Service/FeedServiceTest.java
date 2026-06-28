@@ -21,8 +21,14 @@ import tracklistd.api.Entity.Enums.Role;
 import tracklistd.api.Repository.MusicRepository;
 import tracklistd.api.Repository.PublicationRepository;
 import tracklistd.api.Repository.UserRepository;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.Rollback;
 
 @SpringBootTest
+@ActiveProfiles("test")
+@Transactional
+@Rollback
 public class FeedServiceTest {
     @Autowired
     FeedService feedService;

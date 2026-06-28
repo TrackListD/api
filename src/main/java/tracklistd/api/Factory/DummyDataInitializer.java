@@ -10,6 +10,8 @@ import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Enums.Role;
 import tracklistd.api.Repository.UserRepository;
 
+import java.util.Set;
+
 @Component
 @Profile("populate")
 public class DummyDataInitializer implements CommandLineRunner {
@@ -81,6 +83,9 @@ public class DummyDataInitializer implements CommandLineRunner {
                 "Músicas para Treinar Pesado",
                 Privacy.PUBLIC,
                 true,
+                "Playlist focada em treinos de alta intensidade, com muito metal, rock pesado e batidas rápidas.",
+                null,
+                Set.of("Treino", "Rock", "Academia"),
                 m1, m4, m6);
 
         // Playlist de clássicos do Carlos
@@ -90,6 +95,9 @@ public class DummyDataInitializer implements CommandLineRunner {
                 "Ouro do Rock 70s/80s",
                 Privacy.PUBLIC,
                 false,
+                "Uma coletânea contendo os maiores clássicos do rock das décadas de 70 e 80.",
+                null,
+                Set.of("Classicos", "Rock", "80s"),
                 m2, m5);
 
         // Playlist focada da Ana
@@ -99,6 +107,9 @@ public class DummyDataInitializer implements CommandLineRunner {
                 "Foco Profundo & Estudo",
                 Privacy.PUBLIC,
                 false,
+                "Músicas calmas, lo-fi e instrumentais ideais para concentração e leitura.",
+                null,
+                Set.of("Lofi", "Foco", "Estudo"),
                 m3, m7);
 
         // Playlist privada da Maria (Apenas de teste interno)
@@ -108,6 +119,9 @@ public class DummyDataInitializer implements CommandLineRunner {
                 "Minhas madrugadas reflexivas",
                 Privacy.PRIVATE,
                 true,
+                "Músicas nostálgicas e reflexivas para ouvir na calada da noite.",
+                null,
+                Set.of("Madrugada", "Sad", "Nostalgia"),
                 m1, m3, m5);
 
         System.out.println("✅ Banco de dados populado com uma quantidade massiva de cenários de teste!");

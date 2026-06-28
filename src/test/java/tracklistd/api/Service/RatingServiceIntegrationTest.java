@@ -56,7 +56,7 @@ class RatingServiceIntegrationTest {
         Privacy privacy = Privacy.PUBLIC;
 
         // Act
-        Rating createdRating = ratingService.createRating(author, target, ratingNote, review, privacy);
+        Rating createdRating = ratingService.createRating(author, target.getSpotifyID(), ratingNote, review, privacy);
         assertNotNull(createdRating);
         assertNotNull(createdRating.getId());
 
