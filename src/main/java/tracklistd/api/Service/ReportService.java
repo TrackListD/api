@@ -73,6 +73,11 @@ public class ReportService {
         return createReport(informer, target, commentTarget, ratingTarget, dto.reportReason());
     }
 
+    public Report getReportById(Long id) {
+        return reportRepository.findById(id)
+                .orElseThrow(() -> new ReportDoesNotExist("Esta denúncia não existe. ID: " + id));
+    }
+
     public List<Report> getPendingReports(){
         return reportRepository.findByStatusReport(ReportStatus.PENDING);
     }

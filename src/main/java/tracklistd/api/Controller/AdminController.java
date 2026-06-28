@@ -32,6 +32,17 @@ public class AdminController {
         this.reportMapper = reportMapper;
     }
 
+    @Operation(summary = "Buscar denúncia por ID", description = "Retorna os detalhes de uma denúncia específica para a tela de solução do administrador.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Denúncia encontrada e detalhada."),
+            @ApiResponse(responseCode = "404", description = "Denúncia não encontrada no banco de dados.")
+    })
+    @GetMapping("/reports/{id}")
+    public ResponseEntity<ReportResponseDto> getReportById(@PathVariable Long id) {
+        Report report = reportService.getReportById(id);
+        return ResponseEntity.ok(reportMapper.toDto(report));
+    }
+
     @Operation(summary = "Moderar uma denúncia", description = "Permite que um administrador defina o status final e aplique punições.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Denúncia moderada e devidas providências tomadas."),
