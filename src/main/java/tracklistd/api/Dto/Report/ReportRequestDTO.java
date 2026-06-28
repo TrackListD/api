@@ -4,19 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record ReportRequestDTO(
-    @NotNull(message="Report must have a informer")
-    long informer_id,
+    @NotNull(message="O ID do denunciante é obrigatório.")
+    Long informerId,
 
-    @NotNull(message="Report must have a user target")
-    long user_target_id,
+    Long userTargetId,
 
-    @NotBlank (message="Report must have a reason")
-    String report_reason_id,
+    @NotBlank (message="O motivo da denúncia é obrigatório.")
+    String reportReason,
 
-    Long comment_target_id,
-    Long rating_target_id
+    Long commentTargetId,
+    Long ratingTargetId
 )   
 {}
-
-
-

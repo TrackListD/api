@@ -31,8 +31,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>{
     List<Report> findByUserInformerId(Long userId);
 
     //Retorna todos os Reports feitos contra determinado Rating
-    // Correto: Agora ele acha a variável 'ratingTarget' e pega o 'Id' dela
-    List<Report> findByRatingTargetId(Long ratingId);
+    List<Report> findByRatingId(Long ratingId);
 
     //Retorna Reports contra um usuário com determinado Status
     List<Report> findByUserTargetIdAndStatusReport(Long userId, ReportStatus status);
