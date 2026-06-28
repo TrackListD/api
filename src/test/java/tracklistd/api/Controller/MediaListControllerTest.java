@@ -47,8 +47,8 @@ public class MediaListControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
     @MockitoBean
     private MediaListService mediaListService;
@@ -247,14 +247,14 @@ public class MediaListControllerTest {
     }
 
     @Test
-    @DisplayName("editMediaListName deve retornar 403 quando não autenticado")
+    @DisplayName("editMediaListName deve retornar 401 quando não autenticado")
     void editMediaListName_deveRetornar403_quandoNaoAutenticado() throws Exception {
         MediaListEditRequestDto.EditNameRequestDto request = new MediaListEditRequestDto.EditNameRequestDto("New Name");
 
         mockMvc.perform(patch("/api/mediaList/10/name")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -364,10 +364,10 @@ public class MediaListControllerTest {
     }
 
     @Test
-    @DisplayName("favoriteMediaList deve retornar 403 quando não autenticado")
+    @DisplayName("favoriteMediaList deve retornar 401 quando não autenticado")
     void favoriteMediaList_deveRetornar403_quandoNaoAutenticado() throws Exception {
         mockMvc.perform(post("/api/mediaList/10/favorite"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     // --- DELETE /api/mediaList/{id}/favorite ---
@@ -399,10 +399,10 @@ public class MediaListControllerTest {
     }
 
     @Test
-    @DisplayName("deleteMediaList deve retornar 403 quando não autenticado")
+    @DisplayName("deleteMediaList deve retornar 401 quando não autenticado")
     void deleteMediaList_deveRetornar403_quandoNaoAutenticado() throws Exception {
         mockMvc.perform(delete("/api/mediaList/10"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
