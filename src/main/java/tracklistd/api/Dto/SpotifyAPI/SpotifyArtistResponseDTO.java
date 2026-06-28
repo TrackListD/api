@@ -8,7 +8,7 @@ public record SpotifyArtistResponseDTO(
         @JsonProperty("id") String id,
         @JsonProperty("name") String name,
         @JsonProperty("genres") List<String> genres,
-        @JsonProperty("profile_picture") List<SpotifyArtistImageDTO> images) {
+        @JsonProperty("images") List<SpotifyArtistImageDTO> images) {
 
     public String getProfilePictureURL() {
         if (images != null && !images.isEmpty())
