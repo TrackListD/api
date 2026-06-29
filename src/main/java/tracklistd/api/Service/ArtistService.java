@@ -3,12 +3,15 @@ package tracklistd.api.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import tracklistd.api.Dto.Artist.ArtistDetailsResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyAlbumResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyArtistResponseDTO;
 import tracklistd.api.Entity.Album;
 import tracklistd.api.Entity.Artist;
 import tracklistd.api.Integration.Spotify.Client.SpotifyClient;
 import tracklistd.api.Mapper.SpotifyEntityMapper;
+import tracklistd.api.Repository.AlbumRepository;
 import tracklistd.api.Repository.ArtistRepository;
 import tracklistd.api.Repository.MediaRepository;
 
@@ -20,11 +23,14 @@ public class ArtistService {
 
     private final ArtistRepository artistRepository;
     private final MediaRepository mediaRepository;
+    private final AlbumRepository albumRepository;
     private final SpotifyClient spotifyClient;
     private final SpotifyEntityMapper mapper;
 
     @Transactional
     public Artist syncArtistAndMedia(String spotifyId) {
+        System.out.println("DEBUG - O ID que chegou no Service foi: '" + spotifyId + "'");
+
         SpotifyArtistResponseDTO artistDto = spotifyClient.getArtistById(spotifyId);
 
         Artist artist = artistRepository.findArtistBySpotifyID(spotifyId)
@@ -53,5 +59,14 @@ public class ArtistService {
                 mediaRepository.save(newAlbum);
             }
         }
+    }
+
+    @Transactional()
+    public ArtistDetailsResponseDTO getArtistDetails(String spotifyId) {
+        Artist artist = syncArtistAndMedia(spotifyId); 
+
+        List<Album> albums = albumRepository.findAlbumsByArtistId(spotifyId);
+
+        return mapper.toArtistsDetailsResponseDTO(artist, albums);
     }
 }
