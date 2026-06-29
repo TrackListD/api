@@ -12,10 +12,11 @@ import java.util.Optional;
 public interface MediaRepository extends JpaRepository<Media, Long> {
 
     @Query("""
-            SELECT DISTINCT med FROM Media med
-            LEFT JOIN FETCH med.authors
-            WHERE med.spotifyID = :spotifyID
-            """)
-    Optional<Media> findMediaBySpotifyID(@Param("spotifyID") String spotifyID);
+    SELECT DISTINCT med FROM Media med
+    LEFT JOIN FETCH med.authors
+    LEFT JOIN FETCH med.musics
+    WHERE med.spotifyID = :spotifyID
+    """)
+Optional<Media> findMediaBySpotifyID(@Param("spotifyID") String spotifyID);
 
 }
