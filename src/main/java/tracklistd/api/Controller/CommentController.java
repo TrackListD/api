@@ -41,7 +41,6 @@ public class CommentController {
     private final CommentMapper commentMapper;
     private final UserService userService;
 
-
     @PostMapping
     @Operation(summary = "Criar comentário", description = "Adiciona um comentário a uma publicação existente")
     @ApiResponses({
@@ -51,21 +50,20 @@ public class CommentController {
     })
     public ResponseEntity<CommentResponseDto> createComment(
             @AuthenticationPrincipal User user,
-            @Valid @RequestBody CommentRequestDto commentRequestDto
-    ) {
+            @Valid @RequestBody CommentRequestDto commentRequestDto) {
         Publication post = this.publicationService.getPublicationById(commentRequestDto.idPost());
 
         String commentText = commentRequestDto.text();
 
         Comment comment = this.commentService.createComment(user, post, commentText);
 
-        Long commentLikeCount = this.commentService.getCommentLikes(post);
+        Long commentLikeCount = this.commentService.getCommentLikes(comment); // Corrigido para buscar do comentário
 
-        CommentResponseDto commentResponseDto = this.commentMapper.toResponseDTO(comment, commentLikeCount);
+        // Como o usuário acabou de criar, likedByMe é false
+        CommentResponseDto commentResponseDto = this.commentMapper.toResponseDTO(comment, commentLikeCount, false);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(commentResponseDto);
     }
-
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -76,11 +74,10 @@ public class CommentController {
             @ApiResponse(responseCode = "404", description = "Comentário não encontrado")
     })
     public ResponseEntity<CommentOwnerResponseDto> getUserComment(
-            @PathVariable Long id
-    ) {
-        return ResponseEntity.status(HttpStatus.OK).body(buildOwnerResponse(id));
+            @AuthenticationPrincipal User user, // Adicionado para checar curtida
+            @PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(buildOwnerResponse(id, user));
     }
-
 
     @GetMapping("/post/{postId}")
     @Operation(summary = "Listar comentários de um post", description = "Lista todos os comentários vinculados a uma publicação específica")
@@ -89,17 +86,16 @@ public class CommentController {
             @ApiResponse(responseCode = "404", description = "Publicação não encontrada")
     })
     public ResponseEntity<List<CommentResponseDto>> getPostComments(
-            @PathVariable Long postId
-    ) {
+            @AuthenticationPrincipal User user, // Adicionado para passar aos mappers
+            @PathVariable Long postId) {
         Publication publication = this.publicationService.getPublicationById(postId);
 
         List<Comment> postComments = this.commentService.getCommentsByPost(publication);
 
-        List<CommentResponseDto> responseDtos = buildCommentResponseList(postComments);
+        List<CommentResponseDto> responseDtos = buildCommentResponseList(postComments, user);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDtos);
     }
-
 
     @GetMapping("/user/{userId}")
     @Operation(summary = "Listar comentários de um usuário", description = "Retorna os comentários feitos por um usuário específico")
@@ -109,13 +105,12 @@ public class CommentController {
     })
     public ResponseEntity<?> getUserComments(
             @AuthenticationPrincipal User user,
-            @PathVariable Long userId
-    ) {
+            @PathVariable Long userId) {
         User userWanted = this.userService.findUserById(userId);
 
         List<Comment> postComments = this.commentService.getCommentsByUser(userWanted);
 
-        List<CommentResponseDto> responseDtos = buildCommentResponseList(postComments);
+        List<CommentResponseDto> responseDtos = buildCommentResponseList(postComments, user);
 
         if (user == null || !Objects.equals(userWanted.getId(), user.getId()))
             return ResponseEntity.status(HttpStatus.OK).body(responseDtos);
@@ -129,11 +124,10 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(responseOwnerDtos);
     }
 
-
     @PatchMapping("/{id}/text")
     @Operation(summary = "Editar texto do comentário", description = "Atualiza o conteúdo de texto de um comentário")
     @ApiResponses({
-            @ApiResponse(responseCode = "202", description = "Texto do comentário atualizado com sucesso"),
+            @ApiResponse(responseCode = "202", description = "Texto do comentário updated com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
             @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
             @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
@@ -142,14 +136,12 @@ public class CommentController {
     public ResponseEntity<CommentOwnerResponseDto> editCommentText(
             @AuthenticationPrincipal User user,
             @PathVariable Long id,
-            @RequestBody @Valid CommentEditRequestDto editRequestDto
-    ) {
+            @RequestBody @Valid CommentEditRequestDto editRequestDto) {
 
         this.commentService.editCommentText(editRequestDto.newText(), id, user.getId());
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id, user));
     }
-
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Excluir comentário", description = "Remove um comentário existente")
@@ -161,8 +153,7 @@ public class CommentController {
     })
     public ResponseEntity<Void> deleteComment(
             @AuthenticationPrincipal User user,
-            @PathVariable Long id
-    ) {
+            @PathVariable Long id) {
 
         this.commentService.deleteComment(id, user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -173,27 +164,34 @@ public class CommentController {
         return ResponseEntity.ok(LocalDateTime.now());
     }
 
-    // Métodos privados
+    // Métodos privados ajustados
 
-    private CommentOwnerResponseDto buildOwnerResponse(Long commentId) {
+    private CommentOwnerResponseDto buildOwnerResponse(Long commentId, User user) {
         Comment comment = this.commentService.getCommentById(commentId);
 
-        Long likeCount = this.commentService.getCommentLikes(comment.getPost());
+        Long likeCount = this.commentService.getCommentLikes(comment);
 
-        CommentResponseDto responseDto = this.commentMapper.toResponseDTO(comment, likeCount);
+        boolean likedByMe = user != null && comment.getLikes() != null && comment.getLikes().contains(user);
+
+        CommentResponseDto responseDto = this.commentMapper.toResponseDTO(comment, likeCount, likedByMe);
 
         return this.commentMapper.toOwnerResponseDTO(comment, responseDto);
     }
 
     @NonNull
-    private List<CommentResponseDto> buildCommentResponseList(List<Comment> postComments) {
+    private List<CommentResponseDto> buildCommentResponseList(List<Comment> postComments, User user) {
         Long likeCount;
         List<CommentResponseDto> responseDtos = new ArrayList<>();
 
         for (Comment comment : postComments) {
-            likeCount = this.commentService.getCommentLikes(comment.getPost());
+            likeCount = this.commentService.getCommentLikes(comment); // Ajustado para puxar as curtidas do comentário
 
-            CommentResponseDto commentResponseDto = this.commentMapper.toResponseDTO(comment, likeCount);
+            boolean likedByMe = false;
+            if (user != null) {
+                likedByMe = this.commentService.hasUserLikedComment(comment.getId(), user.getId());
+            }
+
+            CommentResponseDto commentResponseDto = this.commentMapper.toResponseDTO(comment, likeCount, likedByMe);
             responseDtos.add(commentResponseDto);
         }
 

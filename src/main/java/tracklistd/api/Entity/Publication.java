@@ -1,6 +1,8 @@
 package tracklistd.api.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -10,6 +12,7 @@ import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@Getter
 @DiscriminatorColumn(name = "type_publication", discriminatorType = DiscriminatorType.STRING)
 public abstract class Publication {
 
@@ -62,7 +65,9 @@ public abstract class Publication {
         return comments;
     }
 
-    public User getAuthor(){return this.author;}
+    public User getAuthor() {
+        return this.author;
+    }
 
     public void setAuthor(User author) {
         this.author = author;

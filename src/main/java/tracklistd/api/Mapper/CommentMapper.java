@@ -18,10 +18,11 @@ public interface CommentMapper {
     @Mapping(source = "comment.post.id", target = "postId")
     @Mapping(source = "comment.author.id", target = "authorId")
     @Mapping(source = "likeCount", target = "likeCount")
-    CommentResponseDto toResponseDTO(Comment comment, Long likeCount);
+    @Mapping(source = "likedByMe", target = "likedByMe")
+    CommentResponseDto toResponseDTO(Comment comment, Long likeCount, Boolean likedByMe);
 
     @Mapping(source = "commentResponseDto", target = "publicData")
     @Mapping(source = "comment.moderationStatus", target = "status")
-    @Mapping(source = "comment.updateAt",target = "updateAt")
+    @Mapping(source = "comment.updateAt", target = "updateAt")
     CommentOwnerResponseDto toOwnerResponseDTO(Comment comment, CommentResponseDto commentResponseDto);
 }
