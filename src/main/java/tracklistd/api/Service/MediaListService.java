@@ -25,11 +25,14 @@ public class MediaListService {
     // Injeção de Dependencia
     private final MediaListRepository mediaListRepository;
     private final MediaRepository mediaRepository;
+    private final MediaService mediaService;
 
     // Construtor gerenciado pelo Spring Boot
-    public MediaListService(MediaListRepository mediaListRepository, MediaRepository mediaRepository) {
+    public MediaListService(MediaListRepository mediaListRepository, MediaRepository mediaRepository,
+            MediaService mediaService) {
         this.mediaListRepository = mediaListRepository;
         this.mediaRepository = mediaRepository;
+        this.mediaService = mediaService;
     }
 
     // Métodos Publicos
@@ -99,9 +102,11 @@ public class MediaListService {
     public void addMediaToList(Long mediaListId, String mediaId, Long authorId) {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
 
-        // Procuro a media pelo Id
-        Media media = this.mediaRepository.findMediaBySpotifyID(mediaId).orElseThrow(
-                () -> new ResourceNotFoundException("Essa midia não existe"));
+        // Procuro a media pelo Id. Se não existir no banco ainda, o MediaService
+        // busca no Spotify e persiste antes de retornar (mesma lógica usada nas
+        // resenhas) — por isso usamos mediaService.getMediaById ao invés de ir
+        // direto no mediaRepository, que só faz o SELECT e nunca cria a mídia.
+        Media media = this.mediaService.getMediaById(mediaId);
         // Com a midia retornada, verifico se elá é do tipo da lista
         if (!mediaList.getTypeOfList().matches(media))
             throw new InvalidMediaTypeForListException("Impossivel adicionar um(a) " + media.getClass().getSimpleName()
@@ -117,7 +122,8 @@ public class MediaListService {
     public void removeMediaFromList(Long mediaListId, String mediaId, Long authorId) {
         MediaList mediaList = findMediaListAndValidateOwner(mediaListId, authorId);
 
-        // Procura a media pelo id
+        // Procura a media pelo id (aqui pode continuar usando o repository direto:
+        // se a mídia não existir localmente, ela com certeza não está na lista)
         Media media = this.mediaRepository.findMediaBySpotifyID(mediaId).orElseThrow(
                 () -> new ResourceNotFoundException("Essa midia não existe"));
         // Com a media retornada, verifico se ela está na lista
@@ -157,6 +163,7 @@ public class MediaListService {
         List<MediaList> mediaLists = this.mediaListRepository.findAllByAuthorWithAuthorAndMedia(user);
 
         this.mediaListRepository.findAllByAuthorWithTags(user);
+        this.mediaListRepository.findAllByAuthorWithAlbumMusics(user);
 
         return mediaLists;
     }
@@ -173,6 +180,7 @@ public class MediaListService {
                 () -> new ResourceNotFoundException("Essa Lista não existe ou não foi encontrada"));
 
         this.mediaListRepository.findByIdWithTags(mediaId);
+        this.mediaListRepository.findByIdWithAlbumMusics(mediaId);
 
         return mediaList;
     }

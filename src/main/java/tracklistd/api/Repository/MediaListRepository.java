@@ -34,6 +34,11 @@ public interface MediaListRepository extends JpaRepository<MediaList, Long> {
     // Método que retorna uma lista com um nome, para verificar Unicidade
     Optional<MediaList> findMediaListByAuthorAndListName(User author, String listName);
 
+    // OBS: 'musics' NÃO pode ser fetch-joinada junto com 'med.authors' na
+    // mesma query — ambas são List (Bag) e o Hibernate lança
+    // MultipleBagFetchException ao tentar fetch join de duas bags ao mesmo
+    // tempo. Por isso o fetch de musics fica em uma query separada
+    // (findByIdWithAlbumMusics), seguindo o mesmo padrão já usado para tags.
     @Query("""
             SELECT DISTINCT m FROM MediaList m
             JOIN FETCH m.author
@@ -42,6 +47,20 @@ public interface MediaListRepository extends JpaRepository<MediaList, Long> {
             WHERE m.id = :id
             """)
     Optional<MediaList> findByIdWithAuthorAndMedia(@Param("id") Long id);
+
+    // Query auxiliar: inicializa a coleção 'musics' de qualquer Album presente
+    // na lista (mesmo id, mesma sessão — as entidades já carregadas por
+    // findByIdWithAuthorAndMedia são as mesmas instâncias gerenciadas aqui).
+    // Necessária porque Album.getTotalDurationMs() acessa 'musics', que é
+    // FetchType.LAZY; sem isso, o acesso fora da sessão lança
+    // LazyInitializationException durante a serialização da resposta.
+    @Query("""
+            SELECT DISTINCT m FROM MediaList m
+            LEFT JOIN FETCH m.media med
+            LEFT JOIN FETCH TREAT(med AS Album).musics
+            WHERE m.id = :id
+            """)
+    Optional<MediaList> findByIdWithAlbumMusics(@Param("id") Long id);
 
     // Query 2: só inicializa tags (ElementCollection) no MESMO id.
     // Não pode ser fetch-joinada junto com 'media' na query acima porque
@@ -62,6 +81,16 @@ public interface MediaListRepository extends JpaRepository<MediaList, Long> {
             WHERE m.author = :author
             """)
     List<MediaList> findAllByAuthorWithAuthorAndMedia(@Param("author") User author);
+
+    // Mesma lógica de findByIdWithAlbumMusics, mas para todas as listas de um
+    // autor.
+    @Query("""
+            SELECT DISTINCT m FROM MediaList m
+            LEFT JOIN FETCH m.media med
+            LEFT JOIN FETCH TREAT(med AS Album).musics
+            WHERE m.author = :author
+            """)
+    List<MediaList> findAllByAuthorWithAlbumMusics(@Param("author") User author);
 
     @Query("""
             SELECT DISTINCT m FROM MediaList m
