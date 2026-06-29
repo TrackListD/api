@@ -2,10 +2,12 @@ package tracklistd.api.Mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import tracklistd.api.Dto.Artist.ArtistMinDTO;
 import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Dto.User.UserMinResponseDTO;
 import tracklistd.api.Dto.User.UserPerfilResponseDTO;
 import tracklistd.api.Dto.User.UserRegisterResponseDTO;
+import tracklistd.api.Entity.Artist;
 import tracklistd.api.Entity.Media;
 import tracklistd.api.Entity.User;
 
@@ -24,16 +26,21 @@ public interface UserMapper {
             Boolean currentUserIsFollowing,
             Long followersCount,
             Long followingCount,
-            Long mediaListsCount
-    );
+            Long mediaListsCount);
 
     UserMinResponseDTO toMinDto(User user);
 
-    // Método para converter qualquer Mídia para o DTO usando o nosso construtor
     default MediaMinDTO mapMediaToMinDto(Media media) {
         if (media == null) {
             return null;
         }
         return new MediaMinDTO(media);
+    }
+
+    default ArtistMinDTO mapArtistToMinDto(Artist artist) {
+        if (artist == null) {
+            return null;
+        }
+        return new ArtistMinDTO(artist);
     }
 }

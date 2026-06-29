@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import tracklistd.api.Entity.Artist;
 
 @Repository
-public interface ArtistRepository extends JpaRepository<Artist, Long> {
+public interface ArtistRepository extends JpaRepository<Artist, String> {
 
-    Optional<Artist> findArtistBySpotifyID(String SpotifyId);
+    Optional<Artist> findArtistBySpotifyID(String spotifyId);
 }

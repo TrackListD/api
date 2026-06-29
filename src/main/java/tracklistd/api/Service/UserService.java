@@ -1,7 +1,5 @@
 package tracklistd.api.Service;
 
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,15 +7,16 @@ import com.google.firebase.auth.FirebaseToken;
 
 import tracklistd.api.Dto.User.UserRegisterRequestDTO;
 import tracklistd.api.Dto.User.UserUpdatePerfilRequestDTO;
-import tracklistd.api.Entity.Enums.ModerationStatus;
-import tracklistd.api.Entity.Enums.Punishment;
 import tracklistd.api.Entity.Album;
 import tracklistd.api.Entity.Artist;
+import tracklistd.api.Entity.Enums.ModerationStatus;
+import tracklistd.api.Entity.Enums.Punishment;
+import tracklistd.api.Entity.Enums.Privacy;
+import tracklistd.api.Entity.Enums.Role;
+import tracklistd.api.Entity.Media;
 import tracklistd.api.Entity.Music;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
-import tracklistd.api.Entity.Enums.Privacy;
-import tracklistd.api.Entity.Enums.Role;
 import tracklistd.api.Exceptions.UserExceptions.FollowYourself;
 import tracklistd.api.Exceptions.UserExceptions.FriendDoesNotExist;
 import tracklistd.api.Exceptions.UserExceptions.LoginApiAlreadyUsed;
@@ -34,10 +33,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final MediaListRepository mediaListRepository;
+    private final MediaService mediaService;
+    private final ArtistService artistService;
 
-    public UserService(UserRepository userRepository, MediaListRepository mediaListRepository) {
+    public UserService(UserRepository userRepository,
+            MediaListRepository mediaListRepository,
+            MediaService mediaService,
+            ArtistService artistService) {
         this.userRepository = userRepository;
         this.mediaListRepository = mediaListRepository;
+        this.mediaService = mediaService;
+        this.artistService = artistService;
     }
 
     @Transactional
@@ -67,20 +73,58 @@ public class UserService {
             perfil.setBio(dto.bio());
         if (dto.whoCanComment() != null)
             perfil.setWhoCanComment(dto.whoCanComment());
-        if (dto.favoriteAlbum() != null)
-            perfil.setFavoriteAlbum(dto.favoriteAlbum());
-        if (dto.favoriteArtist() != null)
-            perfil.setFavoriteArtist(dto.favoriteArtist());
-        if (dto.favoriteMusic() != null)
-            perfil.setFavoriteArtist(dto.favoriteArtist());
+
+        if (dto.favoriteAlbumSpotifyId() != null) {
+            Media media = mediaService.getMediaById(dto.favoriteAlbumSpotifyId());
+            if (!(media instanceof Album favoriteAlbum)) {
+                throw new ResourceNotFoundException("O item informado não é um álbum");
+            }
+            perfil.setFavoriteAlbum(favoriteAlbum);
+        }
+
+        if (dto.favoriteMusicSpotifyId() != null) {
+            Media media = mediaService.getMediaById(dto.favoriteMusicSpotifyId());
+            if (!(media instanceof Music favoriteMusic)) {
+                throw new ResourceNotFoundException("O item informado não é uma música");
+            }
+            perfil.setFavoriteMusic(favoriteMusic);
+        }
+
+        if (dto.favoriteArtistSpotifyId() != null) {
+            Artist favoriteArtist = artistService.syncArtistAndMedia(dto.favoriteArtistSpotifyId());
+            perfil.setFavoriteArtist(favoriteArtist);
+        }
 
         return userRepository.save(perfil);
     }
 
     @Transactional
     public User findUserById(Long id) {
-        return this.userRepository.findFullById(id).orElseThrow(
+        User user = this.userRepository.findFullById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Esse Usuario não foi encontrado"));
+
+        if (user.getFavoriteAlbum() != null) {
+            userRepository.fetchFavoriteAlbumAuthors(id)
+                    .ifPresent(reidrated -> {
+                        var authorsLoadedAlbum = reidrated.getFavoriteAlbum();
+                        user.setFavoriteAlbum(authorsLoadedAlbum);
+                    });
+            userRepository.fetchFavoriteAlbumMusics(id)
+                    .ifPresent(reidrated -> {
+                        // Copia a lista de músicas já inicializada para o
+                        // mesmo objeto Album que já está com authors
+                        // carregado, em vez de sobrescrever o Album inteiro
+                        // (o que perderia o authors carregado no passo acima).
+                        user.getFavoriteAlbum().setMusics(reidrated.getFavoriteAlbum().getMusics());
+                    });
+        }
+
+        if (user.getFavoriteMusic() != null) {
+            userRepository.fetchUserWithFavoriteMusicAuthors(id)
+                    .ifPresent(reidrated -> user.setFavoriteMusic(reidrated.getFavoriteMusic()));
+        }
+
+        return user;
     }
 
     @Transactional
@@ -132,18 +176,6 @@ public class UserService {
         return user.getFollowing().stream().collect(Collectors.toList());
     }
 
-
-//    @Transactional
-//    public User findOrCreateUser(FirebaseToken decodedToken) {
-//        return userRepository.findByIdLoginApi(decodedToken.getUid())
-//                .orElseGet(() -> {
-//                    UserRegisterRequestDTO dto = new UserRegisterRequestDTO(decodedToken.getName(),
-//                            decodedToken.getUid(), Role.MEMBER, Privacy.PUBLIC, "", decodedToken.getPicture());
-//                    return register(dto);
-//
-//                });
-//    }
-
     @Transactional
     public User findOrCreateUser(FirebaseToken decodedToken) {
         return userRepository.findByIdLoginApi(decodedToken.getUid())
@@ -156,8 +188,7 @@ public class UserService {
                             Role.MEMBER,
                             Privacy.PUBLIC,
                             "", // Bio vazia
-                            decodedToken.getPicture()
-                    );
+                            decodedToken.getPicture());
 
                     return register(dto);
                 });
@@ -207,7 +238,6 @@ public class UserService {
         userRepository.delete(target);
     }
 
-    // NOVOS MÉTODOS DE CONTAGEM (Pura performance)
     @Transactional(readOnly = true)
     public Long countFollowers(Long userId) {
         return userRepository.countFollowersByUserId(userId);
@@ -223,18 +253,8 @@ public class UserService {
         return mediaListRepository.countByAuthorId(authorId);
     }
 
-//    @Transactional
-//    public boolean isFollowing(Long followerId, Long followedId) {
-//        User follower = userRepository.findFullById(followerId).orElseThrow(() -> new UserDoesNotExist(followerId));
-//        return follower.getFollowing()
-//                .stream()
-//                .anyMatch(user -> user.getId().equals(followedId));
-//    }
-
-    // REFATORAÇÃO: Otimizando o isFollowing para não explodir a memória
     @Transactional(readOnly = true)
     public boolean isFollowing(Long followerId, Long followedId) {
-        // Em vez de carregar a lista toda, delegamos a checagem para o banco
         return userRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
     }
 
