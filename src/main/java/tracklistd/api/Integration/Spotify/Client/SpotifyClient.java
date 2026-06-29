@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import tracklistd.api.Dto.SpotifyAPI.SpotifyAlbumContainerDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyAlbumResponseDTO;
@@ -78,12 +79,16 @@ public class SpotifyClient {
 
     private HttpEntity<Void> createRequestWithToken() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(authManager.getAccessToken()); 
+        headers.setBearerAuth(authManager.getAccessToken());  
         return new HttpEntity<>(headers);
     }
 
     public List<SpotifyAlbumResponseDTO> getArtistAlbums(String artistSpotifyId) {
-        String url = SPOTIFY_API_URL + "/artists/" + artistSpotifyId + "/albums?include_groups=album,single&limit=20";
+        String url = UriComponentsBuilder.fromUriString(SPOTIFY_API_URL)
+                .pathSegment("artists", artistSpotifyId, "albums")
+                .queryParam("include_groups", "album")
+                .queryParam("limit", 10)
+                .toUriString();
 
         ResponseEntity<SpotifyAlbumContainerDTO> response = restTemplate.exchange(
                 url,
