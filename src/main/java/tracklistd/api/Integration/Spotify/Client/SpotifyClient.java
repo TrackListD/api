@@ -97,6 +97,16 @@ public class SpotifyClient {
                 SpotifyAlbumContainerDTO.class
         );
     
-        return response.getBody() != null ? response.getBody().items() : List.of();
+        return response.getBody().items().stream()
+            .filter(album -> {
+                String name = album.title().toLowerCase();
+                return !name.contains("deluxe") && 
+                       !name.contains("live") && 
+                       !name.contains("expanded") &&
+                       !name.contains("remaster") &&
+                       !name.contains("anniversary");
+            })
+            .limit(10)
+            .toList();
     }
 }
