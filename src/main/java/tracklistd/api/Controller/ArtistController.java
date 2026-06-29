@@ -7,7 +7,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tracklistd.api.Entity.Artist;
+
+import tracklistd.api.Dto.Artist.ArtistDetailsResponseDTO;
 import tracklistd.api.Service.ArtistService;
 
 @RestController
@@ -19,13 +20,18 @@ public class ArtistController {
     private final ArtistService artistService;
 
     @GetMapping("/{spotifyId}")
-    @Operation(summary = "Buscar e Sincronizar Artista", description = "Recupera os dados de um artista e sincroniza sua discografia (mídias lançadas) no banco de dados.")
+    @Operation(
+        summary = "Obter Detalhes do Artista", 
+        description = "Sincroniza os dados e a discografia do artista no banco e retorna os detalhes completos."
+    )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Artista sincronizado e retornado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Artista não encontrado no Spotify")
+            @ApiResponse(responseCode = "200", description = "Detalhes do artista e álbuns retornados com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Artista não encontrado no sistema ou no Spotify")
     })
-    public ResponseEntity<Artist> getAndSyncArtist(@PathVariable String spotifyId) {
-        Artist artist = artistService.syncArtistAndMedia(spotifyId);
-        return ResponseEntity.ok(artist);
+    public ResponseEntity<ArtistDetailsResponseDTO> getArtistDetails(@PathVariable String spotifyId) {
+        ArtistDetailsResponseDTO details = artistService.getArtistDetails(spotifyId);
+        System.out.println("DEBUG - O ID recebido no Controller foi: " + spotifyId);
+        
+        return ResponseEntity.ok(details);
     }
 }

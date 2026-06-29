@@ -4,6 +4,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import tracklistd.api.Dto.Artist.ArtistDetailsResponseDTO;
+import tracklistd.api.Dto.Artist.ArtistMinDTO;
+import tracklistd.api.Dto.Media.AlbumDetailsResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyAlbumResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyArtistResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyMusicResponseDTO;
@@ -27,6 +30,13 @@ public interface SpotifyEntityMapper {
     @Mapping(target = "bio", ignore = true)
     @Mapping(target = "releasedMedia", ignore = true)
     Artist toArtistEntity(SpotifyArtistResponseDTO dto);
+
+    @Mapping(source = "spotifyID", target = "spotifyID")
+    ArtistMinDTO toArtistMinDTO(Artist artist);
+
+    @Mapping(source = "artist", target = "artist")
+    @Mapping(source = "albums", target = "albums")
+    ArtistDetailsResponseDTO toArtistsDetailsResponseDTO(Artist artist, List<Album> albums);
 
     // ==========================================
     // 2. MAPEAMENTO DE MÚSICA
@@ -54,6 +64,11 @@ public interface SpotifyEntityMapper {
     @Mapping(source = "dto.musicGenres", target = "musicGenres")
     @Mapping(source = "dto.tracks.items", target = "musics", ignore = true)
     Album toAlbumEntity(SpotifyAlbumResponseDTO dto, List<Artist> resolvedArtists);
+
+    @Mapping(source = "spotifyID", target = "spotifyID")
+    @Mapping(source = "title", target = "name")
+    @Mapping(source = "coverUrl", target = "imageUrl")
+    AlbumDetailsResponseDTO toAlbumDetailsResponseDTO(Album album);
 
     @org.mapstruct.AfterMapping
     default void linkAlbumToMusics(@MappingTarget Album album) {
