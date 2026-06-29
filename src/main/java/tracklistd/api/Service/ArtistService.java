@@ -9,6 +9,7 @@ import tracklistd.api.Dto.SpotifyAPI.SpotifyAlbumResponseDTO;
 import tracklistd.api.Dto.SpotifyAPI.SpotifyArtistResponseDTO;
 import tracklistd.api.Entity.Album;
 import tracklistd.api.Entity.Artist;
+import tracklistd.api.Entity.Media;
 import tracklistd.api.Integration.Spotify.Client.SpotifyClient;
 import tracklistd.api.Mapper.SpotifyEntityMapper;
 import tracklistd.api.Repository.AlbumRepository;
@@ -16,6 +17,7 @@ import tracklistd.api.Repository.ArtistRepository;
 import tracklistd.api.Repository.MediaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,20 +48,23 @@ public class ArtistService {
     }
 
     private void syncReleasedMedia(Artist artist, String spotifyId) {
-        List<SpotifyAlbumResponseDTO> artistAlbums = spotifyClient.getArtistAlbums(spotifyId);
+    List<SpotifyAlbumResponseDTO> artistAlbums = spotifyClient.getArtistAlbums(spotifyId);
 
-        for (SpotifyAlbumResponseDTO albumDto : artistAlbums) {
-            boolean exists = mediaRepository.findMediaBySpotifyID(albumDto.id()).isPresent();
+    for (SpotifyAlbumResponseDTO albumDto : artistAlbums) {
+        Optional<Media> existingMedia = mediaRepository.findMediaBySpotifyID(albumDto.id());
+        
+        if (existingMedia.isEmpty()) {
+            Album newAlbum = mapper.toAlbumEntity(albumDto, List.of(artist));
+            newAlbum.setSingle("single".equalsIgnoreCase(albumDto.albumType()));
+            newAlbum.setAuthors(List.of(artist));
             
-            if (!exists) {
-                Album newAlbum = mapper.toAlbumEntity(albumDto, List.of(artist));
-                newAlbum.setSingle("single".equalsIgnoreCase(albumDto.albumType()));
-                
-                newAlbum.setAuthors(List.of(artist));
-                mediaRepository.save(newAlbum);
-            }
+            mediaRepository.save(newAlbum);
+            System.out.println("DEBUG - Álbum persistido com ID: " + albumDto.id());
+        } else {
+            System.out.println("DEBUG - Álbum já existente: " + albumDto.id());
         }
     }
+}
 
     @Transactional()
     public ArtistDetailsResponseDTO getArtistDetails(String spotifyId) {

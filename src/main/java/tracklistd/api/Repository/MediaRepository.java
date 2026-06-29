@@ -13,7 +13,9 @@ public interface MediaRepository extends JpaRepository<Media, String> {
     @Query("""
             SELECT DISTINCT med FROM Media med
             LEFT JOIN FETCH med.authors
+            LEFT JOIN FETCH med.musics
             WHERE med.spotifyID = :spotifyID
             """)
     Optional<Media> findMediaBySpotifyID(@Param("spotifyID") String spotifyID);
+
 }
