@@ -30,8 +30,6 @@ public class ArtistController {
     })
     public ResponseEntity<ArtistDetailsResponseDTO> getArtistDetails(@PathVariable String spotifyId) {
         ArtistDetailsResponseDTO details = artistService.getArtistDetails(spotifyId);
-        System.out.println("DEBUG - O ID recebido no Controller foi: " + spotifyId);
-        
         return ResponseEntity.ok(details);
     }
 }
