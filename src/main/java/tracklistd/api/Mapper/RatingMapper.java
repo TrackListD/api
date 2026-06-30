@@ -7,6 +7,7 @@ import tracklistd.api.Dto.Media.MediaMinDTO;
 import tracklistd.api.Dto.Rating.RatingOwnerResponseDto;
 import tracklistd.api.Dto.Rating.RatingRequestDto;
 import tracklistd.api.Dto.Rating.RatingResponseDto;
+import tracklistd.api.Dto.User.UserMinResponseDTO;
 import tracklistd.api.Entity.Media;
 import tracklistd.api.Entity.Rating;
 import tracklistd.api.Entity.User;
@@ -15,8 +16,7 @@ import tracklistd.api.Entity.User;
 public interface RatingMapper {
 
     // Transforma a Entidade em DTO de response
-    @Mapping(source = "rating.author.id", target = "authorId")
-    @Mapping(source = "rating.author.name", target = "authorName")
+    @Mapping(source = "rating.author", target = "author")
     @Mapping(source = "rating.targetMedia", target = "targetMedia")
     @Mapping(source = "commentCount", target = "commentCount")
     @Mapping(source = "likeCount", target = "likeCount")
@@ -34,4 +34,9 @@ public interface RatingMapper {
         return new MediaMinDTO(media);
     }
 
+    default UserMinResponseDTO mapUserToMinDto(User user) {
+        if (user == null)
+            return null;
+        return new UserMinResponseDTO(user.getId(), user.getName(), user.getProfilePic());
+    }
 }
