@@ -60,7 +60,10 @@ public class MediaListController {
                 MediaList mediaList = mediaListService.createMediaList(user, typeOfList, listName, privacy, isFavorite,
                                 description, coverImageUrl, tags);
 
-                MediaListResponseDto mediaListResponseDto = this.mediaListMapper.toResponseDto(mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
+                // Ajustado para passar o 4º parâmetro (likedByMe)
+                MediaListResponseDto mediaListResponseDto = this.mediaListMapper.toResponseDto(
+                                mediaList, getLikeCount(mediaList), getCommentCount(mediaList),
+                                isLikedByUser(mediaList, user));
                 MediaListOwnerResponseDto ownerResponse = this.mediaListMapper.toOwnerResponseDTO(mediaList,
                                 mediaListResponseDto);
 
@@ -78,7 +81,9 @@ public class MediaListController {
                         @PathVariable Long id) {
                 MediaList mediaList = this.mediaListService.getMediaListById(id);
 
-                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
+                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(
+                                mediaList, getLikeCount(mediaList), getCommentCount(mediaList),
+                                isLikedByUser(mediaList, user));
 
                 if (user == null)
                         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -107,7 +112,8 @@ public class MediaListController {
 
                 List<MediaList> allList = this.mediaListService.getAllByUser(userWanted);
 
-                List<MediaListResponseDto> responseDto = this.buildMediaListResponseList(allList);
+                // Ajustado para passar o usuário logado para a listagem coletiva
+                List<MediaListResponseDto> responseDto = this.buildMediaListResponseList(allList, user);
 
                 if (user == null)
                         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -128,13 +134,6 @@ public class MediaListController {
         }
 
         @PatchMapping("/{id}/name")
-        @Operation(summary = "Renomear lista", description = "Permite alterar o nome de uma lista de mídias")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "202", description = "Nome alterado com sucesso"),
-                        @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
-                        @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
-                        @ApiResponse(responseCode = "404", description = "Lista não encontrada")
-        })
         public ResponseEntity<MediaListOwnerResponseDto> editMediaListName(
                         @AuthenticationPrincipal User user,
                         @PathVariable Long id,
@@ -142,18 +141,10 @@ public class MediaListController {
 
                 this.mediaListService.renameMediaList(editNameDto.newName(), id, user.getId());
 
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id, user));
         }
 
         @PatchMapping("/{id}/privacy")
-        @Operation(summary = "Alterar privacidade da lista", description = "Altera as configurações de privacidade de uma lista")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "202", description = "Privacidade alterada com sucesso"),
-                        @ApiResponse(responseCode = "400", description = "Privacidade inválida fornecida"),
-                        @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
-                        @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
-                        @ApiResponse(responseCode = "404", description = "Lista não encontrada")
-        })
         public ResponseEntity<MediaListOwnerResponseDto> editMediaListPrivacy(
                         @AuthenticationPrincipal User user,
                         @PathVariable Long id,
@@ -161,7 +152,7 @@ public class MediaListController {
 
                 this.mediaListService.changeMediaListPrivacy(id, user.getId(), editNameDto.newPrivacy());
 
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id, user));
         }
 
         @PatchMapping("/{id}/description")
@@ -171,8 +162,7 @@ public class MediaListController {
                         @RequestBody @Valid MediaListEditRequestDto.EditDescriptionRequestDto editDescriptionDto) {
                 this.mediaListService.changeMediaListDescription(id, user.getId(), editDescriptionDto.newDescription());
 
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
-
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id, user));
         }
 
         @PatchMapping("/{id}/coverImage")
@@ -183,8 +173,7 @@ public class MediaListController {
                 this.mediaListService.changeMediaListCoverImage(id, user.getId(),
                                 editCoverImageRequestDto.newCoverImageUrl());
 
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
-
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id, user));
         }
 
         @PatchMapping("/{id}/tags")
@@ -194,18 +183,10 @@ public class MediaListController {
                         @RequestBody @Valid MediaListEditRequestDto.EditTagsRequestDto editTagsDto) {
                 this.mediaListService.updateTagToList(id, user.getId(), editTagsDto.newTags());
 
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id));
-
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(buildOwnerResponse(id, user));
         }
 
         @PostMapping("/{id}/medias/{mediaId}")
-        @Operation(summary = "Adicionar mídia à lista", description = "Adiciona uma música ou álbum à lista especificada")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Mídia adicionada com sucesso"),
-                        @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
-                        @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
-                        @ApiResponse(responseCode = "404", description = "Lista ou mídia não encontrada")
-        })
         public ResponseEntity<MediaListOwnerResponseDto> addMediaToList(
                         @AuthenticationPrincipal User user,
                         @PathVariable Long id,
@@ -213,17 +194,10 @@ public class MediaListController {
 
                 this.mediaListService.addMediaToList(id, mediaId, user.getId());
 
-                return ResponseEntity.status(HttpStatus.OK).body(buildOwnerResponse(id));
+                return ResponseEntity.status(HttpStatus.OK).body(buildOwnerResponse(id, user));
         }
 
         @DeleteMapping("/{id}/medias/{mediaId}")
-        @Operation(summary = "Remover mídia da lista", description = "Remove uma música ou álbum de uma lista existente")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Mídia removida com sucesso"),
-                        @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
-                        @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
-                        @ApiResponse(responseCode = "404", description = "Lista ou mídia não encontrada")
-        })
         public ResponseEntity<MediaListOwnerResponseDto> removeMediaFromList(
                         @AuthenticationPrincipal User user,
                         @PathVariable Long id,
@@ -231,17 +205,10 @@ public class MediaListController {
 
                 this.mediaListService.removeMediaFromList(id, mediaId, user.getId());
 
-                return ResponseEntity.status(HttpStatus.OK).body(buildOwnerResponse(id));
+                return ResponseEntity.status(HttpStatus.OK).body(buildOwnerResponse(id, user));
         }
 
         @PostMapping("/{id}/favorite")
-        @Operation(summary = "Favoritar lista", description = "Adiciona a lista de mídias aos favoritos do usuário logado")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Lista favoritada com sucesso"),
-                        @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
-                        @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
-                        @ApiResponse(responseCode = "404", description = "Lista não encontrada")
-        })
         public ResponseEntity<?> favoriteMediaList(
                         @AuthenticationPrincipal User user,
                         @PathVariable Long id) {
@@ -252,13 +219,6 @@ public class MediaListController {
         }
 
         @DeleteMapping("/{id}/favorite")
-        @Operation(summary = "Desfavoritar lista", description = "Remove a lista de mídias dos favoritos do usuário logado")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Lista desfavoritada com sucesso"),
-                        @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
-                        @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
-                        @ApiResponse(responseCode = "404", description = "Lista não encontrada")
-        })
         public ResponseEntity<?> unfavoriteMediaList(
                         @AuthenticationPrincipal User user,
                         @PathVariable Long id) {
@@ -269,13 +229,6 @@ public class MediaListController {
         }
 
         @DeleteMapping("/{id}")
-        @Operation(summary = "Excluir lista", description = "Remove permanentemente a lista de mídias especificada")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "204", description = "Lista excluída com sucesso"),
-                        @ApiResponse(responseCode = "401", description = "Usuário não autenticado (Token ausente ou inválido)"),
-                        @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
-                        @ApiResponse(responseCode = "404", description = "Lista não encontrada")
-        })
         public ResponseEntity<Void> deleteMediaList(
                         @AuthenticationPrincipal User user,
                         @PathVariable Long id) {
@@ -284,13 +237,13 @@ public class MediaListController {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        // ------- MÉTODOS PRIVADOS
-
         @NonNull
-        private MediaListOwnerResponseDto buildOwnerResponse(Long mediaId) {
+        private MediaListOwnerResponseDto buildOwnerResponse(Long mediaId, User user) {
                 MediaList mediaList = this.mediaListService.getMediaListById(mediaId);
 
-                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
+                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(
+                                mediaList, getLikeCount(mediaList), getCommentCount(mediaList),
+                                isLikedByUser(mediaList, user));
 
                 return this.mediaListMapper.toOwnerResponseDTO(mediaList, responseDto);
         }
@@ -299,7 +252,9 @@ public class MediaListController {
         private ResponseEntity<?> returnResponseDto(Long mediaId, User user) {
                 MediaList mediaList = this.mediaListService.getMediaListById(mediaId);
 
-                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
+                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(
+                                mediaList, getLikeCount(mediaList), getCommentCount(mediaList),
+                                isLikedByUser(mediaList, user));
 
                 boolean isOwner = Objects.equals(mediaList.getAuthorPublication().getId(), user.getId());
 
@@ -311,11 +266,12 @@ public class MediaListController {
         }
 
         @NonNull
-        private List<MediaListResponseDto> buildMediaListResponseList(List<MediaList> allMediaList) {
+        private List<MediaListResponseDto> buildMediaListResponseList(List<MediaList> allMediaList, User user) {
                 List<MediaListResponseDto> listResponseDtos = new ArrayList<>();
                 for (MediaList mediaList : allMediaList) {
                         MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(
-                                 mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
+                                        mediaList, getLikeCount(mediaList), getCommentCount(mediaList),
+                                        isLikedByUser(mediaList, user));
                         listResponseDtos.add(responseDto);
                 }
 
@@ -328,5 +284,14 @@ public class MediaListController {
 
         private Integer getCommentCount(MediaList mediaList) {
                 return this.commentRepository.countByPost(mediaList);
+        }
+
+        private boolean isLikedByUser(MediaList mediaList, User user) {
+                if (user == null)
+                        return false;
+
+                // Ajustado para passar os parâmetros na ordem correta exigida pela query do
+                // Spring Data Jpa
+                return this.likeRepository.existsByUserIdAndPublicationId(user.getId(), mediaList.getId());
         }
 }

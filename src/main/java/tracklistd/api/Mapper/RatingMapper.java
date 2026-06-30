@@ -20,7 +20,8 @@ public interface RatingMapper {
     @Mapping(source = "rating.targetMedia", target = "targetMedia")
     @Mapping(source = "commentCount", target = "commentCount")
     @Mapping(source = "likeCount", target = "likeCount")
-    RatingResponseDto toResponseDto(Rating rating, Integer commentCount, Long likeCount);
+    @Mapping(source = "likedByMe", target = "likedByMe")
+    RatingResponseDto toResponseDto(Rating rating, Integer commentCount, Long likeCount, boolean likedByMe);
 
     // Transforma a Entidade em DTO de response "privado" do criador
     @Mapping(source = "ratingResponseDto", target = "publicData")
