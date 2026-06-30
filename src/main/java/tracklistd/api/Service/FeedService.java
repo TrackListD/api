@@ -10,10 +10,13 @@ import jakarta.transaction.Transactional;
 import tracklistd.api.Dto.Feed.PublicationFeedDTO;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
 import tracklistd.api.Mapper.FeedMapper;
 import tracklistd.api.Repository.PublicationRepository;
 import tracklistd.api.Repository.UserRepository;
+import tracklistd.api.Repository.LikeRepository;
+import tracklistd.api.Repository.CommentRepository;
 
 @Service
 public class FeedService {
@@ -21,12 +24,19 @@ public class FeedService {
         private final PublicationRepository publicationRepository;
         private final UserRepository userRepository;
         private final FeedMapper feedMapper;
+        private final UserService userService;
+        private final LikeRepository likeRepository;
+        private final CommentRepository commentRepository;
 
         public FeedService(PublicationRepository publicationRepository, UserRepository userRepository,
-                        FeedMapper feedMapper) {
+                        FeedMapper feedMapper, UserService userService, LikeRepository likeRepository,
+                        CommentRepository commentRepository) {
                 this.publicationRepository = publicationRepository;
                 this.userRepository = userRepository;
                 this.feedMapper = feedMapper;
+                this.userService = userService;
+                this.likeRepository = likeRepository;
+                this.commentRepository = commentRepository;
         }
 
         @Transactional
@@ -35,11 +45,17 @@ public class FeedService {
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new UserDoesNotExist(userId));
 
+                List<Privacy> allowedPrivacies = List.of(Privacy.PUBLIC, Privacy.JUST_FOLLOWERS);
+
                 List<Publication> publications = publicationRepository
-                                .findByAuthorInOrderByPublicationDateDesc(user.getFollowing());
+                                .findSocialFeed(user.getFollowing(), allowedPrivacies);
 
                 return publications.stream()
-                                .map(publication -> feedMapper.toFeedDTO(publication, userId))
+                                .map(publication -> {
+                                        long likesCount = likeRepository.countByPublicationId(publication.getId());
+                                        int commentsCount = commentRepository.countByPost(publication);
+                                        return feedMapper.toFeedDTO(publication, userId, likesCount, commentsCount);
+                                })
                                 .toList();
         }
 
@@ -49,16 +65,34 @@ public class FeedService {
 
                 List<Publication> trending = publicationRepository.findTrending(oneWeekAgo);
 
-                return trending.stream().map(publication -> feedMapper.toFeedDTO(publication, userId))
+                return trending.stream()
+                                .map(publication -> {
+                                        long likesCount = likeRepository.countByPublicationId(publication.getId());
+                                        int commentsCount = commentRepository.countByPost(publication);
+                                        return feedMapper.toFeedDTO(publication, userId, likesCount, commentsCount);
+                                })
                                 .toList();
 
         }
 
         @Transactional
         public List<PublicationFeedDTO> getUserFeed(Long userId, Long myUserId) {
-                List<Publication> posts = publicationRepository.findByAuthorIdOrderByPublicationDateDesc(userId);
+                List<Privacy> allowedPrivacies;
+                if (userId.equals(myUserId)) {
+                        allowedPrivacies = List.of(Privacy.PUBLIC, Privacy.JUST_FOLLOWERS, Privacy.PRIVATE);
+                } else if (userService.isFollowing(myUserId, userId)) {
+                        allowedPrivacies = List.of(Privacy.PUBLIC, Privacy.JUST_FOLLOWERS);
+                } else {
+                        allowedPrivacies = List.of(Privacy.PUBLIC);
+                }
+
+                List<Publication> posts = publicationRepository.findUserFeed(userId, allowedPrivacies);
                 return posts.stream()
-                                .map(post -> feedMapper.toFeedDTO(post, myUserId))
+                                .map(post -> {
+                                        long likesCount = likeRepository.countByPublicationId(post.getId());
+                                        int commentsCount = commentRepository.countByPost(post);
+                                        return feedMapper.toFeedDTO(post, myUserId, likesCount, commentsCount);
+                                })
                                 .toList();
 
         }

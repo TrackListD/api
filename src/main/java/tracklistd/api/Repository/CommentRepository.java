@@ -13,7 +13,10 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.likes WHERE c.post = :post")
+    @Query("SELECT c FROM Comment c " +
+            "LEFT JOIN FETCH c.likes " +
+            "JOIN FETCH c.author " +
+            "WHERE c.post = :post")
     List<Comment> findAllByPost(@Param("post") Publication post);
 
     Integer countByPost(Publication post);

@@ -39,6 +39,9 @@ class MediaListServiceTest {
     @Mock
     private MediaRepository mediaRepository;
 
+    @Mock
+    private MediaService mediaService;
+
     @InjectMocks
     private MediaListService mediaListService;
 
@@ -248,7 +251,7 @@ class MediaListServiceTest {
         Long listId = 10L;
         String mediaId = "ieie9cdo03k0";
         when(mediaListRepository.findById(listId)).thenReturn(Optional.of(mediaList));
-        when(mediaRepository.findMediaBySpotifyID(mediaId)).thenReturn(Optional.empty());
+        when(mediaService.getMediaById(mediaId)).thenThrow(new ResourceNotFoundException("Media not found"));
 
         // Act & Assert (Ação e Validação)
 
@@ -265,7 +268,7 @@ class MediaListServiceTest {
         // Lista é de MÚSICA, mas passamos um ÁLBUM
         Album album = new Album();
         when(mediaListRepository.findById(listId)).thenReturn(Optional.of(mediaList));
-        when(mediaRepository.findMediaBySpotifyID(mediaId)).thenReturn(Optional.of(album));
+        when(mediaService.getMediaById(mediaId)).thenReturn(album);
 
         // Act & Assert (Ação e Validação)
         assertThrows(InvalidMediaTypeForListException.class,
@@ -280,7 +283,7 @@ class MediaListServiceTest {
         String mediaId = "pewlvwvwvw[vw";
         Music music = new Music();
         when(mediaListRepository.findById(listId)).thenReturn(Optional.of(mediaList));
-        when(mediaRepository.findMediaBySpotifyID(mediaId)).thenReturn(Optional.of(music));
+        when(mediaService.getMediaById(mediaId)).thenReturn(music);
 
         // Act (Ação)
         mediaListService.addMediaToList(listId, mediaId, author.getId());

@@ -2,6 +2,7 @@ package tracklistd.api.Repository;
 
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Entity.Enums.Privacy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,13 +17,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PublicationRepository extends JpaRepository<Publication, Long> {
 
-    public List<Publication> findByAuthorInOrderByPublicationDateDesc(Set<User> following);
+    @Query("SELECT p FROM Publication p WHERE p.author IN :following AND p.whoCanSee IN :privacies AND TYPE(p) IN (Rating, MediaList) ORDER BY p.publicationDate DESC")
+    List<Publication> findSocialFeed(@Param("following") Set<User> following, @Param("privacies") List<Privacy> privacies);
 
-    public List<Publication> findByAuthorIdOrderByPublicationDateDesc(Long authorId);
+    @Query("SELECT p FROM Publication p WHERE p.author.id = :authorId AND p.whoCanSee IN :privacies AND TYPE(p) IN (Rating, MediaList) ORDER BY p.publicationDate DESC")
+    List<Publication> findUserFeed(@Param("authorId") Long authorId, @Param("privacies") List<Privacy> privacies);
 
     @Query("""
             SELECT p FROM Publication p
             WHERE p.publicationDate >= :date
+              AND p.whoCanSee = 'PUBLIC'
+              AND TYPE(p) IN (Rating, MediaList)
             ORDER BY (SIZE(p.likes) + SIZE(p.comments)) DESC
             """)
     List<Publication> findTrending(@Param("date") LocalDateTime date);

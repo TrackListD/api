@@ -32,8 +32,7 @@ public class FeedMapper {
         this.userRepository = userRepository;
     }
 
-    public PublicationFeedDTO toFeedDTO(Publication publication, Long currentUserId) {
-        long likesCount = likeRepository.countByPublicationId(publication.getId());
+    public PublicationFeedDTO toFeedDTO(Publication publication, Long currentUserId, Long likesCount, Integer commentsCount) {
         boolean likedByMe = currentUserId != null &&
                 likeRepository.existsByUserIdAndPublicationId(currentUserId, publication.getId());
 
@@ -87,6 +86,7 @@ public class FeedMapper {
                 publication.getPublicationDate(),
                 likeMapper.toUserMinDTO(publication.getAuthor()),
                 likesCount,
+                commentsCount,
                 likedByMe,
                 mediaDTO,
                 authorFollowedByAuthUser,

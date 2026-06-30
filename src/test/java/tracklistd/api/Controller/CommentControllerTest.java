@@ -108,7 +108,7 @@ public class CommentControllerTest {
                 when(commentService.createComment(any(User.class), any(Publication.class), eq("This is a comment")))
                                 .thenReturn(testComment);
                 when(commentService.getCommentLikes(testComment)).thenReturn(5L);
-                when(commentMapper.toResponseDTO(testComment, 5L, true)).thenReturn(testResponseDto);
+                when(commentMapper.toResponseDTO(eq(testComment), eq(5L), anyBoolean())).thenReturn(testResponseDto);
 
                 mockMvc.perform(post("/api/comments")
                                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null,
@@ -157,7 +157,7 @@ public class CommentControllerTest {
         void getUserComment_deveRetornar200_quandoForAdmin() throws Exception {
                 when(commentService.getCommentById(10L)).thenReturn(testComment);
                 when(commentService.getCommentLikes(testComment)).thenReturn(5L);
-                when(commentMapper.toResponseDTO(testComment, 5L, true)).thenReturn(testResponseDto);
+                when(commentMapper.toResponseDTO(eq(testComment), eq(5L), anyBoolean())).thenReturn(testResponseDto);
                 when(commentMapper.toOwnerResponseDTO(testComment, testResponseDto)).thenReturn(testOwnerResponseDto);
 
                 mockMvc.perform(get("/api/comments/10")
@@ -185,7 +185,7 @@ public class CommentControllerTest {
                 when(publicationService.getPublicationById(100L)).thenReturn(testPost);
                 when(commentService.getCommentsByPost(testPost)).thenReturn(List.of(testComment));
                 when(commentService.getCommentLikes(testComment)).thenReturn(5L);
-                when(commentMapper.toResponseDTO(testComment, 5L, true)).thenReturn(testResponseDto);
+                when(commentMapper.toResponseDTO(eq(testComment), eq(5L), anyBoolean())).thenReturn(testResponseDto);
 
                 mockMvc.perform(get("/api/comments/post/100"))
                                 .andExpect(status().isOk())
@@ -210,7 +210,7 @@ public class CommentControllerTest {
                 when(userService.findUserById(1L)).thenReturn(testUser);
                 when(commentService.getCommentsByUser(testUser)).thenReturn(List.of(testComment));
                 when(commentService.getCommentLikes(testComment)).thenReturn(5L);
-                when(commentMapper.toResponseDTO(testComment, 5L, true)).thenReturn(testResponseDto);
+                when(commentMapper.toResponseDTO(eq(testComment), eq(5L), anyBoolean())).thenReturn(testResponseDto);
                 when(commentMapper.toOwnerResponseDTO(testComment, testResponseDto)).thenReturn(testOwnerResponseDto);
 
                 mockMvc.perform(get("/api/comments/user/1")
@@ -227,7 +227,7 @@ public class CommentControllerTest {
                 when(userService.findUserById(1L)).thenReturn(testUser);
                 when(commentService.getCommentsByUser(testUser)).thenReturn(List.of(testComment));
                 when(commentService.getCommentLikes(testComment)).thenReturn(5L);
-                when(commentMapper.toResponseDTO(testComment, 5L, true)).thenReturn(testResponseDto);
+                when(commentMapper.toResponseDTO(eq(testComment), eq(5L), anyBoolean())).thenReturn(testResponseDto);
 
                 mockMvc.perform(get("/api/comments/user/1")
                                 .with(authentication(new UsernamePasswordAuthenticationToken(otherUser, null,
@@ -255,7 +255,7 @@ public class CommentControllerTest {
 
                 when(commentService.getCommentById(10L)).thenReturn(testComment);
                 when(commentService.getCommentLikes(testComment)).thenReturn(5L);
-                when(commentMapper.toResponseDTO(testComment, 5L, true)).thenReturn(testResponseDto);
+                when(commentMapper.toResponseDTO(eq(testComment), eq(5L), anyBoolean())).thenReturn(testResponseDto);
                 when(commentMapper.toOwnerResponseDTO(testComment, testResponseDto)).thenReturn(testOwnerResponseDto);
 
                 mockMvc.perform(patch("/api/comments/10/text")

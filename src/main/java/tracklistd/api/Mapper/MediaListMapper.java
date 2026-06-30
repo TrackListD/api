@@ -17,12 +17,14 @@ import java.util.stream.Collectors;
 public interface MediaListMapper {
 
 
-    @Mapping(source = "author.name", target = "authorName")
-    @Mapping(source = "author.id", target = "authorId")
-    @Mapping(source = "media", target = "medias")
+    @Mapping(source = "mediaList.author.name", target = "authorName")
+    @Mapping(source = "mediaList.author.id", target = "authorId")
+    @Mapping(source = "mediaList.media", target = "medias")
     @Mapping(target = "totalDurationMs", expression = "java(mediaList.calculateTotalDurationMs())")
     @Mapping(target = "formattedDuration", expression = "java(formatDuration(mediaList))")
-    MediaListResponseDto toResponseDto(MediaList mediaList);
+    @Mapping(source = "likeCount", target = "likeCount")
+    @Mapping(source = "commentCount", target = "commentCount")
+    MediaListResponseDto toResponseDto(MediaList mediaList, Long likeCount, Integer commentCount);
 
     //Transforma a Entidade em DTO de response "privado" do criador
     @Mapping(source = "mediaListResponseDto", target = "publicData")

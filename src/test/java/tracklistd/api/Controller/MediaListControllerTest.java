@@ -27,6 +27,8 @@ import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Integration.FirebaseAuth.Config.SecurityConfig;
 import tracklistd.api.Integration.FirebaseAuth.FirebaseFilter;
 import tracklistd.api.Mapper.MediaListMapper;
+import tracklistd.api.Repository.LikeRepository;
+import tracklistd.api.Repository.CommentRepository;
 import tracklistd.api.Service.*;
 import tracklistd.api.Dto.Media.MediaMinDTO;
 
@@ -62,6 +64,12 @@ public class MediaListControllerTest {
     @MockitoBean
     private FirebaseService firebaseService;
 
+    @MockitoBean
+    private LikeRepository likeRepository;
+
+    @MockitoBean
+    private CommentRepository commentRepository;
+
     private User testUser;
     private User otherUser;
     private MediaList testMediaList;
@@ -88,7 +96,8 @@ public class MediaListControllerTest {
         testResponseDto = new MediaListResponseDto(
                 10L, ListType.ALBUM, "My Album List", false, 1L, "User Test",
                 Set.of(new MediaMinDTO("media-1", "Media Title", "Artist Name", "album", "cover-url", 180000, "3m")),
-                180000, "3m", null, null, null
+                180000, "3m", null, null, null,
+                0L, 0
         );
 
         testOwnerResponseDto = new MediaListOwnerResponseDto(
@@ -105,15 +114,16 @@ public class MediaListControllerTest {
 
         when(mediaListService.createMediaList(any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
+        when(mediaListMapper.toOwnerResponseDTO(eq(testMediaList), eq(testResponseDto))).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(post("/api/mediaList")
                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null, Collections.emptyList())))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.listName").value("My Album List"))
-                .andExpect(jsonPath("$.typeOfList").value("ALBUM"));
+                .andExpect(jsonPath("$.publicData.listName").value("My Album List"))
+                .andExpect(jsonPath("$.publicData.typeOfList").value("ALBUM"));
     }
 
     @Test
@@ -150,7 +160,7 @@ public class MediaListControllerTest {
     @DisplayName("getOneListByUser deve retornar 200 Owner quando usuário for dono")
     void getOneListByUser_deveRetornar200Owner_quandoUsuarioForDono() throws Exception {
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
         when(mediaListMapper.toOwnerResponseDTO(testMediaList, testResponseDto)).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(get("/api/mediaList/10")
@@ -164,7 +174,7 @@ public class MediaListControllerTest {
     @DisplayName("getOneListByUser deve retornar 200 Public quando usuário não for dono")
     void getOneListByUser_deveRetornar200Public_quandoUsuarioNaoForDono() throws Exception {
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
 
         mockMvc.perform(get("/api/mediaList/10")
                 .with(authentication(new UsernamePasswordAuthenticationToken(otherUser, null, Collections.emptyList()))))
@@ -177,7 +187,7 @@ public class MediaListControllerTest {
     @DisplayName("getOneListByUser deve retornar 200 Public quando não autenticado")
     void getOneListByUser_deveRetornar200Public_quandoNaoAutenticado() throws Exception {
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
 
         mockMvc.perform(get("/api/mediaList/10"))
                 .andExpect(status().isOk())
@@ -201,7 +211,7 @@ public class MediaListControllerTest {
     void getAllListByUser_deveRetornarTodasComoOwner_quandoUsuarioForDono() throws Exception {
         when(userService.findUserById(1L)).thenReturn(testUser);
         when(mediaListService.getAllByUser(testUser)).thenReturn(List.of(testMediaList));
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
         when(mediaListMapper.toOwnerResponseDTO(testMediaList, testResponseDto)).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(get("/api/mediaList/user/1")
@@ -216,7 +226,7 @@ public class MediaListControllerTest {
     void getAllListByUser_deveRetornarTodasComoPublic_quandoUsuarioNaoForDono() throws Exception {
         when(userService.findUserById(1L)).thenReturn(testUser);
         when(mediaListService.getAllByUser(testUser)).thenReturn(List.of(testMediaList));
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
 
         mockMvc.perform(get("/api/mediaList/user/1")
                 .with(authentication(new UsernamePasswordAuthenticationToken(otherUser, null, Collections.emptyList()))))
@@ -233,7 +243,7 @@ public class MediaListControllerTest {
         MediaListEditRequestDto.EditNameRequestDto request = new MediaListEditRequestDto.EditNameRequestDto("New List Name");
 
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
         when(mediaListMapper.toOwnerResponseDTO(testMediaList, testResponseDto)).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(patch("/api/mediaList/10/name")
@@ -280,7 +290,7 @@ public class MediaListControllerTest {
         MediaListEditRequestDto.EditPrivacyRequestDto request = new MediaListEditRequestDto.EditPrivacyRequestDto(Privacy.PRIVATE);
 
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
         when(mediaListMapper.toOwnerResponseDTO(testMediaList, testResponseDto)).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(patch("/api/mediaList/10/privacy")
@@ -310,7 +320,7 @@ public class MediaListControllerTest {
     @DisplayName("addMediaToList deve retornar 200 quando dono adiciona")
     void addMediaToList_deveRetornar200_quandoDonoAdiciona() throws Exception {
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
         when(mediaListMapper.toOwnerResponseDTO(testMediaList, testResponseDto)).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(post("/api/mediaList/10/medias/spotify-media-123")
@@ -337,7 +347,7 @@ public class MediaListControllerTest {
     @DisplayName("removeMediaFromList deve retornar 200 quando dono remove")
     void removeMediaFromList_deveRetornar200_quandoDonoRemove() throws Exception {
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
         when(mediaListMapper.toOwnerResponseDTO(testMediaList, testResponseDto)).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(delete("/api/mediaList/10/medias/spotify-media-123")
@@ -353,7 +363,7 @@ public class MediaListControllerTest {
     @DisplayName("favoriteMediaList deve retornar 200 quando autenticado")
     void favoriteMediaList_deveRetornar200_quandoUsuarioAutenticado() throws Exception {
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
         when(mediaListMapper.toOwnerResponseDTO(testMediaList, testResponseDto)).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(post("/api/mediaList/10/favorite")
@@ -376,7 +386,7 @@ public class MediaListControllerTest {
     @DisplayName("unfavoriteMediaList deve retornar 200 quando autenticado")
     void unfavoriteMediaList_deveRetornar200_quandoUsuarioAutenticado() throws Exception {
         when(mediaListService.getMediaListById(10L)).thenReturn(testMediaList);
-        when(mediaListMapper.toResponseDto(testMediaList)).thenReturn(testResponseDto);
+        when(mediaListMapper.toResponseDto(eq(testMediaList), anyLong(), anyInt())).thenReturn(testResponseDto);
         when(mediaListMapper.toOwnerResponseDTO(testMediaList, testResponseDto)).thenReturn(testOwnerResponseDto);
 
         mockMvc.perform(delete("/api/mediaList/10/favorite")

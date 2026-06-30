@@ -15,6 +15,7 @@ public record PublicationFeedDTO(
         LocalDateTime publicationDate,
         UserMinResponseDTO author,
         Long likesCount,
+        Integer commentsCount,
         boolean likedByMe,
         MediaMinDTO media,
         boolean authorFollowedByAuthUser,
