@@ -16,10 +16,6 @@ public class MediaList extends Publication {
     @Column(name = "list_name", nullable = false)
     private String listName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "who_can_see", nullable = false)
-    private Privacy whoCanSee;
-
     @Column(name = "is_favorite")
     private Boolean isFavorite;
 
@@ -40,10 +36,9 @@ public class MediaList extends Publication {
 
     public MediaList(User author, ListType typeOfList, String listName, Privacy whoCanSee,
             Boolean isFavorite, String description, String coverImageUrl, Set<String> tags) {
-        super(author);
+        super(author, whoCanSee);
         this.typeOfList = typeOfList;
         this.listName = listName;
-        this.whoCanSee = whoCanSee;
         this.isFavorite = isFavorite;
         this.description = description;
         this.coverImageUrl = coverImageUrl;
@@ -65,12 +60,8 @@ public class MediaList extends Publication {
         this.listName = listName;
     }
 
-    public Privacy getWhoCanSee() {
-        return whoCanSee;
-    }
-
     public void changePrivacy(Privacy whoCanSee) {
-        this.whoCanSee = whoCanSee;
+        this.setWhoCanSee(whoCanSee);
     }
 
     public Boolean getIsFavorite() {

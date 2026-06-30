@@ -32,19 +32,14 @@ public class Rating extends Publication implements Reportable {
     @Column(name = "moderation_status", nullable = false, updatable = true)
     private ModerationStatus status = ModerationStatus.ACTIVE;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "who_can_see", nullable = false, updatable = true)
-    private Privacy whoCanSee = Privacy.PUBLIC;
-
     public Rating() {
     }
 
     public Rating(User author, Media target, Float ratingNote, String review, Privacy whoCanSee) {
-        super(author);
+        super(author, whoCanSee);
         this.target = target;
         this.ratingNote = ratingNote;
         this.review = review;
-        this.whoCanSee = whoCanSee;
     }
 
     public Media getTargetMedia() {
@@ -75,14 +70,6 @@ public class Rating extends Publication implements Reportable {
 
     public void setStatus(ModerationStatus newStatus) {
         this.status = newStatus;
-    }
-
-    public Privacy getWhoCanSee() {
-        return whoCanSee;
-    }
-
-    public void setWhoCanSee(Privacy whoCanSee) {
-        this.whoCanSee = whoCanSee;
     }
 
     @Override

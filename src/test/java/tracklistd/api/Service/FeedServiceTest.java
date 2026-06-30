@@ -1,93 +1,110 @@
 package tracklistd.api.Service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import tracklistd.api.Dto.Feed.PublicationFeedDTO;
-import tracklistd.api.Entity.Music;
-import tracklistd.api.Entity.Publication;
-import tracklistd.api.Entity.Rating;
-import tracklistd.api.Entity.User;
-import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
-import tracklistd.api.Entity.Enums.Role;
-import tracklistd.api.Repository.MusicRepository;
+import tracklistd.api.Mapper.FeedMapper;
 import tracklistd.api.Repository.PublicationRepository;
 import tracklistd.api.Repository.UserRepository;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.annotation.Rollback;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-@Rollback
+@ExtendWith(MockitoExtension.class)
 public class FeedServiceTest {
-    @Autowired
-    FeedService feedService;
 
-    @Autowired
-    UserRepository userRepository;
+    @InjectMocks
+    private FeedService feedService;
 
-    @Autowired
-    PublicationRepository publicationRepository;
+    @Mock
+    private PublicationRepository publicationRepository;
 
-    @Autowired
-    MusicRepository musicRepository;
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private FeedMapper feedMapper;
+
+    @Mock
+    private UserService userService;
 
     @Test
-    void testFeed() {
-        // cria usuários
-        User joao = new User();
-        joao.setName("João");
-        joao.setIdLoginApi("1234567-" + System.currentTimeMillis());
+    void shouldReturnAllPrivaciesWhenUserRequestsOwnFeed() {
+        Long userId = 1L;
+        Long myUserId = 1L;
 
-        joao.setRole(Role.MEMBER);
-        joao.setWhoCanComment(Privacy.PUBLIC);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Privacy>> captor = ArgumentCaptor.forClass(List.class);
 
-        User maria = new User();
-        maria.setName("Maria");
-        maria.setIdLoginApi("456789-" + System.currentTimeMillis());
-        maria.setRole(Role.MEMBER);
-        maria.setWhoCanComment(Privacy.PUBLIC);
+        when(publicationRepository.findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), anyList()))
+                .thenReturn(Collections.emptyList());
 
-        userRepository.save(joao);
-        userRepository.save(maria);
+        List<PublicationFeedDTO> result = feedService.getUserFeed(userId, myUserId);
 
-        // João segue Maria
-        joao.getFollowing().add(maria);
-        userRepository.save(joao);
+        assertNotNull(result);
+        verify(publicationRepository).findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), captor.capture());
+        
+        List<Privacy> capturedPrivacies = captor.getValue();
+        org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.PUBLIC));
+        org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.JUST_FOLLOWERS));
+        org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.PRIVATE));
+        org.junit.jupiter.api.Assertions.assertEquals(3, capturedPrivacies.size());
+    }
 
-        // cria publicação da Maria
-        Rating rating = new Rating();
+    @Test
+    void shouldReturnPublicAndFollowersWhenUserIsFollower() {
+        Long userId = 2L;
+        Long myUserId = 1L;
 
-        rating.setAuthor(maria);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Privacy>> captor = ArgumentCaptor.forClass(List.class);
 
-        Music media = new Music();
-        media.setSpotifyID("123");
-        media.setTitle("Filme teste");
+        when(userService.isFollowing(myUserId, userId)).thenReturn(true);
+        when(publicationRepository.findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), anyList()))
+                .thenReturn(Collections.emptyList());
 
-        musicRepository.save(media);
+        List<PublicationFeedDTO> result = feedService.getUserFeed(userId, myUserId);
 
-        rating.setMediaTarget(media);
+        assertNotNull(result);
+        verify(publicationRepository).findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), captor.capture());
 
-        rating.editNote(5f);
-        rating.editReview("Muito bom");
+        List<Privacy> capturedPrivacies = captor.getValue();
+        org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.PUBLIC));
+        org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.JUST_FOLLOWERS));
+        org.junit.jupiter.api.Assertions.assertFalse(capturedPrivacies.contains(Privacy.PRIVATE));
+        org.junit.jupiter.api.Assertions.assertEquals(2, capturedPrivacies.size());
+    }
 
-        rating.setWhoCanSee(Privacy.PUBLIC);
-        rating.setStatus(ModerationStatus.ACTIVE);
+    @Test
+    void shouldReturnOnlyPublicWhenUserIsNotFollower() {
+        Long userId = 2L;
+        Long myUserId = 1L;
 
-        publicationRepository.save(rating);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Privacy>> captor = ArgumentCaptor.forClass(List.class);
 
-        List<PublicationFeedDTO> feed = feedService.getSocialFeed(1L);
+        when(userService.isFollowing(myUserId, userId)).thenReturn(false);
+        when(publicationRepository.findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), anyList()))
+                .thenReturn(Collections.emptyList());
 
-        assertNotNull(feed);
+        List<PublicationFeedDTO> result = feedService.getUserFeed(userId, myUserId);
+
+        assertNotNull(result);
+        verify(publicationRepository).findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), captor.capture());
+
+        List<Privacy> capturedPrivacies = captor.getValue();
+        org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.PUBLIC));
+        org.junit.jupiter.api.Assertions.assertFalse(capturedPrivacies.contains(Privacy.JUST_FOLLOWERS));
+        org.junit.jupiter.api.Assertions.assertFalse(capturedPrivacies.contains(Privacy.PRIVATE));
+        org.junit.jupiter.api.Assertions.assertEquals(1, capturedPrivacies.size());
     }
 }

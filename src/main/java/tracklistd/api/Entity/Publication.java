@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import tracklistd.api.Entity.Enums.Privacy;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -23,6 +24,10 @@ public abstract class Publication {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     protected User author;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "who_can_see", nullable = false)
+    private Privacy whoCanSee = Privacy.PUBLIC;
 
     @CreationTimestamp
     @Column(name = "publication_date", nullable = false, updatable = false)
@@ -43,6 +48,12 @@ public abstract class Publication {
 
     public Publication(User author) {
         this.author = author;
+        this.whoCanSee = Privacy.PUBLIC;
+    }
+
+    public Publication(User author, Privacy whoCanSee) {
+        this.author = author;
+        this.whoCanSee = whoCanSee;
     }
 
     public Long getId() {
@@ -71,5 +82,13 @@ public abstract class Publication {
 
     public void setAuthor(User author) {
         this.author = author;
+    }
+
+    public Privacy getWhoCanSee() {
+        return whoCanSee;
+    }
+
+    public void setWhoCanSee(Privacy whoCanSee) {
+        this.whoCanSee = whoCanSee;
     }
 }

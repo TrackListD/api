@@ -2,6 +2,7 @@ package tracklistd.api.Repository;
 
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Entity.Enums.Privacy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,13 +17,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PublicationRepository extends JpaRepository<Publication, Long> {
 
-    public List<Publication> findByAuthorInOrderByPublicationDateDesc(Set<User> following);
+    public List<Publication> findByAuthorInAndWhoCanSeeInOrderByPublicationDateDesc(Set<User> following, List<Privacy> privacies);
 
-    public List<Publication> findByAuthorIdOrderByPublicationDateDesc(Long authorId);
+    public List<Publication> findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(Long authorId, List<Privacy> privacies);
 
     @Query("""
             SELECT p FROM Publication p
             WHERE p.publicationDate >= :date
+              AND p.whoCanSee = 'PUBLIC'
             ORDER BY (SIZE(p.likes) + SIZE(p.comments)) DESC
             """)
     List<Publication> findTrending(@Param("date") LocalDateTime date);
