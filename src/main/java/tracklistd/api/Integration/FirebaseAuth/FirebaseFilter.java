@@ -56,6 +56,19 @@ public class FirebaseFilter extends OncePerRequestFilter {
 
             User user = userService.findOrCreateUser(decodedToken);
 
+            // Bloqueia acesso se a conta estiver banida
+            if (user.getModerationStatus() == tracklistd.api.Entity.Enums.ModerationStatus.BANNED) {
+                throw new InsufficientAuthenticationException("Esta conta foi banida permanentemente.");
+            }
+
+            // Bloqueia acesso se a conta estiver suspensa (e o prazo ainda não venceu)
+            if (user.getModerationStatus() == tracklistd.api.Entity.Enums.ModerationStatus.SUSPENDED) {
+                if (user.getSuspensionEndDate() != null && user.getSuspensionEndDate().isAfter(java.time.LocalDateTime.now())) {
+                    java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
+                    throw new InsufficientAuthenticationException("Sua conta está suspensa até " + user.getSuspensionEndDate().format(formatter) + ".");
+                }
+            }
+
             String roleName = "ROLE_" + user.getRole().name();
             List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleName));
 
