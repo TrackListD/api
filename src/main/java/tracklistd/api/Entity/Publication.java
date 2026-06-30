@@ -91,4 +91,8 @@ public abstract class Publication {
     public void setWhoCanSee(Privacy whoCanSee) {
         this.whoCanSee = whoCanSee;
     }
+
+    public List<Like> getLikes() {
+        return likes;
+    }
 }

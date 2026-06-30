@@ -39,6 +39,9 @@ public record MediaListResponseDto(
         String coverImageUrl,
 
         @Schema(description = "Conjunto de tags associadas à lista para categorização e busca", example = "[\"Rap\", \"Nacional\", \"Classicos\"]")
-        Set<String> tags
+        Set<String> tags,
+
+        Long likeCount,
+        Integer commentCount
 ) {
 }

@@ -15,6 +15,8 @@ import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
 import tracklistd.api.Mapper.FeedMapper;
 import tracklistd.api.Repository.PublicationRepository;
 import tracklistd.api.Repository.UserRepository;
+import tracklistd.api.Repository.LikeRepository;
+import tracklistd.api.Repository.CommentRepository;
 
 @Service
 public class FeedService {
@@ -23,13 +25,18 @@ public class FeedService {
         private final UserRepository userRepository;
         private final FeedMapper feedMapper;
         private final UserService userService;
+        private final LikeRepository likeRepository;
+        private final CommentRepository commentRepository;
 
         public FeedService(PublicationRepository publicationRepository, UserRepository userRepository,
-                        FeedMapper feedMapper, UserService userService) {
+                        FeedMapper feedMapper, UserService userService, LikeRepository likeRepository,
+                        CommentRepository commentRepository) {
                 this.publicationRepository = publicationRepository;
                 this.userRepository = userRepository;
                 this.feedMapper = feedMapper;
                 this.userService = userService;
+                this.likeRepository = likeRepository;
+                this.commentRepository = commentRepository;
         }
 
         @Transactional
@@ -44,7 +51,11 @@ public class FeedService {
                                 .findByAuthorInAndWhoCanSeeInOrderByPublicationDateDesc(user.getFollowing(), allowedPrivacies);
 
                 return publications.stream()
-                                .map(publication -> feedMapper.toFeedDTO(publication, userId))
+                                .map(publication -> {
+                                        long likesCount = likeRepository.countByPublicationId(publication.getId());
+                                        int commentsCount = commentRepository.countByPost(publication);
+                                        return feedMapper.toFeedDTO(publication, userId, likesCount, commentsCount);
+                                })
                                 .toList();
         }
 
@@ -54,7 +65,12 @@ public class FeedService {
 
                 List<Publication> trending = publicationRepository.findTrending(oneWeekAgo);
 
-                return trending.stream().map(publication -> feedMapper.toFeedDTO(publication, userId))
+                return trending.stream()
+                                .map(publication -> {
+                                        long likesCount = likeRepository.countByPublicationId(publication.getId());
+                                        int commentsCount = commentRepository.countByPost(publication);
+                                        return feedMapper.toFeedDTO(publication, userId, likesCount, commentsCount);
+                                })
                                 .toList();
 
         }
@@ -72,7 +88,11 @@ public class FeedService {
 
                 List<Publication> posts = publicationRepository.findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(userId, allowedPrivacies);
                 return posts.stream()
-                                .map(post -> feedMapper.toFeedDTO(post, myUserId))
+                                .map(post -> {
+                                        long likesCount = likeRepository.countByPublicationId(post.getId());
+                                        int commentsCount = commentRepository.countByPost(post);
+                                        return feedMapper.toFeedDTO(post, myUserId, likesCount, commentsCount);
+                                })
                                 .toList();
 
         }

@@ -18,6 +18,8 @@ import tracklistd.api.Entity.*;
 import tracklistd.api.Entity.Enums.ListType;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Mapper.MediaListMapper;
+import tracklistd.api.Repository.LikeRepository;
+import tracklistd.api.Repository.CommentRepository;
 import tracklistd.api.Service.MediaListService;
 import tracklistd.api.Service.UserService;
 
@@ -40,6 +42,8 @@ public class MediaListController {
         private final MediaListService mediaListService;
         private final MediaListMapper mediaListMapper;
         private final UserService userService;
+        private final LikeRepository likeRepository;
+        private final CommentRepository commentRepository;
 
         @PostMapping
         public ResponseEntity<MediaListOwnerResponseDto> createMediaList(
@@ -56,7 +60,7 @@ public class MediaListController {
                 MediaList mediaList = mediaListService.createMediaList(user, typeOfList, listName, privacy, isFavorite,
                                 description, coverImageUrl, tags);
 
-                MediaListResponseDto mediaListResponseDto = this.mediaListMapper.toResponseDto(mediaList);
+                MediaListResponseDto mediaListResponseDto = this.mediaListMapper.toResponseDto(mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
                 MediaListOwnerResponseDto ownerResponse = this.mediaListMapper.toOwnerResponseDTO(mediaList,
                                 mediaListResponseDto);
 
@@ -74,7 +78,7 @@ public class MediaListController {
                         @PathVariable Long id) {
                 MediaList mediaList = this.mediaListService.getMediaListById(id);
 
-                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList);
+                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
 
                 if (user == null)
                         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -286,7 +290,7 @@ public class MediaListController {
         private MediaListOwnerResponseDto buildOwnerResponse(Long mediaId) {
                 MediaList mediaList = this.mediaListService.getMediaListById(mediaId);
 
-                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList);
+                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
 
                 return this.mediaListMapper.toOwnerResponseDTO(mediaList, responseDto);
         }
@@ -295,7 +299,7 @@ public class MediaListController {
         private ResponseEntity<?> returnResponseDto(Long mediaId, User user) {
                 MediaList mediaList = this.mediaListService.getMediaListById(mediaId);
 
-                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList);
+                MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
 
                 boolean isOwner = Objects.equals(mediaList.getAuthorPublication().getId(), user.getId());
 
@@ -310,10 +314,19 @@ public class MediaListController {
         private List<MediaListResponseDto> buildMediaListResponseList(List<MediaList> allMediaList) {
                 List<MediaListResponseDto> listResponseDtos = new ArrayList<>();
                 for (MediaList mediaList : allMediaList) {
-                        MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(mediaList);
+                        MediaListResponseDto responseDto = this.mediaListMapper.toResponseDto(
+                                 mediaList, getLikeCount(mediaList), getCommentCount(mediaList));
                         listResponseDtos.add(responseDto);
                 }
 
                 return listResponseDtos;
+        }
+
+        private Long getLikeCount(MediaList mediaList) {
+                return this.likeRepository.countByPublicationId(mediaList.getId());
+        }
+
+        private Integer getCommentCount(MediaList mediaList) {
+                return this.commentRepository.countByPost(mediaList);
         }
 }

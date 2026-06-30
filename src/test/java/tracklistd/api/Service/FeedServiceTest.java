@@ -18,6 +18,8 @@ import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Mapper.FeedMapper;
 import tracklistd.api.Repository.PublicationRepository;
 import tracklistd.api.Repository.UserRepository;
+import tracklistd.api.Repository.LikeRepository;
+import tracklistd.api.Repository.CommentRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class FeedServiceTest {
@@ -36,6 +38,12 @@ public class FeedServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private LikeRepository likeRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
 
     @Test
     void shouldReturnAllPrivaciesWhenUserRequestsOwnFeed() {
