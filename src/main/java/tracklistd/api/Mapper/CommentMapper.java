@@ -11,12 +11,12 @@ import tracklistd.api.Entity.User;
 
 import java.time.LocalDateTime;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = UserMapper.class)
 public interface CommentMapper {
 
     @Mapping(source = "comment.publicationDate", target = "commentDate")
     @Mapping(source = "comment.post.id", target = "postId")
-    @Mapping(source = "comment.author.id", target = "authorId")
+    @Mapping(source = "comment.author", target = "author")
     @Mapping(source = "likeCount", target = "likeCount")
     @Mapping(source = "likedByMe", target = "likedByMe")
     CommentResponseDto toResponseDTO(Comment comment, Long likeCount, Boolean likedByMe);

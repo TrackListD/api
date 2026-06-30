@@ -25,15 +25,16 @@ public class Album extends Media {
 
     public void addMusic(Music newMusic) {
         this.musics.add(newMusic);
+        if (newMusic.getDuration() != null) {
+            this.duration = (this.duration == null ? 0 : this.duration) + newMusic.getDuration();
+        }
     }
+
+    @Column(name = "duration")
+    private Integer duration = 0;
 
     @Override
     public Integer getTotalDurationMs() {
-        if (this.musics == null || this.musics.isEmpty()) {
-            return 0;
-        }
-        return this.musics.stream()
-                .mapToInt(Music::getTotalDurationMs)
-                .sum();
+        return this.duration != null ? this.duration : 0;
     }
 }
