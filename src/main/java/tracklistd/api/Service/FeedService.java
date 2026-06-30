@@ -48,7 +48,7 @@ public class FeedService {
                 List<Privacy> allowedPrivacies = List.of(Privacy.PUBLIC, Privacy.JUST_FOLLOWERS);
 
                 List<Publication> publications = publicationRepository
-                                .findByAuthorInAndWhoCanSeeInOrderByPublicationDateDesc(user.getFollowing(), allowedPrivacies);
+                                .findSocialFeed(user.getFollowing(), allowedPrivacies);
 
                 return publications.stream()
                                 .map(publication -> {
@@ -86,7 +86,7 @@ public class FeedService {
                         allowedPrivacies = List.of(Privacy.PUBLIC);
                 }
 
-                List<Publication> posts = publicationRepository.findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(userId, allowedPrivacies);
+                List<Publication> posts = publicationRepository.findUserFeed(userId, allowedPrivacies);
                 return posts.stream()
                                 .map(post -> {
                                         long likesCount = likeRepository.countByPublicationId(post.getId());

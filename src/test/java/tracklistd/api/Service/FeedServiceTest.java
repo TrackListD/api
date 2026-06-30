@@ -53,13 +53,13 @@ public class FeedServiceTest {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Privacy>> captor = ArgumentCaptor.forClass(List.class);
 
-        when(publicationRepository.findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), anyList()))
+        when(publicationRepository.findUserFeed(eq(userId), anyList()))
                 .thenReturn(Collections.emptyList());
 
         List<PublicationFeedDTO> result = feedService.getUserFeed(userId, myUserId);
 
         assertNotNull(result);
-        verify(publicationRepository).findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), captor.capture());
+        verify(publicationRepository).findUserFeed(eq(userId), captor.capture());
         
         List<Privacy> capturedPrivacies = captor.getValue();
         org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.PUBLIC));
@@ -77,13 +77,13 @@ public class FeedServiceTest {
         ArgumentCaptor<List<Privacy>> captor = ArgumentCaptor.forClass(List.class);
 
         when(userService.isFollowing(myUserId, userId)).thenReturn(true);
-        when(publicationRepository.findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), anyList()))
+        when(publicationRepository.findUserFeed(eq(userId), anyList()))
                 .thenReturn(Collections.emptyList());
 
         List<PublicationFeedDTO> result = feedService.getUserFeed(userId, myUserId);
 
         assertNotNull(result);
-        verify(publicationRepository).findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), captor.capture());
+        verify(publicationRepository).findUserFeed(eq(userId), captor.capture());
 
         List<Privacy> capturedPrivacies = captor.getValue();
         org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.PUBLIC));
@@ -101,13 +101,13 @@ public class FeedServiceTest {
         ArgumentCaptor<List<Privacy>> captor = ArgumentCaptor.forClass(List.class);
 
         when(userService.isFollowing(myUserId, userId)).thenReturn(false);
-        when(publicationRepository.findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), anyList()))
+        when(publicationRepository.findUserFeed(eq(userId), anyList()))
                 .thenReturn(Collections.emptyList());
 
         List<PublicationFeedDTO> result = feedService.getUserFeed(userId, myUserId);
 
         assertNotNull(result);
-        verify(publicationRepository).findByAuthorIdAndWhoCanSeeInOrderByPublicationDateDesc(eq(userId), captor.capture());
+        verify(publicationRepository).findUserFeed(eq(userId), captor.capture());
 
         List<Privacy> capturedPrivacies = captor.getValue();
         org.junit.jupiter.api.Assertions.assertTrue(capturedPrivacies.contains(Privacy.PUBLIC));
