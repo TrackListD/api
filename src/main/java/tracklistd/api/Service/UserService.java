@@ -178,20 +178,33 @@ public class UserService {
 
     @Transactional
     public User findOrCreateUser(FirebaseToken decodedToken) {
-        return userRepository.findByIdLoginApi(decodedToken.getUid())
-                .orElseGet(() -> {
-                    String safeName = resolveDisplayName(decodedToken);
+        java.util.Optional<User> optionalUser = userRepository.findByIdLoginApi(decodedToken.getUid());
 
-                    UserRegisterRequestDTO dto = new UserRegisterRequestDTO(
-                            safeName,
-                            decodedToken.getUid(),
-                            Role.MEMBER,
-                            Privacy.PUBLIC,
-                            "", // Bio vazia
-                            decodedToken.getPicture());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
 
-                    return register(dto);
-                });
+            // Validação Preguiçosa: Se o infrator ainda suspenso.
+            if (user.getModerationStatus() == ModerationStatus.SUSPENDED) {
+                if (user.getSuspensionEndDate() != null && user.getSuspensionEndDate().isBefore(LocalDateTime.now())) {
+                    user.setModerationStatus(ModerationStatus.ACTIVE);
+                    user.setSuspensionEndDate(null);
+                    userRepository.save(user);
+                }
+            }
+            return user;
+
+        } else {
+            String safeName = resolveDisplayName(decodedToken);
+            UserRegisterRequestDTO dto = new UserRegisterRequestDTO(
+                    safeName,
+                    decodedToken.getUid(),
+                    Role.MEMBER,
+                    Privacy.PUBLIC,
+                    "",
+                    decodedToken.getPicture());
+
+            return register(dto);
+        }
     }
 
     // Método Privado para Tratar casos em que decodedToken.getName() retorna null.
@@ -229,6 +242,7 @@ public class UserService {
                 target.setModerationStatus(ModerationStatus.BANNED);
                 break;
         }
+        userRepository.save(target);
     }
 
     @Transactional

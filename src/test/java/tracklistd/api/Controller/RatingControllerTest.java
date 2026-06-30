@@ -95,14 +95,15 @@ public class RatingControllerTest {
                 UserMinResponseDTO authorDto = new UserMinResponseDTO(1L, "User Test", "teste");
 
                 RatingResponseDto testResponseDto = new RatingResponseDto(
-                                10L,
-                                authorDto,
-                                mediaMinDto,
-                                LocalDateTime.now(),
-                                4.5f,
-                                "Excellent review",
-                                5L,
-                                2);
+                    10L,
+                    authorDto,
+                    mediaMinDto,
+                    LocalDateTime.now(),
+                    4.5f,
+                    "Excellent review",
+                    5L,
+                    2,
+                    false);
 
                 testOwnerResponseDto = new RatingOwnerResponseDto(
                                 testResponseDto, LocalDateTime.now(), ModerationStatus.ACTIVE, Privacy.PUBLIC);
@@ -119,7 +120,7 @@ public class RatingControllerTest {
                 when(ratingService.createRating(any(), any(), eq(4.5f), eq("Excellent review"),
                                 eq(Privacy.PUBLIC)))
                                 .thenReturn(testRating);
-                when(ratingMapper.toResponseDto(any(), anyInt(), anyLong())).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(any(), anyInt(), anyLong(), anyBoolean())).thenReturn(testResponseDto);
 
                 mockMvc.perform(post("/api/ratings")
                                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null,
@@ -171,7 +172,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingById(10L)).thenReturn(testRating);
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
                 when(ratingMapper.toOwnerResponseDTO(testRating, testResponseDto)).thenReturn(testOwnerResponseDto);
 
                 mockMvc.perform(get("/api/ratings/10")
@@ -188,7 +189,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingById(10L)).thenReturn(testRating);
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
 
                 mockMvc.perform(get("/api/ratings/10")
                                 .with(authentication(new UsernamePasswordAuthenticationToken(otherUser, null,
@@ -204,7 +205,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingById(10L)).thenReturn(testRating);
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
 
                 mockMvc.perform(get("/api/ratings/10"))
                                 .andExpect(status().isOk())
@@ -230,7 +231,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingsByUser(testUser)).thenReturn(List.of(testRating));
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
 
                 mockMvc.perform(get("/api/ratings/user/1")
                                 .with(authentication(new UsernamePasswordAuthenticationToken(testUser, null,
@@ -246,7 +247,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingsByUserPrivacy(testUser, Privacy.PUBLIC)).thenReturn(List.of(testRating));
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
 
                 mockMvc.perform(get("/api/ratings/user/1")
                                 .with(authentication(new UsernamePasswordAuthenticationToken(otherUser, null,
@@ -262,7 +263,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingsByUserPrivacy(testUser, Privacy.PUBLIC)).thenReturn(List.of(testRating));
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
 
                 mockMvc.perform(get("/api/ratings/user/1"))
                                 .andExpect(status().isOk())
@@ -289,7 +290,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingById(10L)).thenReturn(testRating);
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
                 when(ratingMapper.toOwnerResponseDTO(testRating, testResponseDto)).thenReturn(testOwnerResponseDto);
 
                 mockMvc.perform(patch("/api/ratings/10/review")
@@ -343,7 +344,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingById(10L)).thenReturn(testRating);
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
                 when(ratingMapper.toOwnerResponseDTO(testRating, testResponseDto)).thenReturn(testOwnerResponseDto);
 
                 mockMvc.perform(patch("/api/ratings/10/note")
@@ -393,7 +394,7 @@ public class RatingControllerTest {
                 when(ratingService.getRatingById(10L)).thenReturn(testRating);
                 when(ratingService.getRatingComments(testRating)).thenReturn(2);
                 when(ratingService.getRatingLikes(testRating)).thenReturn(5L);
-                when(ratingMapper.toResponseDto(testRating, 2, 5L)).thenReturn(testResponseDto);
+                when(ratingMapper.toResponseDto(testRating, 2, 5L, false)).thenReturn(testResponseDto);
                 when(ratingMapper.toOwnerResponseDTO(testRating, testResponseDto)).thenReturn(testOwnerResponseDto);
 
                 mockMvc.perform(patch("/api/ratings/10/privacy")
