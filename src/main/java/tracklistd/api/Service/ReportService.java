@@ -68,7 +68,26 @@ public class ReportService {
 
         User target = dto.userTargetId() != null ? userRepository.findById(dto.userTargetId()).orElse(null) : null;
         Comment commentTarget = dto.commentTargetId() != null ? commentRepository.findById(dto.commentTargetId()).orElse(null) : null;
+<<<<<<< HEAD
+        Long ratingId = dto.ratingTargetId() != null ? dto.ratingTargetId() : dto.postTargetId();
+        Rating ratingTarget = ratingId != null ? ratingRepository.findById(ratingId).orElse(null) : null;
+        
+        LocalDateTime date = LocalDateTime.now();
+        Report report = null;
+        String reason = dto.reportReason();
+        
+        if (commentTarget != null){
+            report = new Report(informer, reason, date, commentTarget);
+        }
+        else if (ratingTarget != null){
+            report = new Report(informer, reason, date, ratingTarget);
+        }
+        else if (target != null){
+            report = new Report(informer, reason, date, target);
+        }
+=======
         Rating ratingTarget = dto.ratingTargetId() != null ? ratingRepository.findById(dto.ratingTargetId()).orElse(null) : null;
+>>>>>>> 14a14386bce6b268c6e08b73dceced5235b5c58c
 
         return createReport(informer, target, commentTarget, ratingTarget, dto.reportReason());
     }

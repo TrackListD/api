@@ -13,6 +13,18 @@ public record ReportRequestDTO(
     String reportReason,
 
     Long commentTargetId,
-    Long ratingTargetId
+    Long ratingTargetId,
+    Long postTargetId
 )   
+<<<<<<< HEAD
+{
+    public Long getActualRatingId() {
+        return ratingTargetId != null ? ratingTargetId : postTargetId;
+    }
+}
+
+
+
+=======
 {}
+>>>>>>> 14a14386bce6b268c6e08b73dceced5235b5c58c
