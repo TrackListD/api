@@ -10,6 +10,8 @@ public record ReportResponseDto(
     Long id,
     Long informerId,
     Long userTargetId,
+    Long commentTargetId,
+    Long ratingTargetId,
     String reason,
     LocalDateTime reportDate,
     ReportStatus reportStatus,
@@ -20,14 +22,19 @@ public record ReportResponseDto(
 ){
 
     public ReportResponseDto(Report report){
-        this(report.getId(),
-        report.getUserInformer().getId(),
-        report.getUserTarget() != null ? report.getUserTarget().getId() : null,
-        report.getReason(),
-        report.getReportDate(),
-        report.getStatusReport(),
-        report.getPunishment(),
-        report.getContentReported());
+        this(
+            report.getId(),
+            report.getUserInformer().getId(),
+            report.getUserTarget() != null ? report.getUserTarget().getId() : null,
+            report.getCommentTarget() != null ? report.getCommentTarget().getId() : null,
+            report.getRatingTarget() != null ? report.getRatingTarget().getId() : null,
+            report.getReason(),
+            report.getReportDate(),
+            report.getStatusReport(),
+            report.getPunishment(),
+            report.getContentReported()
+    
+        );
     }
 
 }

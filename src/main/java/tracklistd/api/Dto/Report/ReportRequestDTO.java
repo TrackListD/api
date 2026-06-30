@@ -7,16 +7,20 @@ public record ReportRequestDTO(
     @NotNull(message="Report must have a informer")
     Long informerId,
 
-    @NotNull(message="Report must have a user target")
     Long userTargetId,
 
     @NotBlank (message="Report must have a reason")
     String reportReason,
 
     Long commentTargetId,
-    Long ratingTargetId
+    Long ratingTargetId,
+    Long postTargetId
 )   
-{}
+{
+    public Long getActualRatingId() {
+        return ratingTargetId != null ? ratingTargetId : postTargetId;
+    }
+}
 
 
 

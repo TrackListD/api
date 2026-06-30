@@ -21,7 +21,7 @@ import tracklistd.api.Entity.Enums.ReportStatus;
 import tracklistd.api.Service.ReportService;
 
 @RestController
-@RequestMapping("/api/Entity/Report")
+@RequestMapping("/api/reports")
 public class ReportController {
 
     private final ReportService reportService;
@@ -67,8 +67,8 @@ public class ReportController {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/pending")
-    public ResponseEntity <List<ReportResponseDto>> getPendingReportsAgainstUser(Long userId){
+    @GetMapping("/pending/user/{userId}")
+    public ResponseEntity <List<ReportResponseDto>> getPendingReportsAgainstUser(@PathVariable Long userId){
         List<ReportResponseDto> list = reportService.getPendingReportAgainstUser(userId);
 
         return ResponseEntity.ok(list);
