@@ -1,5 +1,6 @@
 package tracklistd.api.Controller;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -133,6 +134,7 @@ public class CommentController {
             @ApiResponse(responseCode = "403", description = "Acesso negado (Usuário não é o dono do recurso)"),
             @ApiResponse(responseCode = "404", description = "Comentário não encontrado")
     })
+    @Transactional
     public ResponseEntity<CommentOwnerResponseDto> editCommentText(
             @AuthenticationPrincipal User user,
             @PathVariable Long id,
