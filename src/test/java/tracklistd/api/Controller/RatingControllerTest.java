@@ -18,6 +18,7 @@ import tracklistd.api.Dto.Rating.RatingEditRequestDto;
 import tracklistd.api.Dto.Rating.RatingOwnerResponseDto;
 import tracklistd.api.Dto.Rating.RatingRequestDto;
 import tracklistd.api.Dto.Rating.RatingResponseDto;
+import tracklistd.api.Dto.User.UserMinResponseDTO;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Media;
@@ -89,10 +90,19 @@ public class RatingControllerTest {
                 testRating = Mockito.spy(new Rating(testUser, testMedia, 4.5f, "Excellent review", Privacy.PUBLIC));
                 doReturn(10L).when(testRating).getId();
 
-                MediaMinDTO mediaMinDto = new MediaMinDTO("media-123", "Media Title", "Artist Name", "music", "cover-url", 180000, "3m");
-                testResponseDto = new RatingResponseDto(
-                                10L, 1L, mediaMinDto, LocalDateTime.now(), 4.5f, "Excellent review",
-                                "User Test", 5L, 2);
+                MediaMinDTO mediaMinDto = new MediaMinDTO("media-123", "Media Title", "Artist Name", "music",
+                                "cover-url", 180000, "3m");
+                UserMinResponseDTO authorDto = new UserMinResponseDTO(1L, "User Test", "teste");
+
+                RatingResponseDto testResponseDto = new RatingResponseDto(
+                                10L,
+                                authorDto,
+                                mediaMinDto,
+                                LocalDateTime.now(),
+                                4.5f,
+                                "Excellent review",
+                                5L,
+                                2);
 
                 testOwnerResponseDto = new RatingOwnerResponseDto(
                                 testResponseDto, LocalDateTime.now(), ModerationStatus.ACTIVE, Privacy.PUBLIC);

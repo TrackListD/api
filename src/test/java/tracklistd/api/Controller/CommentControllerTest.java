@@ -19,6 +19,7 @@ import tracklistd.api.Dto.Comment.CommentEditRequestDto;
 import tracklistd.api.Dto.Comment.CommentOwnerResponseDto;
 import tracklistd.api.Dto.Comment.CommentRequestDto;
 import tracklistd.api.Dto.Comment.CommentResponseDto;
+import tracklistd.api.Dto.User.UserMinResponseDTO;
 import tracklistd.api.Entity.Comment;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Publication;
@@ -90,8 +91,16 @@ public class CommentControllerTest {
                 testComment = Mockito.spy(new Comment(testUser, testPost, "This is a comment"));
                 doReturn(10L).when(testComment).getId();
 
-                testResponseDto = new CommentResponseDto(
-                                10L, 100L, 1L, "This is a comment", LocalDateTime.now(), 5L, true);
+                UserMinResponseDTO authorDto = new UserMinResponseDTO(1L, "User Test", "teste");
+
+                CommentResponseDto testCommentDto = new CommentResponseDto(
+                                10L,
+                                100L,
+                                authorDto,
+                                "This is a comment",
+                                LocalDateTime.now(),
+                                5L,
+                                true);
 
                 testOwnerResponseDto = new CommentOwnerResponseDto(
                                 testResponseDto, ModerationStatus.ACTIVE, LocalDateTime.now());

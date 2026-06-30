@@ -32,7 +32,8 @@ public class FeedMapper {
         this.userRepository = userRepository;
     }
 
-    public PublicationFeedDTO toFeedDTO(Publication publication, Long currentUserId, Long likesCount, Integer commentsCount) {
+    public PublicationFeedDTO toFeedDTO(Publication publication, Long currentUserId, Long likesCount,
+            Integer commentsCount) {
         boolean likedByMe = currentUserId != null &&
                 likeRepository.existsByUserIdAndPublicationId(currentUserId, publication.getId());
 
@@ -66,6 +67,11 @@ public class FeedMapper {
             default -> null;
         };
 
+        String coverImageUrl = switch (publication) {
+            case MediaList m -> m.getCoverImageUrl();
+            default -> null;
+        };
+
         boolean authorFollowedByAuthUser = false;
 
         if (currentUserId != null) {
@@ -90,6 +96,7 @@ public class FeedMapper {
                 likedByMe,
                 mediaDTO,
                 authorFollowedByAuthUser,
-                mediaListItems);
+                mediaListItems,
+                coverImageUrl);
     }
 }
