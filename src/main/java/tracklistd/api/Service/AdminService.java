@@ -24,6 +24,7 @@ public class AdminService {
 
     @Transactional
     public Report moderateReport(Long reportID, ReportStatus status, Punishment punishment, Long daysOfSuspension){
+
         Report report = reportService.resolveReport(reportID, status, punishment);
 
         if(status == ReportStatus.RESOLVED){

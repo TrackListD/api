@@ -53,4 +53,13 @@ public class FeedService {
                                 .toList();
 
         }
+
+        @Transactional
+        public List<PublicationFeedDTO> getUserFeed(Long userId, Long myUserId) {
+                List<Publication> posts = publicationRepository.findByAuthorIdOrderByPublicationDateDesc(userId);
+                return posts.stream()
+                                .map(post -> feedMapper.toFeedDTO(post, myUserId))
+                                .toList();
+
+        }
 }

@@ -99,7 +99,7 @@ public class AdminControllerTest {
         when(adminService.moderateReport(eq(10L), eq(ReportStatus.RESOLVED), eq(Punishment.TEMPORARY_SUSPENSION), eq(7L)))
                 .thenReturn(testReport);
 
-        ReportResponseDto responseDto = new ReportResponseDto(10L, 1L, 2L, "Motivo", LocalDateTime.now(), ReportStatus.RESOLVED, null);
+        ReportResponseDto responseDto = new ReportResponseDto(10L, 1L, 2L, "Motivo", LocalDateTime.now(), ReportStatus.RESOLVED, null, null);
         when(reportMapper.toDto(any())).thenReturn(responseDto);
 
         mockMvc.perform(patch("/api/admin/reports/10/moderate")

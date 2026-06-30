@@ -1,6 +1,7 @@
 package tracklistd.api.Controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,8 +41,12 @@ public class ReportController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/pending")
     public ResponseEntity<List<ReportResponseDto>> getPendingReports() {
-    
-        List<ReportResponseDto> pendingReports = reportService.getPendingReportsDto();
+
+        List<ReportResponseDto> pendingReports = reportService.getPendingReports()
+                .stream()
+                .map(ReportResponseDto::new)
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(pendingReports);
     }
 
@@ -52,25 +57,32 @@ public class ReportController {
         @RequestParam ReportStatus newStatus, 
         @RequestParam(required = false) Punishment punishment) {
 
-        ReportResponseDto response = reportService.resolveReport(reportId, newStatus, punishment); 
-    
-        return ResponseEntity.ok(response);
+        Report report = reportService.resolveReport(reportId, newStatus, punishment);
+
+        return ResponseEntity.ok(new ReportResponseDto(report));
     }
 
 
     @GetMapping("/history/{userId}")
     public ResponseEntity <List<ReportResponseDto>> getReportHistoryAgainstUser(@PathVariable Long userId) {
-        List<ReportResponseDto> reports = reportService.getReportHistoryUser(userId);
-        
+
+        // Puxamos a lista de Entidades e convertemos para DTO antes de empacotar no ResponseEntity
+        List<ReportResponseDto> reports = reportService.getReportHistoryUser(userId)
+                .stream()
+                .map(ReportResponseDto::new)
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(reports);
     }
-
-
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/pending/user/{userId}")
     public ResponseEntity <List<ReportResponseDto>> getPendingReportsAgainstUser(@PathVariable Long userId){
-        List<ReportResponseDto> list = reportService.getPendingReportAgainstUser(userId);
 
+        // Puxamos a lista de Entidades e convertemos para DTO antes de empacotar no ResponseEntity
+        List<ReportResponseDto> list = reportService.getPendingReportAgainstUser(userId)
+                .stream()
+                .map(ReportResponseDto::new)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
 

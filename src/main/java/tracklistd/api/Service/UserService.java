@@ -1,6 +1,8 @@
 package tracklistd.api.Service;
 
 import jakarta.transaction.Transactional;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import com.google.firebase.auth.FirebaseToken;
@@ -9,6 +11,9 @@ import tracklistd.api.Dto.User.UserRegisterRequestDTO;
 import tracklistd.api.Dto.User.UserUpdatePerfilRequestDTO;
 import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Punishment;
+import tracklistd.api.Entity.Album;
+import tracklistd.api.Entity.Artist;
+import tracklistd.api.Entity.Music;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Entity.Enums.Privacy;
@@ -59,12 +64,19 @@ public class UserService {
             perfil.setBio(dto.bio());
         if (dto.whoCanComment() != null)
             perfil.setWhoCanComment(dto.whoCanComment());
+        if (dto.favoriteAlbum() != null)
+            perfil.setFavoriteAlbum(dto.favoriteAlbum());
+        if (dto.favoriteArtist() != null)
+            perfil.setFavoriteArtist(dto.favoriteArtist());
+        if (dto.favoriteMusic() != null)
+            perfil.setFavoriteArtist(dto.favoriteArtist());
 
         return userRepository.save(perfil);
     }
 
+    @Transactional
     public User findUserById(Long id) {
-        return this.userRepository.findById(id).orElseThrow(
+        return this.userRepository.findFullById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Esse Usuario não foi encontrado"));
     }
 
@@ -73,10 +85,10 @@ public class UserService {
         if (myId.equals(friendId))
             throw new FollowYourself();
 
-        User me = userRepository.findById(myId)
+        User me = userRepository.findFullById(myId)
                 .orElseThrow(() -> new UserDoesNotExist(myId));
 
-        User friend = userRepository.findById(friendId)
+        User friend = userRepository.findFullById(friendId)
                 .orElseThrow(() -> new FriendDoesNotExist());
 
         if (!me.getFollowing().contains(friend)) {
@@ -91,10 +103,10 @@ public class UserService {
         if (myId.equals(friendId))
             throw new FollowYourself();
 
-        User me = userRepository.findById(myId)
+        User me = userRepository.findFullById(myId)
                 .orElseThrow(() -> new UserDoesNotExist(myId));
 
-        User friend = userRepository.findById(friendId)
+        User friend = userRepository.findFullById(friendId)
                 .orElseThrow(
                         () -> new FriendDoesNotExist());
 
@@ -151,4 +163,13 @@ public class UserService {
                 .orElseThrow(() -> new UserDoesNotExist(id));
         userRepository.delete(target);
     }
+
+    @Transactional
+    public boolean isFollowing(Long followerId, Long followedId) {
+        User follower = userRepository.findFullById(followerId).orElseThrow(() -> new UserDoesNotExist(followerId));
+        return follower.getFollowing()
+                .stream()
+                .anyMatch(user -> user.getId().equals(followedId));
+    }
+
 }

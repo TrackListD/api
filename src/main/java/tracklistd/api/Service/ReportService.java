@@ -38,34 +38,37 @@ public class ReportService {
 
     }
 
-    public Report createReport(User informer, User target, Comment commentTarget, Rating ratingTarget, String reason){
-        
+    public Report createReport(User informer, User target, Comment commentTarget, Rating ratingTarget, String reason) {
+
+        int targetCount = 0;
+        if (target != null) targetCount++;
+        if (commentTarget != null) targetCount++;
+        if (ratingTarget != null) targetCount++;
+
+        if (targetCount == 0) {
+            throw new ReportException("A denúncia precisa ter pelo menos um alvo.");
+        }
+        if (targetCount > 1) {
+            throw new ReportException("A denúncia não pode ter múltiplos alvos simultâneos. Envie apenas um.");
+        }
+
         LocalDateTime date = LocalDateTime.now();
-        Report report = null;
-
-        if (commentTarget != null){
-            report = new Report(informer, reason, date, commentTarget);
+        if (commentTarget != null) {
+            return reportRepository.save(new Report(informer, reason, date, commentTarget));
+        } else if (ratingTarget != null) {
+            return reportRepository.save(new Report(informer, reason, date, ratingTarget));
+        } else {
+            return reportRepository.save(new Report(informer, reason, date, target));
         }
-        else if (ratingTarget != null){
-            report = new Report(informer, reason, date, ratingTarget);
-        }
-        else if (target != null){
-            report = new Report(informer, reason, date, target);
-        }
-
-        if (report == null)
-            throw new ReportException("Reporte sem alvo!");
-        reportRepository.save(report);
-        return report;
     }
 
-    public Report createReport(ReportRequestDTO dto){
+    public Report createReport(ReportRequestDTO dto) {
         User informer = userRepository.findById(dto.informerId())
-            .orElseThrow(() -> new ReportException("Informer not found!"));
-        
+                .orElseThrow(() -> new ReportException("Denunciante não encontrado!"));
 
         User target = dto.userTargetId() != null ? userRepository.findById(dto.userTargetId()).orElse(null) : null;
         Comment commentTarget = dto.commentTargetId() != null ? commentRepository.findById(dto.commentTargetId()).orElse(null) : null;
+<<<<<<< HEAD
         Long ratingId = dto.ratingTargetId() != null ? dto.ratingTargetId() : dto.postTargetId();
         Rating ratingTarget = ratingId != null ? ratingRepository.findById(ratingId).orElse(null) : null;
         
@@ -82,11 +85,11 @@ public class ReportService {
         else if (target != null){
             report = new Report(informer, reason, date, target);
         }
+=======
+        Rating ratingTarget = dto.ratingTargetId() != null ? ratingRepository.findById(dto.ratingTargetId()).orElse(null) : null;
+>>>>>>> 14a14386bce6b268c6e08b73dceced5235b5c58c
 
-        if (report == null)
-            throw new ReportException("Reporte sem alvo!");
-        reportRepository.save(report);
-        return report;
+        return createReport(informer, target, commentTarget, ratingTarget, dto.reportReason());
     }
 
     public List<Report> getPendingReports(){
@@ -103,30 +106,22 @@ public class ReportService {
     }
 
     @Transactional
-    public ReportResponseDto resolveReport(Long reportId, ReportStatus newStatus, Punishment newPunishment){
-        Report report = reportRepository.findById(reportId).orElseThrow( 
-            () -> new ReportDoesNotExist(("This report dos not exist. ID: " + reportId)));
+    public Report resolveReport(Long reportId, ReportStatus newStatus, Punishment newPunishment){
+        Report report = reportRepository.findById(reportId).orElseThrow(
+                () -> new ReportDoesNotExist(("Esta denúncia não existe. ID: " + reportId)));
 
         report.solveReport(newStatus, newPunishment);
 
-        Report updateReport = reportRepository.save(report);
-
-        return new ReportResponseDto(updateReport);
+        return reportRepository.save(report);
     }
 
-    public List<ReportResponseDto> getReportHistoryUser(Long userId){
+    public List<Report> getReportHistoryUser(Long userId){
         List<Report> list = reportRepository.findByUserTargetId(userId);
 
-        return list.stream()
-                .map(ReportResponseDto::new)
-                .toList();
+        return reportRepository.findByUserTargetId(userId);
     }
 
-    public List<ReportResponseDto> getPendingReportAgainstUser(Long userId){
-        List<Report> list = reportRepository.findByUserTargetIdAndStatusReport(userId, ReportStatus.PENDING);
-
-        return list.stream()
-                .map(ReportResponseDto::new)
-                .toList();
+    public List<Report> getPendingReportAgainstUser(Long userId){
+        return reportRepository.findByUserTargetIdAndStatusReport(userId, ReportStatus.PENDING);
     }
 }
