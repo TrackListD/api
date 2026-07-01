@@ -61,6 +61,10 @@ public class Report implements Reportable {
     @JoinColumn(name = "rating_target_id")
     private Rating ratingTarget;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "media_list_target_id")
+    private MediaList mediaListTarget;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "punishment_type", updatable = true)
     private Punishment punishment;
@@ -68,6 +72,15 @@ public class Report implements Reportable {
     // ---------------------------------------//
 
     // ----------- Constructor -----------//
+
+    // Construtor para denúncia de MediaList
+    public Report(User informer, String reason, LocalDateTime date, MediaList mediaListTarget) {
+        this.userInformer = informer;
+        this.reason = reason;
+        this.reportDate = date;
+        this.mediaListTarget = mediaListTarget;
+        this.statusReport = ReportStatus.PENDING;
+    }
 
     // -- Report constructor for Comment --//
     public Report(User informer, String Reason, LocalDateTime date, Comment comment) {
@@ -119,6 +132,9 @@ public class Report implements Reportable {
         if (ratingTarget != null)
             return ratingTarget.getReview();
 
+        if (mediaListTarget != null)
+            return mediaListTarget.getListName();
+
         if (userTarget != null)
             return userTarget.getName();
 
@@ -137,6 +153,9 @@ public class Report implements Reportable {
 
         if (ratingTarget != null)
             return ratingTarget;
+
+        if (mediaListTarget != null)
+            return mediaListTarget;
 
         if (userTarget != null)
             return userTarget;

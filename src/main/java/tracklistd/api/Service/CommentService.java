@@ -98,8 +98,10 @@ public class CommentService {
         return comment;
     }
 
-    protected User hideComment(Comment comment) {
+    @Transactional
+    public User hideComment(Comment comment) {
         comment.setModerationStatus(ModerationStatus.OCULT);
+        commentRepository.save(comment);
         return comment.getAuthorPublication();
     }
 

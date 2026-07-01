@@ -90,8 +90,10 @@ public class RatingService {
         ratingRepository.delete(rating);
     }
 
-    protected User hideRating(Rating rating) {
+    @Transactional
+    public User hideRating(Rating rating) {
         rating.setStatus(ModerationStatus.OCULT);
+        ratingRepository.save(rating);
         return rating.getAuthorPublication();
     }
 

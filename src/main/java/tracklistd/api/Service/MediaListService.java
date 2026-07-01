@@ -2,6 +2,7 @@ package tracklistd.api.Service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.ListType;
 import tracklistd.api.Entity.Enums.Privacy;
 import tracklistd.api.Entity.Media;
@@ -183,6 +184,13 @@ public class MediaListService {
         this.mediaListRepository.findByIdWithAlbumMusics(mediaId);
 
         return mediaList;
+    }
+
+    @Transactional
+    public User hideMediaList(MediaList mediaList) {
+        mediaList.setModerationStatus(ModerationStatus.OCULT);
+        mediaListRepository.save(mediaList);
+        return mediaList.getAuthorPublication();
     }
 
     // Métodos Privados

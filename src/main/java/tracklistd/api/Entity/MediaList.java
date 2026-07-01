@@ -2,13 +2,17 @@ package tracklistd.api.Entity;
 
 import jakarta.persistence.*;
 import tracklistd.api.Entity.Enums.ListType;
+import tracklistd.api.Entity.Enums.ModerationStatus;
 import tracklistd.api.Entity.Enums.Privacy;
+import tracklistd.api.Entity.Interfaces.Reportable;
+import tracklistd.api.Entity.Enums.ModerationStatus;
+
 import java.util.*;
 
 @Entity
 @DiscriminatorValue("media_list")
 @PrimaryKeyJoinColumn(name = "media_list_id")
-public class MediaList extends Publication {
+public class MediaList extends Publication implements Reportable {
     @Enumerated(EnumType.STRING)
     @Column(name = "type_of_list", nullable = false)
     private ListType typeOfList;
@@ -33,6 +37,10 @@ public class MediaList extends Publication {
     @CollectionTable(name = "media_list_tags", joinColumns = @JoinColumn(name = "media_list_id"))
     @Column(name = "tag_name", length = 50)
     private Set<String> tags = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status", nullable = false, updatable = true)
+    private ModerationStatus moderationStatus = ModerationStatus.ACTIVE;
 
     public MediaList(User author, ListType typeOfList, String listName, Privacy whoCanSee,
             Boolean isFavorite, String description, String coverImageUrl, Set<String> tags) {
@@ -122,5 +130,24 @@ public class MediaList extends Publication {
         return this.media.stream()
                 .mapToInt(Media::getTotalDurationMs)
                 .sum();
+    }
+
+    @Override
+    public ModerationStatus getStatusModeration() {
+        return this.moderationStatus;
+    }
+
+    public void setModerationStatus(ModerationStatus moderationStatus) {
+        this.moderationStatus = moderationStatus;
+    }
+
+    @Override
+    public String getContentReported() {
+        return this.listName + (this.description != null ? " - " + this.description : "");
+    }
+
+    @Override
+    public Reportable getTarget() {
+        return super.getAuthorPublication();
     }
 }
