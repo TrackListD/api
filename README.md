@@ -215,3 +215,135 @@ Utilizado para documentar:
 - Documente comportamentos complexos e decisões importantes
 
 ---
+
+# Tracklistd — Guia de Setup do Ambiente de Desenvolvimento
+
+O Tracklistd é composto por dois repositórios separados:
+
+- **`api`**: back-end em Spring Boot (Java), executado via wrapper Maven (`./mvnw`).
+- **`front`**: front-end em React Native com Expo, executado via `npx expo start`.
+
+Antes de rodar qualquer um dos dois, é necessário baixar as dependências do projeto e configurar as variáveis de ambiente (`.env`) correspondentes.
+
+## Pré-requisitos
+
+- Node.js (LTS) e npm instalados, para o **front**.
+- JDK compatível com o projeto instalado, para a **api** (o Maven em si não precisa estar instalado globalmente, pois o projeto usa o wrapper `mvnw`).
+- Uma instância de banco de dados (MySQL/MariaDB) acessível localmente, geralmente via Docker, para a **api**.
+- Conta de acesso ao Firebase Console e ao Spotify for Developers, para gerar as credenciais (ver seção [Variáveis de ambiente](#variáveis-de-ambiente-env)).
+
+## Repositório `api` (Spring Boot)
+
+### Instalar dependências
+
+O wrapper do Maven baixa as dependências declaradas no `pom.xml` automaticamente na primeira execução. Para forçar o download sem rodar a aplicação:
+
+```bash
+./mvnw dependency:resolve
+```
+
+### Rodar a aplicação
+
+Com o `.env` configurado (ver [`.env` da api](#env-da-api)) e o banco de dados acessível:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Esse comando sobe a api usando apenas o `application.properties` padrão. Para escolher um profile específico, veja [Profiles do Spring Boot](#profiles-do-spring-boot).
+
+### Profiles do Spring Boot
+
+A `api` possui múltiplos arquivos de configuração em `src/main/resources/`, um para cada profile:
+
+| Arquivo                           | Profile    | Uso                                    |
+| --------------------------------- | ---------- | -------------------------------------- |
+| `application.properties`          | _(base)_   | Configuração base, sempre carregada    |
+| `application-dev.properties`      | `dev`      | Desenvolvimento local                  |
+| `application-populate.properties` | `populate` | Popula o banco com dados iniciais/seed |
+| `application-prod.properties`     | `prod`     | Produção                               |
+
+Quando um profile é ativado, o Spring Boot carrega o `application.properties` normalmente e, em seguida, sobrepõe/complementa com as chaves do arquivo específico do profile (`application-{profile}.properties`).
+
+Para ativar um profile ao rodar via Maven wrapper, use a flag `-Dspring-boot.run.profiles`:
+
+```bash
+# Profile de desenvolvimento
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Profile de populacao do banco
+./mvnw spring-boot:run -Dspring-boot.run.profiles=populate
+
+# Profile de producao
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+```
+
+Alternativamente, o profile também pode ser definido por variável de ambiente antes de subir a aplicação, o que é útil em pipelines de CI/CD ou containers:
+
+```bash
+export SPRING_PROFILES_ACTIVE=prod
+./mvnw spring-boot:run
+```
+
+> Rodar sem nenhuma flag de profile (`./mvnw spring-boot:run`) usa apenas o `application.properties`, sem nenhum dos overrides de `dev`, `populate` ou `prod`.
+
+## Repositório `front` (React Native / Expo)
+
+### Instalar dependências
+
+```bash
+npm install
+```
+
+### Rodar a aplicação
+
+Com o `.env` configurado (ver [`.env` do front](#env-do-front)):
+
+```bash
+npx expo start
+```
+
+## Variáveis de ambiente (`.env`)
+
+Cada repositório possui seu próprio arquivo `.env` na raiz, que **não deve ser versionado** (deve constar no `.gitignore`). Abaixo estão as chaves esperadas em cada um e como obter os respectivos valores. Os valores em si não são reproduzidos aqui por segurança.
+
+### `.env` do `front`
+
+**Chaves do Firebase** — `EXPO_PUBLIC_FIREBASE_API_KEY`, `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`, `EXPO_PUBLIC_FIREBASE_PROJECT_ID`, `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`, `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `EXPO_PUBLIC_FIREBASE_APP_ID`, `EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID`:
+
+1. Acesse o [Firebase Console](https://console.firebase.google.com/) e selecione o projeto `tracklistd`.
+2. Vá em **Configurações do projeto** (ícone de engrenagem) → **Geral**.
+3. Na seção **Seus apps**, selecione o app Web registrado (ou crie um, se ainda não existir).
+4. O bloco de configuração do SDK (`firebaseConfig`) exibirá todos esses valores prontos para copiar.
+
+**Client IDs do Google Sign-In** — `EXPO_PUBLIC_WEB_CLIENT_ID`, `EXPO_PUBLIC_IOS_CLIENT_ID`:
+
+1. Acesse o [Google Cloud Console](https://console.cloud.google.com/), no mesmo projeto vinculado ao Firebase.
+2. Vá em **APIs & Serviços** → **Credenciais**.
+3. Em **IDs de cliente OAuth 2.0**, localize o cliente do tipo _Web application_ (para `WEB_CLIENT_ID`) e o cliente do tipo _iOS_ (para `IOS_CLIENT_ID`).
+4. Caso não existam, crie-os pelo próprio Firebase Authentication (Método de login → Google), que gera esses clientes automaticamente.
+
+### `.env` da `api`
+
+**Credenciais de banco de dados** — `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_ROOT_PASSWORD`, `DB_USERNAME`, `DB_PASSWORD`:
+
+Não são obtidas de nenhum serviço externo — são definidas por quem configura o ambiente local, normalmente através de um `docker-compose.yml` que sobe uma instância MySQL/MariaDB. Os valores devem ser os mesmos usados na configuração do container do banco (host, porta exposta, nome do schema e credenciais do usuário).
+
+**Credenciais do Spotify** — `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`:
+
+1. Acesse o [Spotify for Developers Dashboard](https://developer.spotify.com/dashboard).
+2. Selecione o app registrado do Tracklistd (ou crie um novo app, caso necessário).
+3. Em **Settings**, o _Client ID_ fica visível diretamente; o _Client Secret_ pode ser revelado clicando em **View client secret**.
+
+**Credencial de administrador do Firebase** — `FIREBASE_JSON_PATH`:
+
+1. No [Firebase Console](https://console.firebase.google.com/), vá em **Configurações do projeto** → **Contas de serviço**.
+2. Clique em **Gerar nova chave privada**, o que baixa um arquivo JSON com as credenciais do Admin SDK.
+3. Coloque esse arquivo em `src/main/resources/firebase/` dentro do repositório `api`.
+4. Aponte `FIREBASE_JSON_PATH` no `.env` para o caminho relativo desse arquivo.
+
+## Observações de segurança
+
+- Nunca faça commit dos arquivos `.env` nem do JSON do Firebase Admin SDK — ambos devem estar listados no `.gitignore`.
+- O _Client Secret_ do Spotify e as senhas de banco são credenciais sensíveis: evite compartilhá-las em chats, tickets ou repositórios públicos.
+- Caso alguma credencial sensível seja exposta acidentalmente, revogue/regenere-a o quanto antes (no Spotify Dashboard, no Firebase Console ou trocando a senha do banco).
