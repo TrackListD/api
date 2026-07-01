@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 
 import tracklistd.api.Mapper.ReportMapper;
 import tracklistd.api.Dto.Report.ReportResponseDto;
@@ -38,6 +39,7 @@ public class AdminController {
             @ApiResponse(responseCode = "404", description = "Denúncia não encontrada no banco de dados.")
     })
     @GetMapping("/reports/{id}")
+    @Transactional(readOnly = true)
     public ResponseEntity<ReportResponseDto> getReportById(@PathVariable Long id) {
         Report report = reportService.getReportById(id);
         return ResponseEntity.ok(reportMapper.toDto(report));
@@ -66,6 +68,7 @@ public class AdminController {
 
     @Operation(summary = "Listar denúncias pendentes", description = "Retorna uma lista de todas as denúncias que aguardam julgamento.")
     @GetMapping("/reports/pending")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<ReportResponseDto>> getPendingReports() {
 
         List<ReportResponseDto> pendingReports = reportService.getPendingReports()
