@@ -1,5 +1,8 @@
 package tracklistd.api.Entity.Enums;
 
-public class ModerationStatus {
-
+public enum ModerationStatus {
+    ACTIVE,
+    BANNED,
+    SUSPENDED,
+    OCULT
 }

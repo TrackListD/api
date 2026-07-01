@@ -1,4 +1,5 @@
 # Guia de Workflow
+
 Este documento define o padrão de desenvolvimento da Organização no GitHub, garantindo organização, qualidade e automação do fluxo de trabalho.
 
 ---
@@ -114,6 +115,7 @@ git commit -m "feat(reports): criar endpoint para denuncia de comentarios ofensi
 
 Closes #42"
 ```
+
 ---
 
 # 4. A Regra de Ouro: Qualidade na Origem
@@ -207,6 +209,7 @@ Utilizado para documentar:
 - regras de negócio
 
 ## Boas Práticas
+
 - Evite documentar o óbvio
 - Priorize clareza no código
 - Documente comportamentos complexos e decisões importantes

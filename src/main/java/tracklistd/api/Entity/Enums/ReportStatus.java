@@ -1,5 +1,7 @@
 package tracklistd.api.Entity.Enums;
 
-public class ReportStatus {
-
+public enum ReportStatus {
+    PENDING,
+    IGNORED,
+    RESOLVED
 }

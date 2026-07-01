@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Arquivo de senhas ###
+.env
+
+src/main/resources/firebase/*
+
+*.http
