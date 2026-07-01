@@ -60,7 +60,9 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<Comment> getCommentsByPost(Publication post) {
 
-        return this.commentRepository.findAllByPost(post);
+        return this.commentRepository.findAllByPost(post).stream()
+                .filter(c -> c.getStatusModeration() != ModerationStatus.OCULT)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -73,7 +75,9 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<Comment> getCommentsByUser(User author) {
 
-        return this.commentRepository.getCommentsByAuthor(author);
+        return this.commentRepository.getCommentsByAuthor(author).stream()
+                .filter(c -> c.getStatusModeration() != ModerationStatus.OCULT)
+                .toList();
     }
 
     @Transactional(readOnly = true)
