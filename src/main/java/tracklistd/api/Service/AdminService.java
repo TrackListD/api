@@ -6,6 +6,7 @@ import tracklistd.api.Entity.Enums.Punishment;
 import tracklistd.api.Entity.Enums.ReportStatus;
 import tracklistd.api.Entity.Report;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Repository.MediaListRepository;
 
 @Service
 public class AdminService {
@@ -14,12 +15,14 @@ public class AdminService {
     private final ReportService reportService;
     private final CommentService commentService;
     private final RatingService ratingService;
+    private final MediaListService mediaListService;
 
-    public AdminService(UserService userService, ReportService reportService, CommentService commentService, RatingService ratingService) {
+    public AdminService(UserService userService, ReportService reportService, CommentService commentService, RatingService ratingService, MediaListService mediaListService) {
         this.userService = userService;
         this.reportService = reportService;
         this.commentService = commentService;
         this.ratingService = ratingService;
+        this.mediaListService = mediaListService;
     }
 
     @Transactional
@@ -35,6 +38,9 @@ public class AdminService {
             }
             else if(report.getRatingTarget() != null){
                 userTarget = ratingService.hideRating(report.getRatingTarget());
+            }
+            else if(report.getMediaListTarget() != null){
+                userTarget = mediaListService.hideMediaList(report.getMediaListTarget());
             }
             else if(report.getUserTarget() != null){
                 userTarget = report.getUserTarget();

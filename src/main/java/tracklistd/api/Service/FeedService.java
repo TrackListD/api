@@ -11,6 +11,8 @@ import tracklistd.api.Dto.Feed.PublicationFeedDTO;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.User;
 import tracklistd.api.Entity.Enums.Privacy;
+import tracklistd.api.Entity.Enums.ModerationStatus;
+import tracklistd.api.Entity.Interfaces.Reportable;
 import tracklistd.api.Exceptions.UserExceptions.UserDoesNotExist;
 import tracklistd.api.Mapper.FeedMapper;
 import tracklistd.api.Repository.PublicationRepository;
@@ -51,6 +53,12 @@ public class FeedService {
                                 .findSocialFeed(user.getFollowing(), allowedPrivacies);
 
                 return publications.stream()
+                                .filter(pub -> {
+                                    if(pub instanceof Reportable reportablePub){
+                                        return reportablePub.getStatusModeration() != ModerationStatus.OCULT;
+                                    }
+                                    return true;
+                                })
                                 .map(publication -> {
                                         long likesCount = likeRepository.countByPublicationId(publication.getId());
                                         int commentsCount = commentRepository.countByPost(publication);
@@ -66,6 +74,12 @@ public class FeedService {
                 List<Publication> trending = publicationRepository.findTrending(oneWeekAgo);
 
                 return trending.stream()
+                                .filter(pub -> {
+                                    if(pub instanceof Reportable reportablePub){
+                                        return reportablePub.getStatusModeration() != ModerationStatus.OCULT;
+                                    }
+                                    return true;
+                                })
                                 .map(publication -> {
                                         long likesCount = likeRepository.countByPublicationId(publication.getId());
                                         int commentsCount = commentRepository.countByPost(publication);
@@ -88,6 +102,12 @@ public class FeedService {
 
                 List<Publication> posts = publicationRepository.findUserFeed(userId, allowedPrivacies);
                 return posts.stream()
+                                .filter(pub -> {
+                                    if(pub instanceof Reportable reportablePub){
+                                        return reportablePub.getStatusModeration() != ModerationStatus.OCULT;
+                                    }
+                                    return true;
+                                })
                                 .map(post -> {
                                         long likesCount = likeRepository.countByPublicationId(post.getId());
                                         int commentsCount = commentRepository.countByPost(post);

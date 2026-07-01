@@ -10,5 +10,6 @@ public interface ReportMapper {
 
     @Mapping(target = "informerId", source = "userInformer.id")
     @Mapping(target = "userTargetId", source = "userTarget.id")
+    @Mapping(target = "reportedContent", source = "contentReported")
     ReportResponseDto toDto(Report report);
 }

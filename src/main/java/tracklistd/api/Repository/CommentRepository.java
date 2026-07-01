@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import tracklistd.api.Entity.Comment;
 import tracklistd.api.Entity.Publication;
 import tracklistd.api.Entity.User;
+import tracklistd.api.Entity.Enums.ModerationStatus;
 
 import java.util.List;
 
@@ -19,7 +20,11 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             "WHERE c.post = :post")
     List<Comment> findAllByPost(@Param("post") Publication post);
 
-    Integer countByPost(Publication post);
+    Integer countByPostAndModerationStatusNot(Publication post, ModerationStatus status);
+
+    default Integer countByPost(Publication post) {
+        return countByPostAndModerationStatusNot(post, ModerationStatus.OCULT);
+    }
 
     @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.likes WHERE c.author = :author")
     List<Comment> getCommentsByAuthor(@Param("author") User author);

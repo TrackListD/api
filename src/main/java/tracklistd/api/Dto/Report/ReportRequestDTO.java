@@ -13,6 +13,7 @@ public record ReportRequestDTO(
     String reportReason,
 
     Long commentTargetId,
-    Long ratingTargetId
+    Long ratingTargetId,
+    Long mediaListTargetId
 )   
 {}
