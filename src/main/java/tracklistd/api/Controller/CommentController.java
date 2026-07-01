@@ -173,7 +173,7 @@ public class CommentController {
 
         Long likeCount = this.commentService.getCommentLikes(comment);
 
-        boolean likedByMe = user != null && comment.getLikes() != null && comment.getLikes().contains(user);
+        boolean likedByMe = user != null && this.commentService.hasUserLikedComment(comment.getId(), user.getId());
 
         CommentResponseDto responseDto = this.commentMapper.toResponseDTO(comment, likeCount, likedByMe);
 
