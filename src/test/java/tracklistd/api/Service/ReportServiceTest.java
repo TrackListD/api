@@ -61,7 +61,7 @@ public class ReportServiceTest {
     @DisplayName("Deve criar denúncia com sucesso quando apenas UM alvo for enviado")
     void createReport_Success() {
         // Arrange
-        ReportRequestDTO dto = new ReportRequestDTO(1L, 2L, "Comportamento abusivo", null, null);
+        ReportRequestDTO dto = new ReportRequestDTO(1L, 2L, "Comportamento abusivo", null, null, null);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(informer));
         when(userRepository.findById(2L)).thenReturn(Optional.of(target));
@@ -86,7 +86,7 @@ public class ReportServiceTest {
     @DisplayName("Deve lançar exceção quando NENHUM alvo for enviado")
     void createReport_FailNoTarget() {
         // Arrange (Deixamos todos os alvos como null)
-        ReportRequestDTO dto = new ReportRequestDTO(1L, null, "Spam", null, null);
+        ReportRequestDTO dto = new ReportRequestDTO(1L, null, "Spam", null, null, null);
         when(userRepository.findById(1L)).thenReturn(Optional.of(informer));
 
         // Act & Assert
@@ -104,7 +104,7 @@ public class ReportServiceTest {
     @DisplayName("Deve lançar exceção quando MÚLTIPLOS alvos forem enviados (Regra de Conflito)")
     void createReport_FailMultipleTargets() {
         // Arrange (Enviando ID de Usuário e de Comentário AO MESMO TEMPO)
-        ReportRequestDTO dto = new ReportRequestDTO(1L, 2L, "Tentativa de Fraude", 10L, null);
+        ReportRequestDTO dto = new ReportRequestDTO(1L, 2L, "Tentativa de Fraude", 10L, null, null);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(informer));
         when(userRepository.findById(2L)).thenReturn(Optional.of(target));

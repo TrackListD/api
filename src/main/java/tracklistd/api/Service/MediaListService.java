@@ -11,6 +11,7 @@ import tracklistd.api.Entity.User;
 import tracklistd.api.Exceptions.CommentExceptions.SelfCommentException;
 import tracklistd.api.Exceptions.MediaExceptions.MediaException;
 import tracklistd.api.Exceptions.MediaListExceptions.*;
+import tracklistd.api.Exceptions.PublicationExceptions.ContentUnavailableException;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
 import tracklistd.api.Repository.MediaListRepository;
 import tracklistd.api.Repository.MediaRepository;
@@ -179,6 +180,10 @@ public class MediaListService {
     public MediaList getMediaListById(Long mediaId) {
         MediaList mediaList = this.mediaListRepository.findByIdWithAuthorAndMedia(mediaId).orElseThrow(
                 () -> new ResourceNotFoundException("Essa Lista não existe ou não foi encontrada"));
+
+        if (mediaList.getStatusModeration() != ModerationStatus.ACTIVE) {
+            throw new ContentUnavailableException("Avaliação indisponível", mediaList.getStatusModeration());
+        }
 
         this.mediaListRepository.findByIdWithTags(mediaId);
         this.mediaListRepository.findByIdWithAlbumMusics(mediaId);

@@ -12,6 +12,7 @@ import tracklistd.api.Exceptions.RatingsExceptions.InvalidRatingNote;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingAlreadyExists;
 import tracklistd.api.Exceptions.RatingsExceptions.RatingOwnershipViolation;
 import tracklistd.api.Exceptions.ResourceNotFoundException;
+import tracklistd.api.Exceptions.PublicationExceptions.ContentUnavailableException;
 import tracklistd.api.Repository.CommentRepository;
 import tracklistd.api.Repository.LikeRepository;
 import tracklistd.api.Repository.RatingRepository;
@@ -112,6 +113,9 @@ public class RatingService {
         Rating rating = this.ratingRepository.findByIdWithTarget(ratingId).orElseThrow(
                 () -> new ResourceNotFoundException("Essa Avaliação não Existe"));
 
+        if (rating.getStatusModeration() != ModerationStatus.ACTIVE) {
+            throw new ContentUnavailableException("Avaliação indisponível", rating.getStatusModeration());
+        }
         return rating;
     }
 
